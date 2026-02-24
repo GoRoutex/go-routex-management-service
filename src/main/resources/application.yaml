@@ -1,0 +1,82 @@
+spring:
+
+  application:
+    name: routex-hub-management-service
+
+  threads:
+    virtual:
+      enabled: true
+
+  kafka:
+    # K8s: set KAFKA_BOOTSTRAP_SERVERS = kafka:9092 (hoặc service của bạn)
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP_ID:driver-service}
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "vn.com.*"
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/routexhub}
+    username: ${SPRING_DATASOURCE_USERNAME:routex}
+    password: ${SPRING_DATASOURCE_PASSWORD:routex@2026}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    show-sql: ${SPRING_JPA_SHOW_SQL:false}
+
+  jackson:
+    mapper:
+      sort-properties-alphabetically: false
+
+  security:
+    user:
+      name: ${SPRING_SECURITY_USER_NAME:admin}
+      password: ${SPRING_SECURITY_USER_PASSWORD:admin}
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+jms:
+  thread:
+    receive:
+      timeout-seconds: ${JMS_THREAD_RECEIVE_TIMEOUT_SECONDS:30}
+    send:
+      timeout-seconds: ${JMS_THREAD_SEND_TIMEOUT_SECONDS:5}
+  receive:
+    timeout: ${JMS_RECEIVE_TIMEOUT:30000}
+  caching:
+    session-cache-size: ${JMS_CACHING_SESSION_CACHE_SIZE:256}
+  time-to-live-milliseconds: ${JMS_TIME_TO_LIVE_MILLISECONDS:20000}
+  recovery-interval: ${JMS_RECOVERY_INTERVAL:5000}
+  max-message: ${JMS_MAX_MESSAGE:1}
+
+server:
+  port: ${SERVER_PORT:8000}
+
+logging:
+  level:
+    org.springframework.security: DEBUG
