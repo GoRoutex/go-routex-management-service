@@ -125,25 +125,27 @@ jobs:
       - name: Update values-dev.yaml and push
         shell: bash
         run: |
-          set -euo pipefail
-
+          set -euxo pipefail   # <- thêm -x để thấy command
           TAG="$(cat tag.txt)"
           IMAGE="${{ secrets.CI_REGISTRY_IMAGE }}"
           PROJECT_NAME="$(basename "${GITHUB_REPOSITORY}")"
           VALUES_PATH="deployment-config/service/${PROJECT_NAME}/values-dev.yaml"
-
+      
           cd gitops
-
           git config user.email "routex@orion-hub"
           git config user.name "routex-bot"
-
+      
+          ls -la deployment-config/service || true
+          echo "PROJECT_NAME=$PROJECT_NAME"
+          echo "VALUES_PATH=$VALUES_PATH"
+      
           test -f "$VALUES_PATH"
-
+      
           yq -i ".image.repository = \"${IMAGE}\"" "$VALUES_PATH"
           yq -i ".image.tag = \"${TAG}\"" "$VALUES_PATH"
-
+      
           git add "$VALUES_PATH"
           git commit -m "chore(gitops): ${PROJECT_NAME} -> ${TAG} (dev)" || echo "No changes"
-
+      
           git pull --rebase origin "${{ secrets.GITOPS_BRANCH }}"
           git push origin "${{ secrets.GITOPS_BRANCH }}"
