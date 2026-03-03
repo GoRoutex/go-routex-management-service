@@ -23,6 +23,7 @@ public class ErrorConstant {
     public static final String INVALID_INPUT_MESSAGE = "Invalid Input";
     public static final String INVALID_REQUEST_TIMESTAMP = "5186";
     public static final String DUPLICATE_ERROR = "9400";
+    public static final String DUPLICATE_VEHICLE = "Vehicle is already exists by %s";
     public static final String DUPLICATE_ROUTE_ASSIGNMENT = "Route Assignment with routeId %s already exists";
     public static final String RECORD_EXISTS = "Record is already existed";
     public static final String INVALID_START_TIME = "Planned Start Time must be before Planned End Time";

@@ -20,7 +20,7 @@ import static vn.com.routex.hub.user.service.infrastructure.persistence.constant
 @RequiredArgsConstructor
 public class RouteManagementFacadeImpl implements RouteManagementFacade {
 
-    private RouteManagementService routeManagementService;
+    private final RouteManagementService routeManagementService;
 
     @Override
     public ResponseEntity<CreateRouteResponse> createRoute(CreateRouteRequest request) {

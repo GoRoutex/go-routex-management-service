@@ -17,9 +17,11 @@ import vn.com.routex.hub.user.service.infrastructure.persistence.exception.Busin
 import vn.com.routex.hub.user.service.infrastructure.persistence.utils.ExceptionUtils;
 import vn.com.routex.hub.user.service.interfaces.models.assignment.AssignRouteRequest;
 import vn.com.routex.hub.user.service.interfaces.models.assignment.AssignRouteResponse;
+import vn.com.routex.hub.user.service.interfaces.models.result.ApiResult;
 import vn.com.routex.hub.user.service.interfaces.models.route.CreateRouteRequest;
 import vn.com.routex.hub.user.service.interfaces.models.route.CreateRouteResponse;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +37,8 @@ import static vn.com.routex.hub.user.service.infrastructure.persistence.constant
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.INVALID_START_TIME;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.INVALID_STOP_ORDER;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
+import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_CODE;
+import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_MESSAGE;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.VEHICLE_NOT_FOUND;
 
 
@@ -74,10 +78,13 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .id(UUID.randomUUID().toString())
                 .routeCode(routeCode)
                 .origin(origin)
+                .creator(request.getData().getCreator())
                 .destination(destination)
                 .plannedStartTime(plannedStartTime)
                 .plannedEndTime(plannedEndTime)
                 .status(RouteStatus.PLANNED)
+                .createdAt(LocalDateTime.now())
+                .createdBy(request.getData().getCreator())
                 .build();
 
 
@@ -92,6 +99,9 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                             .id(UUID.randomUUID().toString())
                             .routeId(newRoute.getId())
                             .stopOrder(point.getStopOrder())
+                            .creator(request.getData().getCreator())
+                            .createdAt(LocalDateTime.now())
+                            .createdBy(request.getData().getCreator())
                             .plannedArrivalTime(arrival)
                             .plannedDepartureTime(departure)
                             .note(point.getNote())
@@ -106,6 +116,10 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .requestId(request.getRequestId())
                 .requestDateTime(request.getRequestDateTime())
                 .channel(request.getChannel())
+                .result(ApiResult.builder()
+                        .responseCode(SUCCESS_CODE)
+                        .description(SUCCESS_MESSAGE)
+                        .build())
                 .data(CreateRouteResponse.CreateRouteResponseData.builder()
                         .id(newRoute.getId())
                         .routeCode(routeCode)
