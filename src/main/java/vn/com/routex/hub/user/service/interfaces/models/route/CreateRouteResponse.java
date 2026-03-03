@@ -26,6 +26,7 @@ public class CreateRouteResponse extends BaseResponse {
     @SuperBuilder
     public static class CreateRouteResponseData {
         private String id;
+        private String creator;
         private String routeCode;
         private String origin;
         private String destination;

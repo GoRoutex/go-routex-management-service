@@ -6,10 +6,14 @@ import vn.com.routex.hub.user.service.interfaces.models.assignment.AssignRouteRe
 import vn.com.routex.hub.user.service.interfaces.models.assignment.AssignRouteResponse;
 import vn.com.routex.hub.user.service.interfaces.models.route.CreateRouteRequest;
 import vn.com.routex.hub.user.service.interfaces.models.route.CreateRouteResponse;
+import vn.com.routex.hub.user.service.interfaces.models.route.SearchRouteRequest;
+import vn.com.routex.hub.user.service.interfaces.models.route.SearchRouteResponse;
 
 public interface RouteManagementFacade {
 
     ResponseEntity<CreateRouteResponse> createRoute(CreateRouteRequest request);
 
     ResponseEntity<AssignRouteResponse> assignRoute(AssignRouteRequest request);
+
+    ResponseEntity<SearchRouteResponse> searchRoute(SearchRouteRequest request);
 }

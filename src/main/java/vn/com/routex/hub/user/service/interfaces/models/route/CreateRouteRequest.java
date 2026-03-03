@@ -1,8 +1,10 @@
 package vn.com.routex.hub.user.service.interfaces.models.route;
 
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,12 +14,17 @@ import vn.com.routex.hub.user.service.interfaces.models.base.BaseRequest;
 
 import java.util.List;
 
+import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ApplicationConstant.OFFSET_DATE_TIME_REGEX;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
 public class CreateRouteRequest extends BaseRequest {
+
+    @Valid
+    @NotNull
     private CreateRouteRequestData data;
 
     @Getter
@@ -29,6 +36,10 @@ public class CreateRouteRequest extends BaseRequest {
 
         @NotBlank
         @NotNull
+        private String creator;
+
+        @NotBlank
+        @NotNull
         private String origin;
 
         @NotBlank
@@ -37,11 +48,14 @@ public class CreateRouteRequest extends BaseRequest {
 
         @NotBlank
         @NotNull
+        @Pattern(regexp = OFFSET_DATE_TIME_REGEX, message= "must be in format of yyyy-MM-ddTHH:mm:ss+timezone e.g. 2026-03-03T14:30:00+07:00")
         private String plannedStartTime;
 
         @NotBlank
         @NotNull
+        @Pattern(regexp = OFFSET_DATE_TIME_REGEX, message= "must be in format of yyyy-MM-ddTHH:mm:ss+timezone e.g. 2026-03-03T14:30:00+07:00")
         private String plannedEndTime;
+
         private List<RouteStopPoints> stopPoints;
     }
 

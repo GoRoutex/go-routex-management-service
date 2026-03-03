@@ -2,8 +2,14 @@ package vn.com.routex.hub.user.service.application.services.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import vn.com.routex.hub.user.service.application.services.RouteManagementService;
+import vn.com.routex.hub.user.service.application.specification.RouteSpecification;
 import vn.com.routex.hub.user.service.domain.assignment.RouteAssignment;
 import vn.com.routex.hub.user.service.domain.assignment.RouteAssignmentRepository;
 import vn.com.routex.hub.user.service.domain.assignment.RouteAssignmentStatus;
@@ -15,14 +21,24 @@ import vn.com.routex.hub.user.service.domain.stoppoint.RouteStopRepository;
 import vn.com.routex.hub.user.service.domain.vehicle.VehicleRepository;
 import vn.com.routex.hub.user.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.user.service.infrastructure.persistence.utils.ExceptionUtils;
+import vn.com.routex.hub.user.service.infrastructure.utils.DateTimeUtils;
 import vn.com.routex.hub.user.service.interfaces.models.assignment.AssignRouteRequest;
 import vn.com.routex.hub.user.service.interfaces.models.assignment.AssignRouteResponse;
+import vn.com.routex.hub.user.service.interfaces.models.result.ApiResult;
 import vn.com.routex.hub.user.service.interfaces.models.route.CreateRouteRequest;
 import vn.com.routex.hub.user.service.interfaces.models.route.CreateRouteResponse;
+import vn.com.routex.hub.user.service.interfaces.models.route.SearchRouteRequest;
+import vn.com.routex.hub.user.service.interfaces.models.route.SearchRouteResponse;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -31,10 +47,15 @@ import java.util.stream.Collectors;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ERROR;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ROUTE_ASSIGNMENT;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
+import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_NUMBER;
+import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_SIZE;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PLANNED_TIME;
+import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.INVALID_SEARCH_TIME;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.INVALID_START_TIME;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.INVALID_STOP_ORDER;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
+import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_CODE;
+import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_MESSAGE;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.VEHICLE_NOT_FOUND;
 
 
@@ -46,6 +67,8 @@ public class RouteManagementServiceImpl implements RouteManagementService {
     private final RouteStopRepository routeStopRepository;
     private final RouteAssignmentRepository routeAssignmentRepository;
     private final VehicleRepository vehicleRepository;
+
+    private static final ZoneId DEFAULT_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 
     @Override
     @Transactional
@@ -74,10 +97,13 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .id(UUID.randomUUID().toString())
                 .routeCode(routeCode)
                 .origin(origin)
+                .creator(request.getData().getCreator())
                 .destination(destination)
                 .plannedStartTime(plannedStartTime)
                 .plannedEndTime(plannedEndTime)
                 .status(RouteStatus.PLANNED)
+                .createdAt(LocalDateTime.now())
+                .createdBy(request.getData().getCreator())
                 .build();
 
 
@@ -92,6 +118,9 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                             .id(UUID.randomUUID().toString())
                             .routeId(newRoute.getId())
                             .stopOrder(point.getStopOrder())
+                            .creator(request.getData().getCreator())
+                            .createdAt(LocalDateTime.now())
+                            .createdBy(request.getData().getCreator())
                             .plannedArrivalTime(arrival)
                             .plannedDepartureTime(departure)
                             .note(point.getNote())
@@ -106,6 +135,10 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .requestId(request.getRequestId())
                 .requestDateTime(request.getRequestDateTime())
                 .channel(request.getChannel())
+                .result(ApiResult.builder()
+                        .responseCode(SUCCESS_CODE)
+                        .description(SUCCESS_MESSAGE)
+                        .build())
                 .data(CreateRouteResponse.CreateRouteResponseData.builder()
                         .id(newRoute.getId())
                         .routeCode(routeCode)
@@ -152,6 +185,91 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                         .vehicleId(routeAssignment.getVehicleId())
                         .status(routeAssignment.getStatus().name())
                         .build())
+                .build();
+    }
+
+    @Override
+    public SearchRouteResponse searchRoute(SearchRouteRequest request) {
+
+        int pageSize = DateTimeUtils.parseIntOrThrow(request.getData().getPageSize(), "pageSize", request);
+        int pageNumber = DateTimeUtils.parseIntOrThrow(request.getData().getPageNumber(), "pageNumber", request);
+
+        if (pageSize < 1 || pageSize > 100) {
+            throw new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
+                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_SIZE));
+        }
+        if (pageNumber < 0) {
+            throw new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
+                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_NUMBER));
+        }
+
+        LocalDate departureDate = DateTimeUtils.parseDateOrThrow(request.getData().getDepartureDate(), "departureDate", request);
+        LocalTime fromTime = DateTimeUtils.parseTimeNullable(request.getData().getFromTime(), "fromTime", request); // HH:mm optional
+        LocalTime toTime = DateTimeUtils.parseTimeNullable(request.getData().getToTime(), "toTime", request);       // HH:mm optional
+
+        if(fromTime != null && toTime != null && fromTime.isAfter(toTime)) {
+            throw new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
+                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_SEARCH_TIME));
+        }
+
+        OffsetDateTime startEx = RouteSpecification.dayStart(departureDate, DEFAULT_ZONE);
+        OffsetDateTime endEx = RouteSpecification.dayEndExclusive(departureDate, DEFAULT_ZONE);
+
+        if(fromTime != null) startEx = RouteSpecification.atTime(departureDate, fromTime, DEFAULT_ZONE);
+        if(toTime != null) endEx = RouteSpecification.atTime(departureDate, toTime, DEFAULT_ZONE);
+
+        Specification<Route> spec = Specification.where(RouteSpecification.originContainsIgnoreCase(request.getData().getOrigin()))
+                .and(RouteSpecification.destinationContainsIgnoreCase(request.getData().getDestination()))
+                .and(RouteSpecification.plannedStartBetween(startEx, endEx));
+
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, "plannedStartTime"));
+
+        Page<Route> pageResult = routeRepository.findAll(pageable);
+
+        List<String> routeIds = pageResult.getContent().stream().map(Route::getId).toList();
+
+        Map<String, List<SearchRouteResponse.SearchStopPoints>> stopsByRouteId;
+        if (!routeIds.isEmpty()) {
+            var stops = routeStopRepository.findByRouteIdIn(routeIds);
+            stops.sort(Comparator.comparingInt(s -> Integer.parseInt(s.getStopOrder())));
+            stopsByRouteId = stops.stream().collect(Collectors.groupingBy(
+                    RouteStop::getRouteId,
+                    Collectors.mapping(this::toStopPoints, Collectors.toList())
+            ));
+        } else {
+            stopsByRouteId = Map.of();
+        }
+
+        List<SearchRouteResponse.SearchRouteResponseData> items = pageResult.getContent().stream()
+                .map(r -> SearchRouteResponse.SearchRouteResponseData.builder()
+                        .id(r.getId())
+                        .routeCode(r.getRouteCode())
+                        .origin(r.getOrigin())
+                        .destination(r.getDestination())
+                        .plannedStartTime(r.getPlannedStartTime())
+                        .plannedEndTime(r.getPlannedEndTime())
+                        .stopPoints(stopsByRouteId.getOrDefault(r.getId(), List.of()))
+                        .build())
+                .collect(Collectors.toList());
+
+        return SearchRouteResponse.builder()
+                .requestId(request.getRequestId())
+                .requestDateTime(request.getRequestDateTime())
+                .channel(request.getChannel())
+                .data(items)
+                .build();
+    }
+
+    private SearchRouteResponse.SearchStopPoints toStopPoints(RouteStop s) {
+        return SearchRouteResponse.SearchStopPoints.builder()
+                .id(s.getId())
+                .stopOrder(s.getStopOrder())
+                .plannedArrivalTime(s.getStopOrder())
+                .routeId(s.getRouteId())
+                .plannedArrivalTime(s.getPlannedArrivalTime().toString())
+                .plannedDepartureTime(s.getPlannedDepartureTime().toString())
+                .note(s.getNote())
                 .build();
     }
 

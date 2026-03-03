@@ -12,6 +12,8 @@ import vn.com.routex.hub.user.service.interfaces.models.assignment.AssignRouteRe
 import vn.com.routex.hub.user.service.interfaces.models.assignment.AssignRouteResponse;
 import vn.com.routex.hub.user.service.interfaces.models.route.CreateRouteRequest;
 import vn.com.routex.hub.user.service.interfaces.models.route.CreateRouteResponse;
+import vn.com.routex.hub.user.service.interfaces.models.route.SearchRouteRequest;
+import vn.com.routex.hub.user.service.interfaces.models.route.SearchRouteResponse;
 
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.TIMEOUT_ERROR;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.TIMEOUT_ERROR_MESSAGE;
@@ -20,7 +22,7 @@ import static vn.com.routex.hub.user.service.infrastructure.persistence.constant
 @RequiredArgsConstructor
 public class RouteManagementFacadeImpl implements RouteManagementFacade {
 
-    private RouteManagementService routeManagementService;
+    private final RouteManagementService routeManagementService;
 
     @Override
     public ResponseEntity<CreateRouteResponse> createRoute(CreateRouteRequest request) {
@@ -43,6 +45,22 @@ public class RouteManagementFacadeImpl implements RouteManagementFacade {
         AssignRouteResponse response = routeManagementService.assignRoute(request);
         if(response == null) {
             throw new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
+                    ExceptionUtils.buildResultResponse(TIMEOUT_ERROR, TIMEOUT_ERROR_MESSAGE));
+        }
+        response.setRequestId(request.getRequestId());
+        response.setRequestDateTime(request.getRequestDateTime());
+        response.setChannel(request.getChannel());
+        if(response.getData() == null) {
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<SearchRouteResponse> searchRoute(SearchRouteRequest request) {
+        SearchRouteResponse response = routeManagementService.searchRoute(request);
+        if(response == null) {
+            throw new BusinessException(request.getRequestId(), request.getRequestDateTime(),request.getChannel(),
                     ExceptionUtils.buildResultResponse(TIMEOUT_ERROR, TIMEOUT_ERROR_MESSAGE));
         }
         response.setRequestId(request.getRequestId());

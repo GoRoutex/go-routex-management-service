@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.user.service.domain.auditing.AbstractAuditingEntity;
 
 @Getter
@@ -17,11 +18,15 @@ import vn.com.routex.hub.user.service.domain.auditing.AbstractAuditingEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@SuperBuilder
 @Table(name = "VEHICLE")
 public class Vehicle extends AbstractAuditingEntity {
 
     @Id
     private String id;
+
+    @Column(name = "CREATOR")
+    private String creator;
 
     @Column(name = "STATUS")
     @Enumerated(EnumType.STRING)
