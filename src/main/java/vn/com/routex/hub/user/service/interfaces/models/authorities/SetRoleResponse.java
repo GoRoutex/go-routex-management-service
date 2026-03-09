@@ -6,20 +6,21 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.user.service.interfaces.models.base.BaseResponse;
 
+import java.time.OffsetDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @SuperBuilder
-public class AddRoleResponse extends BaseResponse<AddRoleResponse.AddRoleResponseData> {
+public class SetRoleResponse extends BaseResponse<SetRoleResponse.SetRoleResponseData> {
 
     @Getter
     @Setter
     @NoArgsConstructor
     @SuperBuilder
-    public static class AddRoleResponseData {
-        private String code;
-        private String name;
-        private String creator;
-        private String description;
+    public static class SetRoleResponseData {
+        private String userId;
+        private String roleId;
+        private OffsetDateTime assignedAt;
     }
 }

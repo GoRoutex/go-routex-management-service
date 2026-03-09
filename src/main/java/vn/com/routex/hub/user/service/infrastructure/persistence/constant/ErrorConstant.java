@@ -10,6 +10,8 @@ public class ErrorConstant {
     public static final String AUTHORITIES_ERROR = "You are not authorized for this action";
     public static final String TIMEOUT_ERROR_MESSAGE = "Timeout";
     public static final String RECORD_NOT_FOUND = "1407";
+    public static final String ROLE_NOT_FOUND = "Role not found";
+    public static final String AUTHORITIES_NOT_FOUND = "Authorities not found";
     public static final String ROUTE_NOT_FOUND = "Route with Id %s not found";
     public static final String SEAT_NOT_FOUND = "Seats not found";
     public static final String VEHICLE_NOT_FOUND = "Vehicle not found";
@@ -29,6 +31,7 @@ public class ErrorConstant {
     public static final String INVALID_INPUT_MESSAGE = "Invalid Input";
     public static final String INVALID_REQUEST_TIMESTAMP = "5186";
     public static final String DUPLICATE_ERROR = "9400";
+    public static final String DUPLICATE_USER_ROLE_MESSAGE = "User already has this role";
     public static final String ROLE_EXISTS_ERROR = "Role with %s already exists";
     public static final String PERMISSION_EXISTS_ERROR = "Authorities with %s already exists";
     public static final String INVALID_PAGE_SIZE = "pageSize must be in [1..100]";

@@ -1,6 +1,5 @@
 package vn.com.routex.hub.user.service.application.facade;
 
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import vn.com.routex.hub.user.service.interfaces.models.location.SearchLocationResponse;
 

@@ -6,20 +6,20 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.user.service.interfaces.models.base.BaseResponse;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @SuperBuilder
-public class AddRoleResponse extends BaseResponse<AddRoleResponse.AddRoleResponseData> {
+public class SetPermissionResponse extends BaseResponse<SetPermissionResponse.SetPermissionResponseData> {
 
     @Getter
     @Setter
     @NoArgsConstructor
     @SuperBuilder
-    public static class AddRoleResponseData {
-        private String code;
-        private String name;
-        private String creator;
-        private String description;
+    public static class SetPermissionResponseData {
+        private String roleId;
+        private Set<String> authorities;
     }
 }

@@ -19,5 +19,8 @@ public class AddPermissionResponse extends BaseResponse<AddPermissionResponse.Ad
     public static class AddPermissionResponseData {
         private String code;
         private String name;
+        private String creator;
+        private String description;
+
     }
 }

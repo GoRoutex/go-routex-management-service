@@ -13,6 +13,10 @@ import vn.com.routex.hub.user.service.interfaces.models.authorities.AddPermissio
 import vn.com.routex.hub.user.service.interfaces.models.authorities.AddPermissionResponse;
 import vn.com.routex.hub.user.service.interfaces.models.authorities.AddRoleRequest;
 import vn.com.routex.hub.user.service.interfaces.models.authorities.AddRoleResponse;
+import vn.com.routex.hub.user.service.interfaces.models.authorities.SetPermissionRequest;
+import vn.com.routex.hub.user.service.interfaces.models.authorities.SetPermissionResponse;
+import vn.com.routex.hub.user.service.interfaces.models.authorities.SetRoleRequest;
+import vn.com.routex.hub.user.service.interfaces.models.authorities.SetRoleResponse;
 
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ApiConstant.ADD_PERMISSIONS;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ApiConstant.ADD_ROLES;
@@ -20,6 +24,8 @@ import static vn.com.routex.hub.user.service.infrastructure.persistence.constant
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ApiConstant.API_VERSION;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ApiConstant.AUTHORITIES_PATH;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ApiConstant.MANAGEMENT_PATH;
+import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ApiConstant.SET_PERMISSIONS;
+import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ApiConstant.SET_ROLES;
 
 @RestController
 @RequestMapping(API_PATH + API_VERSION + MANAGEMENT_PATH)
@@ -36,6 +42,16 @@ public class AuthoritiesManagementController {
     @PostMapping(AUTHORITIES_PATH + ADD_PERMISSIONS)
     public ResponseEntity<AddPermissionResponse> addPermission(@Valid @RequestBody AddPermissionRequest request) {
         return authoritiesManagementFacade.addPermission(request);
+    }
+
+    @PostMapping(AUTHORITIES_PATH + SET_ROLES)
+    public ResponseEntity<SetRoleResponse> setRole(@Valid @RequestBody SetRoleRequest request) {
+        return authoritiesManagementFacade.setRole(request);
+    }
+
+    @PostMapping(AUTHORITIES_PATH + SET_PERMISSIONS)
+    public ResponseEntity<SetPermissionResponse> setPermission(@Valid @RequestBody SetPermissionRequest request) {
+        return  authoritiesManagementFacade.setPermission(request);
     }
 
 }

@@ -6,9 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import vn.com.routex.hub.user.service.interfaces.models.location.LocationCodeProjection;
-import vn.com.routex.hub.user.service.interfaces.models.location.SearchLocationResponse;
-
-import java.util.Map;
 
 public interface LocationRepository extends JpaRepository<Location, Integer> {
 

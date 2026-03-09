@@ -39,7 +39,6 @@ import vn.com.routex.hub.user.service.interfaces.models.route.SearchRouteRespons
 import vn.com.routex.hub.user.service.interfaces.models.seat.RouteSeatView;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -128,7 +127,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .plannedStartTime(plannedStartTime)
                 .plannedEndTime(plannedEndTime)
                 .status(RouteStatus.PLANNED)
-                .createdAt(LocalDateTime.now())
+                .createdAt(OffsetDateTime.now())
                 .createdBy(request.getData().getCreator())
                 .build();
 
@@ -145,7 +144,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                             .routeId(newRoute.getId())
                             .stopOrder(point.getStopOrder())
                             .creator(request.getData().getCreator())
-                            .createdAt(LocalDateTime.now())
+                            .createdAt(OffsetDateTime.now())
                             .createdBy(request.getData().getCreator())
                             .plannedArrivalTime(arrival)
                             .plannedDepartureTime(departure)

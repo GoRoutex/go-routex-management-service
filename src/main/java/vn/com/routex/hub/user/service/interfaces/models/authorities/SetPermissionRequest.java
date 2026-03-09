@@ -1,6 +1,5 @@
 package vn.com.routex.hub.user.service.interfaces.models.authorities;
 
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,40 +10,31 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.user.service.interfaces.models.base.BaseRequest;
 
+import java.util.Set;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class AddRoleRequest extends BaseRequest {
+public class SetPermissionRequest extends BaseRequest {
 
     @Valid
     @NotNull
-    private AddRoleRequestData data;
+    private SetPermissionRequestData data;
 
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
     @SuperBuilder
-    public static class AddRoleRequestData {
-
+    public static class SetPermissionRequestData {
         @NotBlank
         @NotNull
-        private String code;
+        private String roleId;
 
-        @NotBlank
         @NotNull
-        private String name;
+        private Set<String> authoritiesCode;
 
-        @NotBlank
-        @NotNull
-        private String description;
-
-        @NotBlank
-        @NotNull
-        private String creator;
-
-        private boolean enabled;
     }
 }

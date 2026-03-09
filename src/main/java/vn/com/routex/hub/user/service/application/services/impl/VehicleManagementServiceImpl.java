@@ -14,7 +14,7 @@ import vn.com.routex.hub.user.service.interfaces.models.result.ApiResult;
 import vn.com.routex.hub.user.service.interfaces.models.vehicle.AddVehicleRequest;
 import vn.com.routex.hub.user.service.interfaces.models.vehicle.AddVehicleResponse;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ERROR;
@@ -42,7 +42,7 @@ public class VehicleManagementServiceImpl implements VehicleManagementService {
                 .vehiclePlate(request.getData().getVehiclePlate())
                 .seatCapacity(Integer.valueOf(request.getData().getSeatCapacity()))
                 .manufacturer(request.getData().getManufacturer())
-                .createdAt(LocalDateTime.now())
+                .createdAt(OffsetDateTime.now())
                 .status(VehicleStatus.AVAILABLE)
                 .creator(request.getData().getCreator())
                 .createdBy(request.getData().getCreator())

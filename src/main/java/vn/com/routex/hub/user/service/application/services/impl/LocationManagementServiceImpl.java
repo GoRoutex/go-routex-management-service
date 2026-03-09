@@ -1,6 +1,5 @@
 package vn.com.routex.hub.user.service.application.services.impl;
 
-import io.micrometer.core.instrument.search.Search;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -8,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import vn.com.routex.hub.user.service.application.services.LocationManagementService;
-import vn.com.routex.hub.user.service.domain.location.Location;
 import vn.com.routex.hub.user.service.domain.location.LocationRepository;
 import vn.com.routex.hub.user.service.interfaces.models.location.SearchLocationResponse;
 

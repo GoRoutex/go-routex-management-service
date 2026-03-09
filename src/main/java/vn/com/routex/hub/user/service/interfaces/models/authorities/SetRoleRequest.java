@@ -16,35 +16,25 @@ import vn.com.routex.hub.user.service.interfaces.models.base.BaseRequest;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class AddRoleRequest extends BaseRequest {
+public class SetRoleRequest extends BaseRequest {
 
     @Valid
     @NotNull
-    private AddRoleRequestData data;
+    private SetRoleRequestData data;
 
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
     @SuperBuilder
-    public static class AddRoleRequestData {
+    public static class SetRoleRequestData {
 
-        @NotBlank
         @NotNull
-        private String code;
-
         @NotBlank
-        @NotNull
-        private String name;
+        private String userId;
 
+        @NotNull
         @NotBlank
-        @NotNull
-        private String description;
-
-        @NotBlank
-        @NotNull
-        private String creator;
-
-        private boolean enabled;
+        private String roleId;
     }
 }
