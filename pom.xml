@@ -47,9 +47,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>vn.com.go.routex</groupId>
+			<groupId>io.github.louisphm091</groupId>
 			<artifactId>identity-security-spring-boot-starter</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.5</version>
 		</dependency>
 
 		<dependency>
