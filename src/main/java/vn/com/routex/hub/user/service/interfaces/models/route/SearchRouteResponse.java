@@ -12,15 +12,11 @@ import java.util.List;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class SearchRouteResponse extends BaseResponse {
-    private List<SearchRouteResponseData> data;
-
+public class SearchRouteResponse extends BaseResponse<List<SearchRouteResponse.SearchRouteResponseData>> {
     @Getter
     @Setter
-    @AllArgsConstructor
     @NoArgsConstructor
     @SuperBuilder
     public static class SearchRouteResponseData {

@@ -7,6 +7,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -24,6 +25,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.AUTHORITIES_ERROR;
+import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.AUTHORIZATION_ERROR;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.INVALID_HTTP_REQUEST_RESOURCE_ERROR;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.INVALID_HTTP_REQUEST_RESOURCE_ERROR_MESSAGE;
 import static vn.com.routex.hub.user.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
@@ -66,6 +69,22 @@ public class ExceptionHandlerAdvice {
         return ApiRequestUtils.getBaseRequestOrDefault(request);
     }
 
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<BaseResponse> handleAuthorizationDeniedException(
+            HttpServletRequest request,
+            AuthorizationDeniedException exception
+    ) {
+        BaseRequest baseRequest = logAndGetBaseRequest(request, exception);
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(buildBaseResponse(
+                        baseRequest,
+                        ApiResult.builder()
+                                .responseCode(AUTHORIZATION_ERROR)
+                                .description(AUTHORITIES_ERROR)
+                                .build()
+                ));
+    }
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<BaseResponse> handleBusinessException(HttpServletRequest request, BusinessException ex) {
         BaseRequest baseRequest = logAndGetBaseRequest(request, ex);

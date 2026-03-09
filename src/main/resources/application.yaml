@@ -77,6 +77,14 @@ jms:
 server:
   port: ${SERVER_PORT:8000}
 
+identity:
+  jwt:
+    secret: ${JWT_SECRET:CZZRadv0Xe8z3stWFWYdtiJ2E86gUgJvFEfbCYFgJhQ}
+    issuer: ${JWT_ISSUER:user-service}
+    audience: ${JWT_AUDIENCE:management-service}
+    authority-claim-name: ${JWT_CLAIM_NAME:roles}
+    authority-prefix: ${JWT_AUTH_PREFIX:ROLE_}
+
 logging:
   level:
     org.springframework.security: DEBUG

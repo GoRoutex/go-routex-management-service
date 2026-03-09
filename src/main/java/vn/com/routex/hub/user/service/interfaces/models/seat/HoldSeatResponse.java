@@ -1,6 +1,5 @@
 package vn.com.routex.hub.user.service.interfaces.models.seat;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,15 +11,11 @@ import java.util.List;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class HoldSeatResponse extends BaseResponse {
-    private List<HoldSeatResponseData> data;
-
+public class HoldSeatResponse extends BaseResponse<List<HoldSeatResponse.HoldSeatResponseData>> {
     @Getter
     @Setter
-    @AllArgsConstructor
     @NoArgsConstructor
     @SuperBuilder
     public static class HoldSeatResponseData {

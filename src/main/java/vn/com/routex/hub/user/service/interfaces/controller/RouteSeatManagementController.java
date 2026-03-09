@@ -4,6 +4,7 @@ package vn.com.routex.hub.user.service.interfaces.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +25,7 @@ import static vn.com.routex.hub.user.service.infrastructure.persistence.constant
 @RestController
 @RequestMapping(API_PATH + API_VERSION + MANAGEMENT_PATH)
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('route-seat:management') and hasRole('ADMIN')")
 public class RouteSeatManagementController {
 
     private final RouteSeatManagementFacade routeSeatManagementFacade;

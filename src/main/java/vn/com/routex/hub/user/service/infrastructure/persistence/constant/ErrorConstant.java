@@ -6,6 +6,8 @@ public class ErrorConstant {
     public static final String SYSTEM_ERROR = "6800";
     public static final String SYSTEM_ERROR_MESSAGE = "System Error";
     public static final String TIMEOUT_ERROR = "0600";
+    public static final String AUTHORIZATION_ERROR = "3200";
+    public static final String AUTHORITIES_ERROR = "You are not authorized for this action";
     public static final String TIMEOUT_ERROR_MESSAGE = "Timeout";
     public static final String RECORD_NOT_FOUND = "1407";
     public static final String ROUTE_NOT_FOUND = "Route with Id %s not found";
@@ -27,6 +29,8 @@ public class ErrorConstant {
     public static final String INVALID_INPUT_MESSAGE = "Invalid Input";
     public static final String INVALID_REQUEST_TIMESTAMP = "5186";
     public static final String DUPLICATE_ERROR = "9400";
+    public static final String ROLE_EXISTS_ERROR = "Role with %s already exists";
+    public static final String PERMISSION_EXISTS_ERROR = "Authorities with %s already exists";
     public static final String INVALID_PAGE_SIZE = "pageSize must be in [1..100]";
     public static final String INVALID_PAGE_NUMBER = "pageNumber must be >= 0";
     public static final String INVALID_SEAT_NO = "seatNos must not be empty";

@@ -57,10 +57,6 @@ public class User extends AbstractAuditingEntity {
     @Column(nullable = false)
     private UserStatus status;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserRoles role;
-
     @Column(name = "TENANT_ID")
     private String tenantId;
 

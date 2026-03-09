@@ -2,8 +2,10 @@ package vn.com.routex.hub.user.service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import vn.com.go.routex.identity.security.annotation.EnableIdentitySecurity;
 
 @SpringBootApplication
+@EnableIdentitySecurity
 public class ManagementServiceApplication {
 
 	public static void main(String[] args) {
