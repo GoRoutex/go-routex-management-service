@@ -3,9 +3,9 @@ package vn.com.routex.hub.management.service.infrastructure.kafka.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
-import vn.com.routex.hub.management.service.infrastructure.kafka.event.KafkaEventMessage;
-import vn.com.routex.hub.management.service.infrastructure.kafka.handler.KafkaTopicHandler;
+import vn.com.routex.hub.management.service.infrastructure.kafka.model.KafkaEventMessage;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.JsonUtils;
+import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -14,23 +14,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class KafkaEventPublisher {
 
-    private final KafkaTemplate<String, Object> kafkaTemplate;
-    private final KafkaTopicHandler topicResolver;
-
+    private final KafkaTemplate<String, String> kafkaTemplate;
     public void publish(
-            String topicKey,
-            String eventKey,
+            BaseRequest baseRequest,
+            String topic,
+            String event,
             String aggregateId,
             Object payload
     ) {
         try {
-            String topic = topicResolver.topicName(topicKey);
-            String eventName = topicResolver.eventName(eventKey);
-
             KafkaEventMessage<Object> message =
                     KafkaEventMessage.builder()
+                            .requestId(baseRequest.getRequestId())
+                            .requestDateTime(baseRequest.getRequestDateTime())
+                            .channel(baseRequest.getChannel())
                             .eventId(UUID.randomUUID().toString())
-                            .eventName(eventName)
+                            .eventName(event)
                             .aggregateId(aggregateId)
                             .source("management-service")
                             .version(1)

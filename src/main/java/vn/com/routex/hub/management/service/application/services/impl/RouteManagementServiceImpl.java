@@ -2,6 +2,7 @@ package vn.com.routex.hub.management.service.application.services.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,10 +25,12 @@ import vn.com.routex.hub.management.service.domain.stoppoint.RouteStop;
 import vn.com.routex.hub.management.service.domain.stoppoint.RouteStopRepository;
 import vn.com.routex.hub.management.service.domain.vehicle.Vehicle;
 import vn.com.routex.hub.management.service.domain.vehicle.VehicleRepository;
+import vn.com.routex.hub.management.service.infrastructure.kafka.config.KafkaEventPublisher;
+import vn.com.routex.hub.management.service.infrastructure.kafka.event.RouteReadyForSaleEvent;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.log.SystemLog;
-import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.DateTimeUtils;
+import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 import vn.com.routex.hub.management.service.interfaces.models.assignment.AssignRouteRequest;
 import vn.com.routex.hub.management.service.interfaces.models.assignment.AssignRouteResponse;
 import vn.com.routex.hub.management.service.interfaces.models.location.LocationCodeProjection;
@@ -81,6 +84,14 @@ public class RouteManagementServiceImpl implements RouteManagementService {
     private final VehicleRepository vehicleRepository;
     private final LocationRepository locationRepository;
     private final RouteSeatRepository routeSeatRepository;
+    private final KafkaEventPublisher kafkaEventPublisher;
+
+
+    @Value("${spring.kafka.topics.routes}")
+    private String bookingTopic;
+
+    @Value("${spring.kafka.events.route-ready-for-sale}")
+    private String routeReadyForSale;
 
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
@@ -231,14 +242,14 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                         .orElseThrow(() -> new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
                                 ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, request.getData().getRouteId()))));
 
-
-        route.setStatus(RouteStatus.ASSIGNED);
-        routeAssignmentRepository.save(routeAssignment);
-
         if(routeSeatRepository.existsByRouteId(request.getData().getRouteId())) {
             throw new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
                     ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(ROUTE_SEAT_EXIST, request.getData().getRouteId())));
         }
+
+        route.setStatus(RouteStatus.ASSIGNED);
+        routeAssignmentRepository.save(routeAssignment);
+        routeRepository.save(route);
 
         List<String> seatNos = generateSeatNos(vehicle);
 
@@ -255,6 +266,25 @@ public class RouteManagementServiceImpl implements RouteManagementService {
 
         routeSeatRepository.saveAll(seats);
 
+
+        RouteReadyForSaleEvent event = RouteReadyForSaleEvent
+                .builder()
+                .routeId(routeAssignment.getRouteId())
+                .vehicleId(routeAssignment.getVehicleId())
+                .assignedBy(request.getData().getCreator())
+                .assignedAt(routeAssignment.getAssignedAt())
+                .routeStatus(route.getStatus().name())
+                .seatCount(seatNos.size())
+                .seatNos(seatNos)
+                .build();
+
+        kafkaEventPublisher.publish(
+                request,
+                bookingTopic,
+                routeReadyForSale,
+                routeAssignment.getRouteId(),
+                event
+        );
         return AssignRouteResponse.builder()
                 .requestId(request.getRequestId())
                 .requestDateTime(request.getRequestDateTime())
