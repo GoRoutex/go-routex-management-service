@@ -34,13 +34,13 @@ The RouteHub ecosystem consists of multiple repositories organized by domain and
 
 | Repository | Description |
 |------------|------------|
-| routex-hub-user-service | User management, authentication, role & permission |
-| routex-hub-driver-service | Driver profile, availability, and operations |
-| routex-hub-trip-service | Trip scheduling and route management |
-| routex-hub-booking-service | Passenger booking & ticket handling |
-| routex-hub-payment-service | Payment integration & transaction processing |
-| routex-hub-gateway | API Gateway & request routing |
-| routex-hub-config | Centralized configuration management |
+| go-routex-user-service | User management, authentication, role & permission |
+| go-routex-driver-service | Driver profile, availability, and operations |
+| go-routex-trip-service | Trip scheduling and route management |
+| go-routex-booking-service | Passenger booking & ticket handling |
+| go-routex-payment-service | Payment integration & transaction processing |
+| go-routex-gateway | API Gateway & request routing |
+| go-routex-config | Centralized configuration management |
 
 ---
 
@@ -59,7 +59,7 @@ The RouteHub ecosystem consists of multiple repositories organized by domain and
 
 | Repository | Description |
 |------------|------------|
-| routex-hub-deployment-config | GitOps deployment configuration |
+| go-routex-deployment-config | GitOps deployment configuration |
 | CI/CD Pipelines | Automated build, tag, release & deployment |
 | Kubernetes Manifests | Cluster deployment resources |
 

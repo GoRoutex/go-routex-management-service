@@ -1,7 +1,7 @@
 spring:
 
   application:
-    name: routex-hub-management-service
+    name: go-routex-management-service
 
   threads:
     virtual:
@@ -10,7 +10,6 @@ spring:
   kafka:
     # K8s: set KAFKA_BOOTSTRAP_SERVERS = kafka:9092 (hoặc service của bạn)
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -18,6 +17,9 @@ spring:
       retries: 3
       properties:
         enable.idempotence: true
+        max.in.flight.requests.per.connection: 1
+        compression.type: gzip
+        linger.ms: 10
 
     consumer:
       group-id: ${KAFKA_CONSUMER_GROUP_ID:driver-service}
@@ -27,6 +29,48 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "vn.com.*"
+        spring.json.use.type.headers: false
+        session.timeout.ms: 30000
+        max.poll.records: 500
+
+    events:
+      # Booking Events
+      booking-created: "routex.booking.created"
+      booking-confirmed: "routex.booking.confirmed"
+      booking-cancelled: "routex.booking.cancelled"
+      booking-failed: "routex.booking.failed"
+
+      # Payment Events
+      payment-initiated: "routex.payment.initiated"
+      payment-completed: "routex.payment.completed"
+      payment-failed: "routex.payment.failed"
+      payment-refunded: "routex.payment.refunded"
+
+      # Seat Events
+      seat-reserved: "routex.seat.reserved"
+      seat-released: "routex.seat.released"
+      seat-locked: "routex.seat.locked"
+
+      # Notification Events
+      notification-email: "routex.notification.email"
+      notification-sms: "routex.notification.sms"
+
+    topics:
+      bookings: "bus-bookings"
+      payments: "bus-payments"
+      seats: "bus-seats"
+      notifications: "bus-notifications"
+      dead-letter: "bus-dead-letter-queue"
+
+    listener:
+      ack-mode: manual
+
+  # Retry Configuration
+  retry:
+    max-attempts: 3
+    backoff-ms: 1000
+    backoff-multiplier: 2
+
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/routexhub}
@@ -37,7 +81,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:none}
     show-sql: ${SPRING_JPA_SHOW_SQL:false}
 
   jackson:
@@ -79,7 +123,7 @@ server:
 
 identity:
   jwt:
-    secret: ${JWT_SECRET:CZZRadv0Xe8z3stWFWYdtiJ2E86gUgJvFEfbCYFgJhQ}
+    secret: ${JWT_SECRET}
     issuer: ${JWT_ISSUER:user-service}
     audience: ${JWT_AUDIENCE:management-service}
     authority-claim-name: ${JWT_CLAIM_NAME:roles}
@@ -88,3 +132,5 @@ identity:
 logging:
   level:
     org.springframework.security: DEBUG
+    org.springframework.kafka: INFO
+    org.apache.kafka: WARN
