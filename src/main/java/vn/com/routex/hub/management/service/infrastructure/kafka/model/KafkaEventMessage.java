@@ -1,4 +1,4 @@
-package vn.com.routex.hub.management.service.infrastructure.kafka.event;
+package vn.com.routex.hub.management.service.infrastructure.kafka.model;
 
 import lombok.Builder;
 
@@ -6,6 +6,9 @@ import java.time.OffsetDateTime;
 
 @Builder
 public record KafkaEventMessage<T> (
+        String requestId,
+        String requestDateTime,
+        String channel,
         String eventId,
         String eventName,
         String aggregateId,

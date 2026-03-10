@@ -51,13 +51,16 @@ spring:
       seat-released: "routex.seat.released"
       seat-locked: "routex.seat.locked"
 
+      route-ready-for-sale: "routex.route.ready-for-sale"
+
       # Notification Events
       notification-email: "routex.notification.email"
       notification-sms: "routex.notification.sms"
 
     topics:
+      routes: "route-management"
       bookings: "bus-bookings"
-      payments: "bus-payments"
+      payments: "route-payments"
       seats: "bus-seats"
       notifications: "bus-notifications"
       dead-letter: "bus-dead-letter-queue"
