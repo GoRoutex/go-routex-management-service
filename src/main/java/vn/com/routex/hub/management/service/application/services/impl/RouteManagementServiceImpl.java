@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.management.service.application.services.RouteManagementService;
 import vn.com.routex.hub.management.service.application.specification.RouteSpecification;
 import vn.com.routex.hub.management.service.domain.assignment.RouteAssignment;
@@ -18,7 +19,6 @@ import vn.com.routex.hub.management.service.domain.location.LocationRepository;
 import vn.com.routex.hub.management.service.domain.route.Route;
 import vn.com.routex.hub.management.service.domain.route.RouteRepository;
 import vn.com.routex.hub.management.service.domain.route.RouteStatus;
-import vn.com.routex.hub.management.service.domain.seat.RouteSeat;
 import vn.com.routex.hub.management.service.domain.seat.RouteSeatRepository;
 import vn.com.routex.hub.management.service.domain.seat.SeatStatus;
 import vn.com.routex.hub.management.service.domain.stoppoint.RouteStop;
@@ -26,9 +26,8 @@ import vn.com.routex.hub.management.service.domain.stoppoint.RouteStopRepository
 import vn.com.routex.hub.management.service.domain.vehicle.Vehicle;
 import vn.com.routex.hub.management.service.domain.vehicle.VehicleRepository;
 import vn.com.routex.hub.management.service.infrastructure.kafka.config.KafkaEventPublisher;
-import vn.com.routex.hub.management.service.infrastructure.kafka.event.RouteReadyForSaleEvent;
+import vn.com.routex.hub.management.service.infrastructure.kafka.event.RouteSellableEvent;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
-import vn.com.routex.hub.management.service.infrastructure.persistence.log.SystemLog;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.DateTimeUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 import vn.com.routex.hub.management.service.interfaces.models.assignment.AssignRouteRequest;
@@ -45,7 +44,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -55,7 +53,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ERROR;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ROUTE_ASSIGNMENT;
@@ -190,32 +187,6 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .build();
     }
 
-
-    private List<String> generateSeatNos(Vehicle vehicle) {
-        int seatCapacity = vehicle.getSeatCapacity();
-        boolean hasFloor = vehicle.isHasFloor();
-
-        if(seatCapacity <= 0) return List.of();
-
-        if(!hasFloor) {
-            return IntStream.rangeClosed(1, seatCapacity)
-                    .mapToObj(i -> String.format("%02d", i))
-                    .toList();
-        }
-
-        int half = (seatCapacity + 1) / 2;
-        List<String> seatNos = new ArrayList<>(seatCapacity);
-        for (int i = 1; i <= Math.min(half, seatCapacity); i++) {
-            seatNos.add("A" + String.format("%02d", i));
-        }
-        for (int i = half + 1; i <= seatCapacity; i++) {
-            seatNos.add("B" + String.format("%02d", i));
-        }
-
-        sLog.info("SeatNos: {}", seatNos);
-        return seatNos;
-    }
-
     @Override
     @Transactional
     public AssignRouteResponse assignRoute(AssignRouteRequest request) {
@@ -242,40 +213,20 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                         .orElseThrow(() -> new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
                                 ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, request.getData().getRouteId()))));
 
-        if(routeSeatRepository.existsByRouteId(request.getData().getRouteId())) {
-            throw new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
-                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(ROUTE_SEAT_EXIST, request.getData().getRouteId())));
-        }
-
         route.setStatus(RouteStatus.ASSIGNED);
         routeAssignmentRepository.save(routeAssignment);
         routeRepository.save(route);
 
-        List<String> seatNos = generateSeatNos(vehicle);
-
-        sLog.info("Seat Nos: {}", seatNos);
-
-        List<RouteSeat> seats = seatNos.stream()
-                .map(seatNo -> RouteSeat.builder()
-                        .routeId(request.getData().getRouteId())
-                        .seatNo(seatNo)
-                        .status(SeatStatus.AVAILABLE)
-                        .creator(request.getData().getCreator())
-                        .build())
-                .collect(Collectors.toList());
-
-        routeSeatRepository.saveAll(seats);
-
-
-        RouteReadyForSaleEvent event = RouteReadyForSaleEvent
+        RouteSellableEvent event = RouteSellableEvent
                 .builder()
                 .routeId(routeAssignment.getRouteId())
                 .vehicleId(routeAssignment.getVehicleId())
                 .assignedBy(request.getData().getCreator())
                 .assignedAt(routeAssignment.getAssignedAt())
                 .routeStatus(route.getStatus().name())
-                .seatCount(seatNos.size())
-                .seatNos(seatNos)
+                .seatCount(vehicle.getSeatCapacity())
+                .hasFloor(vehicle.isHasFloor())
+                .creator(request.getData().getCreator())
                 .build();
 
         kafkaEventPublisher.publish(
