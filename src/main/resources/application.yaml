@@ -9,7 +9,7 @@ spring:
 
   kafka:
     # K8s: set KAFKA_BOOTSTRAP_SERVERS = kafka:9092 (hoặc service của bạn)
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVER:localhost:9092}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -74,6 +74,18 @@ spring:
     backoff-ms: 1000
     backoff-multiplier: 2
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+      password: ""
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+      connect-timeout: 30000 # Connection timeout (count in milliseconds)
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/routexhub}
