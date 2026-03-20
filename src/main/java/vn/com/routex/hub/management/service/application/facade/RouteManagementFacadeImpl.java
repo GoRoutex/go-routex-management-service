@@ -10,6 +10,10 @@ import vn.com.routex.hub.management.service.interfaces.models.assignment.AssignR
 import vn.com.routex.hub.management.service.interfaces.models.assignment.AssignRouteResponse;
 import vn.com.routex.hub.management.service.interfaces.models.route.CreateRouteRequest;
 import vn.com.routex.hub.management.service.interfaces.models.route.CreateRouteResponse;
+import vn.com.routex.hub.management.service.interfaces.models.route.DeleteRouteRequest;
+import vn.com.routex.hub.management.service.interfaces.models.route.DeleteRouteResponse;
+import vn.com.routex.hub.management.service.interfaces.models.route.FetchRouteRequest;
+import vn.com.routex.hub.management.service.interfaces.models.route.FetchRouteResponse;
 import vn.com.routex.hub.management.service.interfaces.models.route.SearchRouteRequest;
 import vn.com.routex.hub.management.service.interfaces.models.route.SearchRouteResponse;
 
@@ -34,6 +38,18 @@ public class RouteManagementFacadeImpl implements RouteManagementFacade {
     @Override
     public ResponseEntity<SearchRouteResponse> searchRoute(SearchRouteRequest request) {
         SearchRouteResponse response = routeManagementService.searchRoute(request);
+        return HttpResponseUtil.buildResponse(request, response);
+    }
+
+    @Override
+    public ResponseEntity<FetchRouteResponse> fetchRoute(FetchRouteRequest request) {
+        FetchRouteResponse response = routeManagementService.fetchRoute(request);
+        return HttpResponseUtil.buildResponse(request, response);
+    }
+
+    @Override
+    public ResponseEntity<DeleteRouteResponse> deleteRoute(DeleteRouteRequest request) {
+        DeleteRouteResponse response = routeManagementService.deleteRoute(request);
         return HttpResponseUtil.buildResponse(request, response);
     }
 }

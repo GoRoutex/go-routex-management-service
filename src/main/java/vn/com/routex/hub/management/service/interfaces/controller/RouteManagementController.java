@@ -14,6 +14,10 @@ import vn.com.routex.hub.management.service.interfaces.models.assignment.AssignR
 import vn.com.routex.hub.management.service.interfaces.models.assignment.AssignRouteResponse;
 import vn.com.routex.hub.management.service.interfaces.models.route.CreateRouteRequest;
 import vn.com.routex.hub.management.service.interfaces.models.route.CreateRouteResponse;
+import vn.com.routex.hub.management.service.interfaces.models.route.DeleteRouteRequest;
+import vn.com.routex.hub.management.service.interfaces.models.route.DeleteRouteResponse;
+import vn.com.routex.hub.management.service.interfaces.models.route.FetchRouteRequest;
+import vn.com.routex.hub.management.service.interfaces.models.route.FetchRouteResponse;
 import vn.com.routex.hub.management.service.interfaces.models.route.SearchRouteRequest;
 import vn.com.routex.hub.management.service.interfaces.models.route.SearchRouteResponse;
 
@@ -21,6 +25,8 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.API_VERSION;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.ASSIGNMENT_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.CREATE_PATH;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.DELETE_PATH;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.FETCH_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.MANAGEMENT_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.ROUTE_SERVICE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.SEARCH_PATH;
@@ -47,6 +53,16 @@ public class RouteManagementController {
     @PostMapping(SEARCH_PATH)
     public ResponseEntity<SearchRouteResponse> searchRoute(@Valid @RequestBody SearchRouteRequest request) {
         return routeManagementFacade.searchRoute(request);
+    }
+
+    @PostMapping(FETCH_PATH)
+    public ResponseEntity<FetchRouteResponse> fetchRoute(@Valid @RequestBody FetchRouteRequest request) {
+        return routeManagementFacade.fetchRoute(request);
+    }
+
+    @PostMapping(DELETE_PATH)
+    public ResponseEntity<DeleteRouteResponse> deleteRoute(@Valid @RequestBody DeleteRouteRequest request) {
+        return routeManagementFacade.deleteRoute(request);
     }
 
 }

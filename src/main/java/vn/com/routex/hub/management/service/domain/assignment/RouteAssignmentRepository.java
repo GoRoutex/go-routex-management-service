@@ -6,10 +6,14 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RouteAssignmentRepository extends JpaRepository<RouteAssignment, String> {
     boolean existsByRouteId(String routeId);
+
+    Optional<RouteAssignment> findFirstByRouteIdAndStatusAndUnAssignedAtIsNullOrderByAssignedAtDesc(String routeId, RouteAssignmentStatus status);
+
     @Query(value = """
             SELECT ra.*
             FROM route_assignment ra

@@ -5,6 +5,10 @@ import vn.com.routex.hub.management.service.interfaces.models.assignment.AssignR
 import vn.com.routex.hub.management.service.interfaces.models.assignment.AssignRouteResponse;
 import vn.com.routex.hub.management.service.interfaces.models.route.CreateRouteRequest;
 import vn.com.routex.hub.management.service.interfaces.models.route.CreateRouteResponse;
+import vn.com.routex.hub.management.service.interfaces.models.route.DeleteRouteRequest;
+import vn.com.routex.hub.management.service.interfaces.models.route.DeleteRouteResponse;
+import vn.com.routex.hub.management.service.interfaces.models.route.FetchRouteRequest;
+import vn.com.routex.hub.management.service.interfaces.models.route.FetchRouteResponse;
 import vn.com.routex.hub.management.service.interfaces.models.route.SearchRouteRequest;
 import vn.com.routex.hub.management.service.interfaces.models.route.SearchRouteResponse;
 
@@ -15,4 +19,8 @@ public interface RouteManagementFacade {
     ResponseEntity<AssignRouteResponse> assignRoute(AssignRouteRequest request);
 
     ResponseEntity<SearchRouteResponse> searchRoute(SearchRouteRequest request);
+
+    ResponseEntity<FetchRouteResponse> fetchRoute(FetchRouteRequest request);
+
+    ResponseEntity<DeleteRouteResponse> deleteRoute(DeleteRouteRequest request);
 }

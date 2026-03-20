@@ -10,5 +10,7 @@ public interface RouteStopRepository extends JpaRepository<RouteStop, String> {
 
     RouteStop findByRouteId(String routeId);
 
+    List<RouteStop> findAllByRouteId(String routeId);
+
     List<RouteStop> findByRouteIdIn(List<String> routeIds);
 }

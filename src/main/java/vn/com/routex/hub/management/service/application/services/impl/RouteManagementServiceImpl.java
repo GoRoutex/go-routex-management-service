@@ -36,6 +36,10 @@ import vn.com.routex.hub.management.service.interfaces.models.location.LocationC
 import vn.com.routex.hub.management.service.interfaces.models.result.ApiResult;
 import vn.com.routex.hub.management.service.interfaces.models.route.CreateRouteRequest;
 import vn.com.routex.hub.management.service.interfaces.models.route.CreateRouteResponse;
+import vn.com.routex.hub.management.service.interfaces.models.route.DeleteRouteRequest;
+import vn.com.routex.hub.management.service.interfaces.models.route.DeleteRouteResponse;
+import vn.com.routex.hub.management.service.interfaces.models.route.FetchRouteRequest;
+import vn.com.routex.hub.management.service.interfaces.models.route.FetchRouteResponse;
 import vn.com.routex.hub.management.service.interfaces.models.route.SearchRouteRequest;
 import vn.com.routex.hub.management.service.interfaces.models.route.SearchRouteResponse;
 import vn.com.routex.hub.management.service.interfaces.models.seat.RouteSeatView;
@@ -382,6 +386,103 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                         .description(SUCCESS_MESSAGE)
                         .build())
                 .data(items)
+                .build();
+    }
+
+    @Override
+    public FetchRouteResponse fetchRoute(FetchRouteRequest request) {
+        Route route = routeRepository.findById(request.getData().getRouteId())
+                .orElseThrow(() -> new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
+                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, request.getData().getRouteId()))));
+
+        RouteAssignment assignment = routeAssignmentRepository
+                .findFirstByRouteIdAndStatusAndUnAssignedAtIsNullOrderByAssignedAtDesc(route.getId(), RouteAssignmentStatus.ASSIGNED)
+                .orElse(null);
+
+        Vehicle vehicle = assignment == null ? null : vehicleRepository.findById(assignment.getVehicleId()).orElse(null);
+
+        Long availableSeats = routeSeatRepository
+                .countByRouteIdAndStatus(List.of(route.getId()), SeatStatus.AVAILABLE.name())
+                .stream()
+                .findFirst()
+                .map(RouteSeatView::getAvailableSeat)
+                .orElse(0L);
+
+        List<RouteStop> routeStops = routeStopRepository.findAllByRouteId(route.getId());
+        routeStops.sort(Comparator.comparingInt(stop -> Integer.parseInt(stop.getStopOrder())));
+
+        List<SearchRouteResponse.SearchStopPoints> stopPoints = routeStops.stream()
+                .map(this::toStopPoints)
+                .toList();
+
+        return FetchRouteResponse.builder()
+                .requestId(request.getRequestId())
+                .requestDateTime(request.getRequestDateTime())
+                .channel(request.getChannel())
+                .result(ApiResult.builder()
+                        .responseCode(SUCCESS_CODE)
+                        .description(SUCCESS_MESSAGE)
+                        .build())
+                .data(FetchRouteResponse.FetchRouteResponseData.builder()
+                        .id(route.getId())
+                        .creator(route.getCreator())
+                        .pickupBranch(route.getPickupBranch())
+                        .routeCode(route.getRouteCode())
+                        .origin(route.getOrigin())
+                        .destination(route.getDestination())
+                        .plannedStartTime(route.getPlannedStartTime())
+                        .plannedEndTime(route.getPlannedEndTime())
+                        .actualStartTime(route.getActualStartTime())
+                        .actualEndTime(route.getActualEndTime())
+                        .status(route.getStatus().name())
+                        .availableSeats(availableSeats)
+                        .vehicleId(assignment == null ? null : assignment.getVehicleId())
+                        .vehiclePlate(vehicle == null ? null : vehicle.getVehiclePlate())
+                        .hasFloor(vehicle == null ? null : vehicle.isHasFloor())
+                        .assignedAt(assignment == null ? null : assignment.getAssignedAt())
+                        .stopPoints(stopPoints)
+                        .build())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public DeleteRouteResponse deleteRoute(DeleteRouteRequest request) {
+        Route route = routeRepository.findById(request.getData().getRouteId())
+                .orElseThrow(() -> new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
+                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, request.getData().getRouteId()))));
+
+        OffsetDateTime now = OffsetDateTime.now();
+        route.setStatus(RouteStatus.CANCELED);
+        route.setUpdatedAt(now);
+        route.setUpdatedBy(request.getData().getCreator());
+        routeRepository.save(route);
+
+        routeAssignmentRepository
+                .findFirstByRouteIdAndStatusAndUnAssignedAtIsNullOrderByAssignedAtDesc(route.getId(), RouteAssignmentStatus.ASSIGNED)
+                .ifPresent(routeAssignment -> {
+                    routeAssignment.setStatus(RouteAssignmentStatus.CANCELED);
+                    routeAssignment.setUnAssignedAt(now);
+                    routeAssignment.setUpdatedAt(now);
+                    routeAssignment.setUpdatedBy(request.getData().getCreator());
+                    routeAssignmentRepository.save(routeAssignment);
+                });
+
+        return DeleteRouteResponse.builder()
+                .requestId(request.getRequestId())
+                .requestDateTime(request.getRequestDateTime())
+                .channel(request.getChannel())
+                .result(ApiResult.builder()
+                        .responseCode(SUCCESS_CODE)
+                        .description(SUCCESS_MESSAGE)
+                        .build())
+                .data(DeleteRouteResponse.DeleteRouteResponseData.builder()
+                        .creator(request.getData().getCreator())
+                        .routeId(route.getId())
+                        .routeCode(route.getRouteCode())
+                        .status(route.getStatus().name())
+                        .updatedAt(route.getUpdatedAt())
+                        .build())
                 .build();
     }
 
