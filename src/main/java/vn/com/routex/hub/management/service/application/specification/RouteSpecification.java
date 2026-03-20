@@ -2,8 +2,8 @@ package vn.com.routex.hub.management.service.application.specification;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
-import vn.com.routex.hub.management.service.domain.route.Route;
 import vn.com.routex.hub.management.service.domain.route.RouteStatus;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.route.entity.RouteJpaEntity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -13,17 +13,17 @@ import java.time.ZoneId;
 @RequiredArgsConstructor
 public class RouteSpecification {
 
-    public static Specification<Route> originContainsIgnoreCase(String origin) {
+    public static Specification<RouteJpaEntity> originContainsIgnoreCase(String origin) {
         String v = normalize(origin);
         return (root, query, cb) -> cb.like(cb.lower(root.get("origin")), "%" + v + "%");
     }
 
-    public static Specification<Route> destinationContainsIgnoreCase(String destination) {
+    public static Specification<RouteJpaEntity> destinationContainsIgnoreCase(String destination) {
         String v = normalize(destination);
         return (root, query, cb) -> cb.like(cb.lower(root.get("destination")), "%" + v + "%");
     }
 
-    public static Specification<Route> assignedStatus(RouteStatus status) {
+    public static Specification<RouteJpaEntity> assignedStatus(RouteStatus status) {
         return (root, query, cb) -> {
             if(status == null) {
                 return cb.conjunction();
@@ -32,7 +32,7 @@ public class RouteSpecification {
         };
     }
 
-    public static Specification<Route> plannedStartBetween(OffsetDateTime startInitialize, OffsetDateTime endInitialize) {
+    public static Specification<RouteJpaEntity> plannedStartBetween(OffsetDateTime startInitialize, OffsetDateTime endInitialize) {
         return (root, query, cb) -> cb.and(
             cb.greaterThanOrEqualTo(root.get("plannedStartTime"), startInitialize),
             cb.lessThan(root.get("plannedStartTime"), endInitialize));

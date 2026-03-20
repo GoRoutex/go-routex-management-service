@@ -1,10 +1,10 @@
 package vn.com.routex.hub.management.service.application.services;
 
-import vn.com.routex.hub.management.service.interfaces.models.vehicle.AddVehicleRequest;
-import vn.com.routex.hub.management.service.interfaces.models.vehicle.AddVehicleResponse;
+import vn.com.routex.hub.management.service.application.dto.vehicle.AddVehicleCommand;
+import vn.com.routex.hub.management.service.application.dto.vehicle.AddVehicleResult;
 
 public interface VehicleManagementService {
 
-    AddVehicleResponse addVehicle(AddVehicleRequest request);
+    AddVehicleResult addVehicle(AddVehicleCommand command);
 
 }

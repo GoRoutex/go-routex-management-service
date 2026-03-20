@@ -107,6 +107,7 @@ identity:
     authority-claim-name: ${JWT_CLAIM_NAME:roles}
     authority-prefix: ${JWT_AUTH_PREFIX:ROLE_}
 
+
 logging:
   level:
     org.springframework.security: DEBUG

@@ -2,7 +2,6 @@ package vn.com.routex.hub.management.service.infrastructure.persistence.utils;
 
 import lombok.experimental.UtilityClass;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
-import vn.com.routex.hub.management.service.interfaces.models.route.SearchRouteRequest;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -15,33 +14,33 @@ public class DateTimeUtils {
 
     public static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
 
-    public int parseIntOrThrow(String v, String field, SearchRouteRequest req) {
+    public int parseIntOrThrow(String v, String field, String requestId, String requestDateTime, String channel) {
         if (v == null || v.isBlank()) {
-            throw new BusinessException(req.getRequestId(), req.getRequestDateTime(), req.getChannel(),
+            throw new BusinessException(requestId, requestDateTime, channel,
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, field + " is required"));
         }
         if (!v.trim().matches("^\\d{1,3}$")) {
-            throw new BusinessException(req.getRequestId(), req.getRequestDateTime(), req.getChannel(),
+            throw new BusinessException(requestId, requestDateTime, channel,
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, field + " must be numeric"));
         }
         return Integer.parseInt(v.trim());
     }
 
-    public LocalDate parseDateOrThrow(String v, String field, SearchRouteRequest req) {
+    public LocalDate parseDateOrThrow(String v, String field, String requestId, String requestDateTime, String channel) {
         try {
             return LocalDate.parse(v.trim()); // yyyy-MM-dd
         } catch (Exception e) {
-            throw new BusinessException(req.getRequestId(), req.getRequestDateTime(), req.getChannel(),
+            throw new BusinessException(requestId, requestDateTime, channel,
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, field + " must be yyyy-MM-dd"));
         }
     }
 
-    public LocalTime parseTimeNullable(String v, String field, SearchRouteRequest req) {
+    public LocalTime parseTimeNullable(String v, String field, String requestId, String requestDateTime, String channel) {
         if (v == null || v.isBlank()) return null;
         try {
             return LocalTime.parse(v.trim(), TIME_FMT); // HH:mm
         } catch (Exception e) {
-            throw new BusinessException(req.getRequestId(), req.getRequestDateTime(), req.getChannel(),
+            throw new BusinessException(requestId, requestDateTime, channel,
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, field + " must be HH:mm"));
         }
     }

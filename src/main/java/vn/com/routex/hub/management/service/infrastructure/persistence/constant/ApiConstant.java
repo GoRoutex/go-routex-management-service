@@ -16,6 +16,8 @@ public class ApiConstant {
     public static final String CONFIRM_PATH = "/confirm";
     public static final String CREATE_PATH = "/create";
     public static final String ASSIGNMENT_PATH = "/assignment";
+    public static final String FETCH_PATH = "/fetch";
+    public static final String DELETE_PATH = "/delete";
     public static final String VEHICLE_SERVICE = "/vehicle-service";
     public static final String ADD_PATH = "/add";
     public static final String SEARCH_PATH = "/search";

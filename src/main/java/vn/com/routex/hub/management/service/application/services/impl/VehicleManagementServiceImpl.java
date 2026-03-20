@@ -3,70 +3,54 @@ package vn.com.routex.hub.management.service.application.services.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import vn.com.routex.hub.management.service.application.dto.vehicle.AddVehicleCommand;
+import vn.com.routex.hub.management.service.application.dto.vehicle.AddVehicleResult;
 import vn.com.routex.hub.management.service.application.services.VehicleManagementService;
-import vn.com.routex.hub.management.service.domain.vehicle.Vehicle;
-import vn.com.routex.hub.management.service.domain.vehicle.VehicleRepository;
+import vn.com.routex.hub.management.service.domain.vehicle.model.VehicleProfile;
+import vn.com.routex.hub.management.service.domain.vehicle.port.VehicleProfileRepositoryPort;
 import vn.com.routex.hub.management.service.domain.vehicle.VehicleStatus;
 import vn.com.routex.hub.management.service.domain.vehicle.VehicleType;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
-import vn.com.routex.hub.management.service.interfaces.models.result.ApiResult;
-import vn.com.routex.hub.management.service.interfaces.models.vehicle.AddVehicleRequest;
-import vn.com.routex.hub.management.service.interfaces.models.vehicle.AddVehicleResponse;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ERROR;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_VEHICLE;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_CODE;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_MESSAGE;
-
 @Service
 @RequiredArgsConstructor
 public class VehicleManagementServiceImpl implements VehicleManagementService {
 
-    private final VehicleRepository vehicleRepository;
+    private final VehicleProfileRepositoryPort vehicleProfileRepositoryPort;
 
     @Override
     @Transactional
-    public AddVehicleResponse addVehicle(AddVehicleRequest request) {
-        if(vehicleRepository.existsByVehiclePlate(request.getData().getVehiclePlate())) {
-            throw new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
-                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(DUPLICATE_VEHICLE, request.getData().getVehiclePlate())));
+    public AddVehicleResult addVehicle(AddVehicleCommand command) {
+        if(vehicleProfileRepositoryPort.existsByVehiclePlate(command.getVehiclePlate())) {
+            throw new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
+                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(DUPLICATE_VEHICLE, command.getVehiclePlate())));
         }
 
-        Vehicle newVehicle = Vehicle.builder()
-                .id(UUID.randomUUID().toString())
-                .type(VehicleType.valueOf(request.getData().getType()))
-                .vehiclePlate(request.getData().getVehiclePlate())
-                .seatCapacity(Integer.valueOf(request.getData().getSeatCapacity()))
-                .manufacturer(request.getData().getManufacturer())
-                .createdAt(OffsetDateTime.now())
+        VehicleProfile newVehicle = VehicleProfile.register(
+                UUID.randomUUID().toString(),
+                command.getCreator(),
+                VehicleType.valueOf(command.getType()),
+                command.getVehiclePlate(),
+                Integer.valueOf(command.getSeatCapacity()),
+                command.getManufacturer(),
+                OffsetDateTime.now()
+        );
+
+        vehicleProfileRepositoryPort.save(newVehicle);
+
+        return AddVehicleResult.builder()
+                .creator(command.getCreator())
+                .type(newVehicle.getType())
+                .vehiclePlate(command.getVehiclePlate())
+                .seatCapacity(command.getSeatCapacity())
+                .manufacturer(command.getManufacturer())
                 .status(VehicleStatus.AVAILABLE)
-                .creator(request.getData().getCreator())
-                .createdBy(request.getData().getCreator())
-                .build();
-
-        vehicleRepository.save(newVehicle);
-
-        return AddVehicleResponse.builder()
-                .requestId(request.getRequestId())
-                .requestDateTime(request.getRequestDateTime())
-                .channel(request.getChannel())
-                .result(ApiResult.builder()
-                        .responseCode(SUCCESS_CODE)
-                        .description(SUCCESS_MESSAGE)
-                        .build())
-                .data(AddVehicleResponse.AddVehicleResponseData.builder()
-                        .creator(request.getData().getCreator())
-                        .status(newVehicle.getStatus())
-                        .type(newVehicle.getType())
-                        .vehiclePlate(request.getData().getVehiclePlate())
-                        .seatCapacity(request.getData().getSeatCapacity())
-                        .manufacturer(request.getData().getManufacturer())
-                        .status(VehicleStatus.AVAILABLE)
-                        .build())
                 .build();
     }
 }

@@ -1,17 +1,20 @@
 package vn.com.routex.hub.management.service.application.services;
 
-import vn.com.routex.hub.management.service.interfaces.models.authorities.AddPermissionRequest;
-import vn.com.routex.hub.management.service.interfaces.models.authorities.AddPermissionResponse;
-import vn.com.routex.hub.management.service.interfaces.models.authorities.AddRoleRequest;
-import vn.com.routex.hub.management.service.interfaces.models.authorities.AddRoleResponse;
-import vn.com.routex.hub.management.service.interfaces.models.authorities.SetPermissionRequest;
-import vn.com.routex.hub.management.service.interfaces.models.authorities.SetPermissionResponse;
-import vn.com.routex.hub.management.service.interfaces.models.authorities.SetRoleRequest;
-import vn.com.routex.hub.management.service.interfaces.models.authorities.SetRoleResponse;
+import vn.com.routex.hub.management.service.application.dto.authorities.AddPermissionCommand;
+import vn.com.routex.hub.management.service.application.dto.authorities.AddPermissionResult;
+import vn.com.routex.hub.management.service.application.dto.authorities.AddRoleCommand;
+import vn.com.routex.hub.management.service.application.dto.authorities.AddRoleResult;
+import vn.com.routex.hub.management.service.application.dto.authorities.SetPermissionCommand;
+import vn.com.routex.hub.management.service.application.dto.authorities.SetPermissionResult;
+import vn.com.routex.hub.management.service.application.dto.authorities.SetRoleCommand;
+import vn.com.routex.hub.management.service.application.dto.authorities.SetRoleResult;
 
 public interface AuthoritiesManagementService {
-    AddRoleResponse addRole(AddRoleRequest request);
-    AddPermissionResponse addPermission(AddPermissionRequest request);
-    SetPermissionResponse setPermission(SetPermissionRequest request);
-    SetRoleResponse setRole(SetRoleRequest request);
+    AddRoleResult addRole(AddRoleCommand command);
+
+    AddPermissionResult addPermission(AddPermissionCommand command);
+
+    SetPermissionResult setPermission(SetPermissionCommand command);
+
+    SetRoleResult setRole(SetRoleCommand command);
 }

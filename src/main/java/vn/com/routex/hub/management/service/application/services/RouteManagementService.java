@@ -1,17 +1,25 @@
 package vn.com.routex.hub.management.service.application.services;
 
-import vn.com.routex.hub.management.service.interfaces.models.assignment.AssignRouteRequest;
-import vn.com.routex.hub.management.service.interfaces.models.assignment.AssignRouteResponse;
-import vn.com.routex.hub.management.service.interfaces.models.route.CreateRouteRequest;
-import vn.com.routex.hub.management.service.interfaces.models.route.CreateRouteResponse;
-import vn.com.routex.hub.management.service.interfaces.models.route.SearchRouteRequest;
-import vn.com.routex.hub.management.service.interfaces.models.route.SearchRouteResponse;
+import vn.com.routex.hub.management.service.application.dto.route.AssignRouteCommand;
+import vn.com.routex.hub.management.service.application.dto.route.AssignRouteResult;
+import vn.com.routex.hub.management.service.application.dto.route.CreateRouteCommand;
+import vn.com.routex.hub.management.service.application.dto.route.CreateRouteResult;
+import vn.com.routex.hub.management.service.application.dto.route.DeleteRouteCommand;
+import vn.com.routex.hub.management.service.application.dto.route.DeleteRouteResult;
+import vn.com.routex.hub.management.service.application.dto.route.FetchRouteQuery;
+import vn.com.routex.hub.management.service.application.dto.route.FetchRouteResult;
+import vn.com.routex.hub.management.service.application.dto.route.SearchRouteQuery;
+import vn.com.routex.hub.management.service.application.dto.route.SearchRouteResult;
 
 public interface RouteManagementService {
 
-    CreateRouteResponse createRoute(CreateRouteRequest request);
+    CreateRouteResult createRoute(CreateRouteCommand command);
 
-    AssignRouteResponse assignRoute(AssignRouteRequest request);
+    AssignRouteResult assignRoute(AssignRouteCommand command);
 
-    SearchRouteResponse searchRoute(SearchRouteRequest request);
+    SearchRouteResult searchRoute(SearchRouteQuery query);
+
+    FetchRouteResult fetchRoute(FetchRouteQuery query);
+
+    DeleteRouteResult deleteRoute(DeleteRouteCommand command);
 }
