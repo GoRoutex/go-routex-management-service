@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import vn.com.routex.hub.management.service.application.facade.LocationManagementFacade;
+import vn.com.routex.hub.management.service.application.dto.location.SearchLocationQuery;
+import vn.com.routex.hub.management.service.application.dto.location.SearchLocationResult;
+import vn.com.routex.hub.management.service.application.services.LocationManagementService;
 import vn.com.routex.hub.management.service.interfaces.models.location.SearchLocationResponse;
 
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.API_PATH;
@@ -24,13 +26,29 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 public class LocationManagementController {
 
 
-    private final LocationManagementFacade locationManagementFacade;
+    private final LocationManagementService locationManagementService;
 
     @GetMapping(LOCATION_SERVICE + SEARCH_PATH)
     public ResponseEntity<SearchLocationResponse> searchLocation(
             @RequestParam String keyword,
             @RequestParam int page,
             @RequestParam int size) {
-        return locationManagementFacade.searchLocation(keyword, page, size);
+        SearchLocationResult result = locationManagementService.searchLocation(SearchLocationQuery.builder()
+                .keyword(keyword)
+                .page(page)
+                .size(size)
+                .build());
+
+        SearchLocationResponse response = SearchLocationResponse.builder()
+                .data(result.getData().stream()
+                        .map(item -> SearchLocationResponse.SearchLocationResponseData.builder()
+                                .id(item.getId())
+                                .name(item.getName())
+                                .code(item.getCode())
+                                .build())
+                        .toList())
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 }

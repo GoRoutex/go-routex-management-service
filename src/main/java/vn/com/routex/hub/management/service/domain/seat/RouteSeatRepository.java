@@ -3,7 +3,6 @@ package vn.com.routex.hub.management.service.domain.seat;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import vn.com.routex.hub.management.service.interfaces.models.seat.RouteSeatView;
 
 import java.util.List;
 
@@ -20,8 +19,8 @@ public interface RouteSeatRepository extends JpaRepository<RouteSeat, String> {
                         GROUP BY rs.ROUTE_ID;
             """,
             nativeQuery = true)
-    List<RouteSeatView> countByRouteIdAndStatus(@Param("routeIds") List<String> routeIds,
-                                                @Param("status") String status);
+    List<RouteSeatAvailabilityView> countByRouteIdAndStatus(@Param("routeIds") List<String> routeIds,
+                                                            @Param("status") String status);
 
     List<String> routeId(String routeId);
 

@@ -5,7 +5,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.management.service.infrastructure.kafka.model.KafkaEventMessage;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.JsonUtils;
-import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -16,7 +15,9 @@ public class KafkaEventPublisher {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     public void publish(
-            BaseRequest baseRequest,
+            String requestId,
+            String requestDateTime,
+            String channel,
             String topic,
             String event,
             String aggregateId,
@@ -25,9 +26,9 @@ public class KafkaEventPublisher {
         try {
             KafkaEventMessage<Object> message =
                     KafkaEventMessage.builder()
-                            .requestId(baseRequest.getRequestId())
-                            .requestDateTime(baseRequest.getRequestDateTime())
-                            .channel(baseRequest.getChannel())
+                            .requestId(requestId)
+                            .requestDateTime(requestDateTime)
+                            .channel(channel)
                             .eventId(UUID.randomUUID().toString())
                             .eventName(event)
                             .aggregateId(aggregateId)

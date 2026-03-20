@@ -2,27 +2,24 @@ package vn.com.routex.hub.management.service.application.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import vn.com.routex.hub.management.service.application.dto.authorities.AddPermissionCommand;
+import vn.com.routex.hub.management.service.application.dto.authorities.AddPermissionResult;
+import vn.com.routex.hub.management.service.application.dto.authorities.AddRoleCommand;
+import vn.com.routex.hub.management.service.application.dto.authorities.AddRoleResult;
+import vn.com.routex.hub.management.service.application.dto.authorities.SetPermissionCommand;
+import vn.com.routex.hub.management.service.application.dto.authorities.SetPermissionResult;
+import vn.com.routex.hub.management.service.application.dto.authorities.SetRoleCommand;
+import vn.com.routex.hub.management.service.application.dto.authorities.SetRoleResult;
 import vn.com.routex.hub.management.service.application.services.AuthoritiesManagementService;
-import vn.com.routex.hub.management.service.domain.roles.Authorities;
-import vn.com.routex.hub.management.service.domain.roles.AuthoritiesRepository;
-import vn.com.routex.hub.management.service.domain.roles.Roles;
-import vn.com.routex.hub.management.service.domain.roles.RolesRepository;
-import vn.com.routex.hub.management.service.domain.roles.UserRoleId;
-import vn.com.routex.hub.management.service.domain.roles.UserRoles;
-import vn.com.routex.hub.management.service.domain.roles.UserRolesRepository;
-import vn.com.routex.hub.management.service.domain.user.User;
-import vn.com.routex.hub.management.service.domain.user.UserRepository;
+import vn.com.routex.hub.management.service.domain.authorities.model.PermissionProfile;
+import vn.com.routex.hub.management.service.domain.authorities.model.RoleAggregate;
+import vn.com.routex.hub.management.service.domain.authorities.model.UserRoleAssignment;
+import vn.com.routex.hub.management.service.domain.authorities.port.PermissionRepositoryPort;
+import vn.com.routex.hub.management.service.domain.authorities.port.RoleRepositoryPort;
+import vn.com.routex.hub.management.service.domain.authorities.port.UserAccountLookupPort;
+import vn.com.routex.hub.management.service.domain.authorities.port.UserRoleAssignmentRepositoryPort;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
-import vn.com.routex.hub.management.service.interfaces.models.authorities.AddPermissionRequest;
-import vn.com.routex.hub.management.service.interfaces.models.authorities.AddPermissionResponse;
-import vn.com.routex.hub.management.service.interfaces.models.authorities.AddRoleRequest;
-import vn.com.routex.hub.management.service.interfaces.models.authorities.AddRoleResponse;
-import vn.com.routex.hub.management.service.interfaces.models.authorities.SetPermissionRequest;
-import vn.com.routex.hub.management.service.interfaces.models.authorities.SetPermissionResponse;
-import vn.com.routex.hub.management.service.interfaces.models.authorities.SetRoleRequest;
-import vn.com.routex.hub.management.service.interfaces.models.authorities.SetRoleResponse;
-import vn.com.routex.hub.management.service.interfaces.models.result.ApiResult;
 
 import java.time.OffsetDateTime;
 import java.util.HashSet;
@@ -38,175 +35,129 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROLE_EXISTS_ERROR;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROLE_NOT_FOUND;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_CODE;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_MESSAGE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.USER_NOT_FOUND_MESSAGE;
 
 @Service
 @RequiredArgsConstructor
 public class AuthoritiesManagementServiceImpl implements AuthoritiesManagementService {
 
-    private final RolesRepository rolesRepository;
-    private final AuthoritiesRepository authoritiesRepository;
-    private final UserRolesRepository userRolesRepository;
-    private final UserRepository userRepository;
+    private final RoleRepositoryPort roleRepositoryPort;
+    private final PermissionRepositoryPort permissionRepositoryPort;
+    private final UserRoleAssignmentRepositoryPort userRoleAssignmentRepositoryPort;
+    private final UserAccountLookupPort userAccountLookupPort;
 
     @Override
-    public AddRoleResponse addRole(AddRoleRequest request) {
-        if (rolesRepository.existsByCode(request.getData().getCode())) {
-            throw new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
-                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(ROLE_EXISTS_ERROR, request.getData().getCode())));
+    public AddRoleResult addRole(AddRoleCommand command) {
+        if (roleRepositoryPort.existsByCode(command.getCode())) {
+            throw new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
+                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(ROLE_EXISTS_ERROR, command.getCode())));
         }
 
-        Roles roles = Roles.builder()
-                .id(UUID.randomUUID().toString())
-                .code(request.getData().getCode())
-                .name(request.getData().getName())
-                .description(request.getData().getDescription())
-                .enabled(request.getData().isEnabled())
-                .createdAt(OffsetDateTime.now())
-                .createdBy(request.getData().getCreator())
-                .build();
+        RoleAggregate roleAggregate = RoleAggregate.create(
+                UUID.randomUUID().toString(),
+                command.getCode(),
+                command.getName(),
+                command.getDescription(),
+                command.isEnabled(),
+                command.getCreator(),
+                OffsetDateTime.now()
+        );
 
-        rolesRepository.save(roles);
+        roleRepositoryPort.save(roleAggregate);
 
-        return AddRoleResponse.builder()
-                .requestId(request.getRequestId())
-                .requestDateTime(request.getRequestDateTime())
-                .channel(request.getChannel())
-                .result(ApiResult.builder()
-                        .responseCode(SUCCESS_CODE)
-                        .description(SUCCESS_MESSAGE)
-                        .build())
-                .data(AddRoleResponse.AddRoleResponseData.builder()
-                        .code(request.getData().getCode())
-                        .name(request.getData().getName())
-                        .description(request.getData().getDescription())
-                        .build())
+        return AddRoleResult.builder()
+                .code(command.getCode())
+                .name(command.getName())
+                .creator(command.getCreator())
+                .description(command.getDescription())
                 .build();
     }
 
     @Override
-    public AddPermissionResponse addPermission(AddPermissionRequest request) {
+    public AddPermissionResult addPermission(AddPermissionCommand command) {
 
-        if (authoritiesRepository.existsByCode(request.getData().getCode())) {
-            throw new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
-                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(PERMISSION_EXISTS_ERROR, request.getData().getCode())));
+        if (permissionRepositoryPort.existsByCode(command.getCode())) {
+            throw new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
+                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(PERMISSION_EXISTS_ERROR, command.getCode())));
         }
 
-        Authorities authorities = Authorities.builder()
-                .id(UUID.randomUUID().toString())
-                .code(request.getData().getCode())
-                .name(request.getData().getName())
-                .description(request.getData().getDescription())
-                .enabled(request.getData().isEnabled())
-                .createdAt(OffsetDateTime.now())
-                .createdBy(request.getData().getCreator())
-                .build();
+        PermissionProfile permissionProfile = PermissionProfile.create(
+                UUID.randomUUID().toString(),
+                command.getCode(),
+                command.getName(),
+                command.getDescription(),
+                command.isEnabled(),
+                command.getCreator(),
+                OffsetDateTime.now()
+        );
 
-        authoritiesRepository.save(authorities);
+        permissionRepositoryPort.save(permissionProfile);
 
-        return AddPermissionResponse.builder()
-                .requestId(request.getRequestId())
-                .requestDateTime(request.getRequestDateTime())
-                .channel(request.getChannel())
-                .result(ApiResult.builder()
-                        .responseCode(SUCCESS_CODE)
-                        .description(SUCCESS_MESSAGE)
-                        .build())
-                .data(AddPermissionResponse.AddPermissionResponseData.builder()
-                        .code(request.getData().getCode())
-                        .name(request.getData().getName())
-                        .description(request.getData().getDescription())
-                        .build())
+        return AddPermissionResult.builder()
+                .code(command.getCode())
+                .name(command.getName())
+                .creator(command.getCreator())
+                .description(command.getDescription())
                 .build();
     }
 
     @Override
-    public SetPermissionResponse setPermission(SetPermissionRequest request) {
-        Roles roles = rolesRepository.findById(request.getData().getRoleId())
-                .orElseThrow(() -> new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
+    public SetPermissionResult setPermission(SetPermissionCommand command) {
+        RoleAggregate roleAggregate = roleRepositoryPort.findById(command.getRoleId())
+                .orElseThrow(() -> new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, ROLE_NOT_FOUND)));
 
-        List<Authorities> authoritiesList = authoritiesRepository.findByCodeIn(request.getData().getAuthoritiesCode());
+        List<PermissionProfile> authoritiesList = permissionRepositoryPort.findByCodes(command.getAuthoritiesCode());
 
-        if(authoritiesList.size() != request.getData().getAuthoritiesCode().size()) {
+        if(authoritiesList.size() != command.getAuthoritiesCode().size()) {
             Set<String> foundCodes = authoritiesList.stream()
-                    .map(Authorities::getCode)
+                    .map(PermissionProfile::getCode)
                     .collect(Collectors.toSet());
 
-            Set<String> missingCodes = new HashSet<>(request.getData().getAuthoritiesCode());
+            Set<String> missingCodes = new HashSet<>(command.getAuthoritiesCode());
             missingCodes.removeAll(foundCodes);
 
-            throw new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
+            throw new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
                     ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, AUTHORITIES_NOT_FOUND));
         }
 
-        roles.getAuthorities().addAll(authoritiesList);
-        rolesRepository.save(roles);
+        roleAggregate.assignAuthorities(command.getAuthoritiesCode());
+        roleRepositoryPort.save(roleAggregate);
 
 
-        return SetPermissionResponse.builder()
-                .requestId(request.getRequestId())
-                .requestDateTime(request.getRequestDateTime())
-                .channel(request.getChannel())
-                .result(ApiResult.builder()
-                        .responseCode(SUCCESS_CODE)
-                        .description(SUCCESS_MESSAGE)
-                        .build())
-                .data(SetPermissionResponse.SetPermissionResponseData.builder()
-                        .roleId(request.getData().getRoleId())
-                        .authorities(request.getData().getAuthoritiesCode())
-                        .build())
+        return SetPermissionResult.builder()
+                .roleId(command.getRoleId())
+                .authorities(command.getAuthoritiesCode())
                 .build();
     }
 
     @Override
-    public SetRoleResponse setRole(SetRoleRequest request) {
-        Roles roles = rolesRepository.findById(request.getData().getRoleId())
-                .orElseThrow(() -> new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
+    public SetRoleResult setRole(SetRoleCommand command) {
+        RoleAggregate roleAggregate = roleRepositoryPort.findById(command.getRoleId())
+                .orElseThrow(() -> new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, ROLE_NOT_FOUND)));
 
-        User user = userRepository.findById(request.getData().getUserId())
-                .orElseThrow(() -> new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
+        userAccountLookupPort.findById(command.getUserId())
+                .orElseThrow(() -> new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, USER_NOT_FOUND_MESSAGE)));
 
-
-        UserRoleId id = UserRoleId.builder()
-                .roleId(request.getData().getRoleId())
-                .userId(request.getData().getUserId())
-                .build();
-
-        if(userRolesRepository.existsById(id)) {
-            throw new BusinessException(request.getRequestId(), request.getRequestDateTime(), request.getChannel(),
+        if(userRoleAssignmentRepositoryPort.exists(command.getUserId(), command.getRoleId())) {
+            throw new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
                     ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, DUPLICATE_USER_ROLE_MESSAGE));
         }
 
-        UserRoles userRoles = UserRoles.builder()
-                .id(UserRoleId.builder()
-                        .userId(request.getData().getUserId())
-                        .roleId(request.getData().getRoleId())
-                        .build())
+        UserRoleAssignment userRoleAssignment = UserRoleAssignment.assign(
+                command.getUserId(),
+                roleAggregate.getId(),
+                OffsetDateTime.now()
+        );
+
+        userRoleAssignmentRepositoryPort.save(userRoleAssignment);
+
+        return SetRoleResult.builder()
+                .userId(command.getUserId())
+                .roleId(command.getRoleId())
                 .assignedAt(OffsetDateTime.now())
-                .build();
-
-
-        userRolesRepository.save(userRoles);
-
-        return SetRoleResponse.builder()
-                .requestId(request.getRequestId())
-                .requestDateTime(request.getRequestDateTime())
-                .channel(request.getChannel())
-                .result(ApiResult.builder()
-                        .responseCode(SUCCESS_CODE)
-                        .description(SUCCESS_MESSAGE)
-                        .build())
-                .data(SetRoleResponse.SetRoleResponseData
-                        .builder()
-                        .userId(request.getData().getUserId())
-                        .roleId(request.getData().getRoleId())
-                        .assignedAt(OffsetDateTime.now())
-                        .build())
                 .build();
 
     }
