@@ -1,11 +1,7 @@
 package vn.com.routex.hub.management.service.domain.route.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Builder;
 
-@Getter
-@AllArgsConstructor
-public class LocationCodePair {
-    private final String originCode;
-    private final String destinationCode;
+@Builder
+public record LocationCodePair(String originCode, String destinationCode) {
 }

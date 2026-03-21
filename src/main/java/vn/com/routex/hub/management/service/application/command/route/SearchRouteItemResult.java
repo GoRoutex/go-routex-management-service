@@ -1,4 +1,4 @@
-package vn.com.routex.hub.management.service.application.dto.route;
+package vn.com.routex.hub.management.service.application.command.route;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,22 +12,16 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @SuperBuilder
-public class FetchRouteResult {
+public class SearchRouteItemResult {
     private String id;
-    private String creator;
     private String pickupBranch;
-    private String routeCode;
     private String origin;
     private String destination;
+    private Long availableSeats;
     private OffsetDateTime plannedStartTime;
     private OffsetDateTime plannedEndTime;
-    private OffsetDateTime actualStartTime;
-    private OffsetDateTime actualEndTime;
-    private String status;
-    private Long availableSeats;
-    private String vehicleId;
     private String vehiclePlate;
-    private Boolean hasFloor;
-    private OffsetDateTime assignedAt;
+    private boolean hasFloor;
+    private String routeCode;
     private List<RouteStopPointResult> stopPoints;
 }

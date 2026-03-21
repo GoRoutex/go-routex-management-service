@@ -1,4 +1,4 @@
-package vn.com.routex.hub.management.service.application.dto.vehicle;
+package vn.com.routex.hub.management.service.application.command.authorities;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,12 +11,12 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class AddVehicleCommand {
+public class AddRoleCommand {
+    private String code;
+    private String name;
+    private String description;
     private String creator;
-    private String type;
-    private String vehiclePlate;
-    private String seatCapacity;
-    private String manufacturer;
+    private boolean enabled;
     private String requestId;
     private String requestDateTime;
     private String channel;

@@ -1,4 +1,4 @@
-package vn.com.routex.hub.management.service.application.dto.route;
+package vn.com.routex.hub.management.service.application.command.route;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package vn.com.routex.hub.management.service.application.dto.route;
+package vn.com.routex.hub.management.service.application.command.vehicle;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,21 +6,17 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class CreateRouteCommand {
+public class AddVehicleCommand {
     private String creator;
-    private String pickupBranch;
-    private String origin;
-    private String destination;
-    private String plannedStartTime;
-    private String plannedEndTime;
-    private List<RouteStopPointCommand> stopPoints;
+    private String type;
+    private String vehiclePlate;
+    private String seatCapacity;
+    private String manufacturer;
     private String requestId;
     private String requestDateTime;
     private String channel;
