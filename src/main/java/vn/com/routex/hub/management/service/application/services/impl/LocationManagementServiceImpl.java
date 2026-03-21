@@ -2,8 +2,8 @@ package vn.com.routex.hub.management.service.application.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.com.routex.hub.management.service.application.dto.location.SearchLocationQuery;
-import vn.com.routex.hub.management.service.application.dto.location.SearchLocationResult;
+import vn.com.routex.hub.management.service.application.command.location.SearchLocationQuery;
+import vn.com.routex.hub.management.service.application.command.location.SearchLocationResult;
 import vn.com.routex.hub.management.service.application.services.LocationManagementService;
 import vn.com.routex.hub.management.service.domain.location.port.LocationQueryPort;
 

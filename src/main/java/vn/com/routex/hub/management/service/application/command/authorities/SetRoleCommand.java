@@ -1,4 +1,4 @@
-package vn.com.routex.hub.management.service.application.dto.route;
+package vn.com.routex.hub.management.service.application.command.authorities;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,8 +11,9 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class FetchRouteQuery {
-    private String routeId;
+public class SetRoleCommand {
+    private String userId;
+    private String roleId;
     private String requestId;
     private String requestDateTime;
     private String channel;

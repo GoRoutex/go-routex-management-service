@@ -4,22 +4,21 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import vn.com.go.routex.identity.security.log.SystemLog;
-import vn.com.routex.hub.management.service.application.dto.route.AssignRouteCommand;
-import vn.com.routex.hub.management.service.application.dto.route.AssignRouteResult;
-import vn.com.routex.hub.management.service.application.dto.route.CreateRouteCommand;
-import vn.com.routex.hub.management.service.application.dto.route.CreateRouteResult;
-import vn.com.routex.hub.management.service.application.dto.route.DeleteRouteCommand;
-import vn.com.routex.hub.management.service.application.dto.route.DeleteRouteResult;
-import vn.com.routex.hub.management.service.application.dto.route.FetchRouteQuery;
-import vn.com.routex.hub.management.service.application.dto.route.FetchRouteResult;
-import vn.com.routex.hub.management.service.application.dto.route.RouteStopPointCommand;
-import vn.com.routex.hub.management.service.application.dto.route.RouteStopPointResult;
-import vn.com.routex.hub.management.service.application.dto.route.SearchRouteItemResult;
-import vn.com.routex.hub.management.service.application.dto.route.SearchRouteQuery;
-import vn.com.routex.hub.management.service.application.dto.route.SearchRouteResult;
+import vn.com.routex.hub.management.service.application.command.route.AssignRouteCommand;
+import vn.com.routex.hub.management.service.application.command.route.AssignRouteResult;
+import vn.com.routex.hub.management.service.application.command.route.CreateRouteCommand;
+import vn.com.routex.hub.management.service.application.command.route.CreateRouteResult;
+import vn.com.routex.hub.management.service.application.command.route.DeleteRouteCommand;
+import vn.com.routex.hub.management.service.application.command.route.DeleteRouteResult;
+import vn.com.routex.hub.management.service.application.command.route.FetchRouteQuery;
+import vn.com.routex.hub.management.service.application.command.route.FetchRouteResult;
+import vn.com.routex.hub.management.service.application.command.route.RouteStopPointCommand;
+import vn.com.routex.hub.management.service.application.command.route.RouteStopPointResult;
+import vn.com.routex.hub.management.service.application.command.route.SearchRouteItemResult;
+import vn.com.routex.hub.management.service.application.command.route.SearchRouteQuery;
+import vn.com.routex.hub.management.service.application.command.route.SearchRouteResult;
 import vn.com.routex.hub.management.service.application.services.RouteManagementService;
 import vn.com.routex.hub.management.service.application.specification.RouteSpecification;
-import vn.com.routex.hub.management.service.domain.assignment.RouteAssignmentStatus;
 import vn.com.routex.hub.management.service.domain.route.RouteStatus;
 import vn.com.routex.hub.management.service.domain.route.model.LocationCodePair;
 import vn.com.routex.hub.management.service.domain.route.model.RouteAggregate;
@@ -45,7 +44,6 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -97,8 +95,8 @@ public class RouteManagementServiceImpl implements RouteManagementService {
 
         LocationCodePair codeResult = routeLocationLookupPort.getCodes(command.getOrigin(), command.getDestination());
 
-        String originCode = codeResult.getOriginCode();
-        String destinationCode = codeResult.getDestinationCode();
+        String originCode = codeResult.originCode();
+        String destinationCode = codeResult.destinationCode();
 
         String routeCode = routeAggregateRepositoryPort.generateRouteCode(originCode, destinationCode);
 

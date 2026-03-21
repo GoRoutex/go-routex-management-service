@@ -1,4 +1,4 @@
-package vn.com.routex.hub.management.service.application.dto.authorities;
+package vn.com.routex.hub.management.service.application.command.route;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,12 +11,9 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class AddPermissionCommand {
-    private String code;
-    private String name;
-    private String description;
+public class DeleteRouteCommand {
     private String creator;
-    private boolean enabled;
+    private String routeId;
     private String requestId;
     private String requestDateTime;
     private String channel;

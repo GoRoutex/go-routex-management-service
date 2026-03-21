@@ -1,4 +1,4 @@
-package vn.com.routex.hub.management.service.application.dto.authorities;
+package vn.com.routex.hub.management.service.application.command.authorities;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

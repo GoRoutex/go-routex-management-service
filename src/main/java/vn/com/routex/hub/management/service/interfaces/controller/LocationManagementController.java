@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import vn.com.routex.hub.management.service.application.dto.location.SearchLocationQuery;
-import vn.com.routex.hub.management.service.application.dto.location.SearchLocationResult;
+import vn.com.routex.hub.management.service.application.command.location.SearchLocationQuery;
+import vn.com.routex.hub.management.service.application.command.location.SearchLocationResult;
 import vn.com.routex.hub.management.service.application.services.LocationManagementService;
 import vn.com.routex.hub.management.service.interfaces.models.location.SearchLocationResponse;
 
