@@ -40,15 +40,6 @@ public class RouteSeatJpaEntity {
     @Enumerated(EnumType.STRING)
     private SeatStatus status;
 
-    @Column(name = "TICKET_ID")
-    private String ticketId;
-
-    @Column(name = "HOLD_UNTIL")
-    private OffsetDateTime holdUntil;
-
-    @Column(name = "HOLD_BY")
-    private String holdBy;
-
     @Column(name = "CREATOR")
     private String creator;
 }
