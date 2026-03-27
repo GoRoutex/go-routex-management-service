@@ -19,6 +19,7 @@ public class RouteAssignmentRecord {
     private String routeId;
     private String creator;
     private String vehicleId;
+    private String driverId;
     private OffsetDateTime assignedAt;
     private OffsetDateTime unAssignedAt;
     private RouteAssignmentStatus status;
@@ -30,12 +31,14 @@ public class RouteAssignmentRecord {
             String routeId,
             String creator,
             String vehicleId,
+            String driverId,
             OffsetDateTime assignedAt
     ) {
         return RouteAssignmentRecord.builder()
                 .id(id)
                 .routeId(routeId)
                 .creator(creator)
+                .driverId(driverId)
                 .vehicleId(vehicleId)
                 .assignedAt(assignedAt)
                 .status(RouteAssignmentStatus.ASSIGNED)

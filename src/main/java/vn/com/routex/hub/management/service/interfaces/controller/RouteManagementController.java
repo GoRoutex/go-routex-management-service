@@ -4,6 +4,7 @@ package vn.com.routex.hub.management.service.interfaces.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,7 +57,7 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 @RestController
 @RequestMapping(API_PATH + API_VERSION + MANAGEMENT_PATH + ROUTE_SERVICE)
 @RequiredArgsConstructor
-//@PreAuthorize("hasAuthority('route:management') and hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('route:management') and hasRole('ADMIN')")
 public class RouteManagementController {
 
     private final RouteManagementService routeManagementService;

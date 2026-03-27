@@ -15,6 +15,7 @@ public class AssignRouteCommand {
     private String creator;
     private String routeId;
     private String vehicleId;
+    private String driverId;
     private String requestId;
     private String requestDateTime;
     private String channel;
