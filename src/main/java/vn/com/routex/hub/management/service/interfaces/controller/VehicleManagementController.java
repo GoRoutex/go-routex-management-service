@@ -5,10 +5,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.WebRequest;
 import vn.com.routex.hub.management.service.application.command.vehicle.AddVehicleCommand;
 import vn.com.routex.hub.management.service.application.command.vehicle.AddVehicleResult;
 import vn.com.routex.hub.management.service.application.services.VehicleManagementService;
@@ -32,6 +35,12 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 public class VehicleManagementController {
 
     private final VehicleManagementService vehicleManagementService;
+
+    @InitBinder
+    public void initBinder(WebDataBinder webDataBinder, WebRequest webRequest) {
+        webDataBinder.setDisallowedFields("requestId", "requestDateTime", "channel", "data");
+    }
+
 
     @PostMapping(VEHICLE_SERVICE + ADD_PATH)
     public ResponseEntity<AddVehicleResponse> addVehicle(@Valid @RequestBody AddVehicleRequest request) {

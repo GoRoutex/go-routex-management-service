@@ -5,10 +5,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.WebRequest;
 import vn.com.routex.hub.management.service.application.command.authorities.AddPermissionCommand;
 import vn.com.routex.hub.management.service.application.command.authorities.AddPermissionResult;
 import vn.com.routex.hub.management.service.application.command.authorities.AddRoleCommand;
@@ -48,6 +51,11 @@ public class AuthoritiesManagementController {
 
 
     private final AuthoritiesManagementService authoritiesManagementService;
+
+    @InitBinder
+    public void initBinder(WebDataBinder webDataBinder, WebRequest webRequest) {
+        webDataBinder.setDisallowedFields("requestId", "requestDateTime", "channel", "data");
+    }
 
     @PostMapping(AUTHORITIES_PATH + ADD_ROLES)
     public ResponseEntity<AddRoleResponse> addRole(@Valid @RequestBody AddRoleRequest request) {
