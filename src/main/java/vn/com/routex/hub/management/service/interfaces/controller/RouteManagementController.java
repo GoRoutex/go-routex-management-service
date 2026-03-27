@@ -4,10 +4,13 @@ package vn.com.routex.hub.management.service.interfaces.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.WebRequest;
 import vn.com.routex.hub.management.service.application.command.route.AssignRouteCommand;
 import vn.com.routex.hub.management.service.application.command.route.AssignRouteResult;
 import vn.com.routex.hub.management.service.application.command.route.CreateRouteCommand;
@@ -57,6 +60,11 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 public class RouteManagementController {
 
     private final RouteManagementService routeManagementService;
+
+    @InitBinder
+    public void initBinder(WebDataBinder webDataBinder, WebRequest webRequest) {
+        webDataBinder.setDisallowedFields("requestId", "requestDateTime", "channel", "data");
+    }
 
     @PostMapping(CREATE_PATH)
     public ResponseEntity<CreateRouteResponse> createRoute(@Valid @RequestBody CreateRouteRequest request) {
