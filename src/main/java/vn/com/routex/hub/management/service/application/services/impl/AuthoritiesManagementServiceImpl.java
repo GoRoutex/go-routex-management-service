@@ -82,7 +82,6 @@ public class AuthoritiesManagementServiceImpl implements AuthoritiesManagementSe
         }
 
         PermissionProfile permissionProfile = PermissionProfile.create(
-                UUID.randomUUID().toString(),
                 command.getCode(),
                 command.getName(),
                 command.getDescription(),

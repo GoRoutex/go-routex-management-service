@@ -14,7 +14,7 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
 public class PermissionProfile {
-    private String id;
+    private int id;
     private String code;
     private String name;
     private String description;
@@ -23,7 +23,6 @@ public class PermissionProfile {
     private String createdBy;
 
     public static PermissionProfile create(
-            String id,
             String code,
             String name,
             String description,
@@ -32,7 +31,6 @@ public class PermissionProfile {
             OffsetDateTime createdAt
     ) {
         return PermissionProfile.builder()
-                .id(id)
                 .code(code)
                 .name(name)
                 .description(description)
