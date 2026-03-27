@@ -13,6 +13,7 @@ public class AssignRouteResult {
     private String creator;
     private String routeId;
     private String vehicleId;
+    private String driverId;
     private String assignedAt;
     private String status;
 }

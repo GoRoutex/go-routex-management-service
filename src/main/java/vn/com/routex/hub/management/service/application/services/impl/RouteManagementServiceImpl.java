@@ -186,6 +186,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 command.getRouteId(),
                 command.getCreator(),
                 vehicle.getId(),
+                command.getDriverId(),
                 assignedAt
         );
 
@@ -217,6 +218,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .assignedAt(routeAssignment.getAssignedAt().toString())
                 .routeId(routeAssignment.getRouteId())
                 .vehicleId(routeAssignment.getVehicleId())
+                .driverId(routeAssignment.getDriverId())
                 .status(routeAssignment.getStatus().name())
                 .build();
     }
