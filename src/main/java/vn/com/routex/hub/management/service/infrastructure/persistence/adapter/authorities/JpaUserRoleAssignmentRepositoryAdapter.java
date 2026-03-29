@@ -25,4 +25,9 @@ public class JpaUserRoleAssignmentRepositoryAdapter implements UserRoleAssignmen
     public void save(UserRoleAssignment assignment) {
         userRoleJpaRepository.save(UserRolePersistenceMapper.toEntity(assignment));
     }
+
+    @Override
+    public void deleteByUserId(String userId) {
+        userRoleJpaRepository.deleteByIdUserId(userId);
+    }
 }

@@ -25,7 +25,7 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(API_PATH + API_VERSION + MANAGEMENT_PATH)
-@PreAuthorize("hasAuthority('location:management') and hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('location:management') or hasRole('ADMIN')")
 public class LocationManagementController {
 
 

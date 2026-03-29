@@ -39,14 +39,14 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.AUTHORITIES_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.MANAGEMENT_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.SET_PERMISSIONS;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.SET_ROLES;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.SET_ROLE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_CODE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_MESSAGE;
 
 @RestController
 @RequestMapping(API_PATH + API_VERSION + MANAGEMENT_PATH)
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ADMIN') or hasAuthority('authorities:management')")
 public class AuthoritiesManagementController {
 
 
@@ -106,7 +106,7 @@ public class AuthoritiesManagementController {
         return HttpResponseUtil.buildResponse(request, response);
     }
 
-    @PostMapping(AUTHORITIES_PATH + SET_ROLES)
+    @PostMapping(AUTHORITIES_PATH + SET_ROLE)
     public ResponseEntity<SetRoleResponse> setRole(@Valid @RequestBody SetRoleRequest request) {
         SetRoleResult result = authoritiesManagementService.setRole(SetRoleCommand.builder()
                 .userId(request.getData().getUserId())

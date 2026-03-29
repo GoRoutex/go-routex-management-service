@@ -9,7 +9,7 @@ public class ApiConstant {
     public static final String AUTHORITIES_PATH = "/authorities";
     public static final String ADD_ROLES = "/add-roles";
     public static final String SET_PERMISSIONS = "/set-permissions";
-    public static final String SET_ROLES = "/set-roles";
+    public static final String SET_ROLE = "/set-role";
     public static final String ADD_PERMISSIONS = "/add-permissions";
     public static final String HOLD_SEAT_PATH = "/hold-seat";
     public static final String BOOKING_PATH = "/booking-service";

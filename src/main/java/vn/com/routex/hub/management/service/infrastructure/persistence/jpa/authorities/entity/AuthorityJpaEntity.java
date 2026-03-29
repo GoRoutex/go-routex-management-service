@@ -3,9 +3,12 @@ package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.auth
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Generated;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,7 +24,7 @@ import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEnti
 @Table(name = "AUTHORITIES")
 public class AuthorityJpaEntity extends AbstractAuditingEntity {
     @Id
-    private String id;
+    private int id;
 
     @Column(name = "CODE", nullable = false, unique = true)
     private String code;

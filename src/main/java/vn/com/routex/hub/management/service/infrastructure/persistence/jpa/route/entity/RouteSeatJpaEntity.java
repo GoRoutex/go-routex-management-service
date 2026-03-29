@@ -1,5 +1,4 @@
-package vn.com.routex.hub.management.service.domain.seat;
-
+package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.route.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import vn.com.routex.hub.management.service.domain.seat.SeatStatus;
 
 import java.time.OffsetDateTime;
 
@@ -24,11 +24,11 @@ import java.time.OffsetDateTime;
 @SuperBuilder
 @Entity
 @Table(name = "ROUTE_SEAT")
-public class RouteSeat {
+public class RouteSeatJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(name = "ROUTE_ID")
     private String routeId;
@@ -40,16 +40,7 @@ public class RouteSeat {
     @Enumerated(EnumType.STRING)
     private SeatStatus status;
 
-    @Column(name = "TICKET_ID")
-    private String ticketId;
-
-    @Column(name = "HOLD_UNTIL")
-    private OffsetDateTime holdUntil;
-
-    @Column(name = "HOLD_BY")
-    private String holdBy;
-
     @Column(name = "CREATOR")
     private String creator;
-
 }
+

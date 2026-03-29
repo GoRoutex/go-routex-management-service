@@ -2,6 +2,7 @@ package vn.com.routex.hub.management.service.application.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vn.com.routex.hub.management.service.application.command.authorities.AddPermissionCommand;
 import vn.com.routex.hub.management.service.application.command.authorities.AddPermissionResult;
 import vn.com.routex.hub.management.service.application.command.authorities.AddRoleCommand;
@@ -13,6 +14,7 @@ import vn.com.routex.hub.management.service.application.command.authorities.SetR
 import vn.com.routex.hub.management.service.application.services.AuthoritiesManagementService;
 import vn.com.routex.hub.management.service.domain.authorities.model.PermissionProfile;
 import vn.com.routex.hub.management.service.domain.authorities.model.RoleAggregate;
+import vn.com.routex.hub.management.service.domain.authorities.model.UserAccountReference;
 import vn.com.routex.hub.management.service.domain.authorities.model.UserRoleAssignment;
 import vn.com.routex.hub.management.service.domain.authorities.port.PermissionRepositoryPort;
 import vn.com.routex.hub.management.service.domain.authorities.port.RoleRepositoryPort;
@@ -82,7 +84,6 @@ public class AuthoritiesManagementServiceImpl implements AuthoritiesManagementSe
         }
 
         PermissionProfile permissionProfile = PermissionProfile.create(
-                UUID.randomUUID().toString(),
                 command.getCode(),
                 command.getName(),
                 command.getDescription(),
@@ -132,12 +133,13 @@ public class AuthoritiesManagementServiceImpl implements AuthoritiesManagementSe
     }
 
     @Override
+    @Transactional
     public SetRoleResult setRole(SetRoleCommand command) {
         RoleAggregate roleAggregate = roleRepositoryPort.findById(command.getRoleId())
                 .orElseThrow(() -> new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, ROLE_NOT_FOUND)));
 
-        userAccountLookupPort.findById(command.getUserId())
+        UserAccountReference user = userAccountLookupPort.findById(command.getUserId())
                 .orElseThrow(() -> new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, USER_NOT_FOUND_MESSAGE)));
 
@@ -145,6 +147,8 @@ public class AuthoritiesManagementServiceImpl implements AuthoritiesManagementSe
             throw new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
                     ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, DUPLICATE_USER_ROLE_MESSAGE));
         }
+
+        userRoleAssignmentRepositoryPort.deleteByUserId(command.getUserId());
 
         UserRoleAssignment userRoleAssignment = UserRoleAssignment.assign(
                 command.getUserId(),

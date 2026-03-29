@@ -2,6 +2,8 @@ package vn.com.routex.hub.management.service.domain.stoppoint;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -37,5 +39,6 @@ public class StopPoint extends AbstractAuditingEntity {
     private BigDecimal longtitude; // Kinh do
 
     @Column(name = "TYPE")
+    @Enumerated(EnumType.STRING)
     private StopType type;
 }
