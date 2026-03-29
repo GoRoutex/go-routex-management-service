@@ -1,5 +1,6 @@
 package vn.com.routex.hub.management.service.infrastructure.persistence.security;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -31,23 +32,35 @@ public class ApiFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+
+        CachedHttpServletRequestWrapper cachedHttpServletRequestWrapper = new CachedHttpServletRequestWrapper(request);
+        ContentCachingResponseWrapper contentCachingResponseWrapper = new ContentCachingResponseWrapper(response);
+
         try {
-            CachedHttpServletRequestWrapper cachedHttpServletRequestWrapper = new CachedHttpServletRequestWrapper(request);
-            ContentCachingResponseWrapper contentCachingResponseWrapper = new ContentCachingResponseWrapper(response);
-            String jsonStringBody = new String(cachedHttpServletRequestWrapper.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            String jsonStringBody = new String(
+                    cachedHttpServletRequestWrapper.getInputStream().readAllBytes(),
+                    StandardCharsets.UTF_8
+            );
             BaseRequest apiRequest = objectMapper.readValue(jsonStringBody, BaseRequest.class);
             request.setAttribute(RequestAttributes.REQUEST_ID, apiRequest.getRequestId());
             request.setAttribute(RequestAttributes.REQUEST_DATE_TIME, apiRequest.getRequestDateTime());
             request.setAttribute(RequestAttributes.CHANNEL, apiRequest.getChannel());
-            filterChain.doFilter(cachedHttpServletRequestWrapper, contentCachingResponseWrapper);
-            String responseMessage = new String(contentCachingResponseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
-            log.info("{}", responseMessage);
-            contentCachingResponseWrapper.copyBodyToResponse();
-        } catch (Exception e) {
-            log.error(e.getLocalizedMessage());
+        } catch (JsonProcessingException | IllegalArgumentException e) {
+            // Invalid envelope request (requestId/requestDateTime/channel missing/invalid JSON).
+            log.warn("Invalid request envelope: {}", e.getMessage());
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("Invalid Request");
             response.getWriter().flush();
+            return;
+        }
+
+        try {
+            filterChain.doFilter(cachedHttpServletRequestWrapper, contentCachingResponseWrapper);
+        } finally {
+            // Always mirror the response back to the client and log it.
+            String responseMessage = new String(contentCachingResponseWrapper.getContentAsByteArray(), StandardCharsets.UTF_8);
+            log.info("{}", responseMessage);
+            contentCachingResponseWrapper.copyBodyToResponse();
         }
     }
 }

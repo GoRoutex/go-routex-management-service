@@ -31,7 +31,7 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 @RestController
 @RequestMapping(API_PATH + API_VERSION + MANAGEMENT_PATH)
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('vehicle:management') and hasRole('ADMIN')")
+@PreAuthorize("hasAuthority('vehicle:management') or hasRole('ADMIN')")
 public class VehicleManagementController {
 
     private final VehicleManagementService vehicleManagementService;
