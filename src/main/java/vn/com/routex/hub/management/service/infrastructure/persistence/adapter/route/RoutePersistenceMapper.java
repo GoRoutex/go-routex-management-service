@@ -6,7 +6,7 @@ import vn.com.routex.hub.management.service.domain.route.model.RouteStopPlan;
 import vn.com.routex.hub.management.service.domain.route.model.VehicleSnapshot;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.assignment.entity.RouteAssignmentJpaEntity;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.route.entity.RouteJpaEntity;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.stoppoint.entity.RouteStopJpaEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.operationpoint.entity.OperationPointJpaEntity;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.vehicle.entity.VehicleJpaEntity;
 
 final class RoutePersistenceMapper {
@@ -54,7 +54,7 @@ final class RoutePersistenceMapper {
                 .build();
     }
 
-    static RouteStopPlan toStopPlan(RouteStopJpaEntity routeStop) {
+    static RouteStopPlan toStopPlan(OperationPointJpaEntity routeStop) {
         return RouteStopPlan.builder()
                 .id(routeStop.getId())
                 .routeId(routeStop.getRouteId())
@@ -68,8 +68,8 @@ final class RoutePersistenceMapper {
                 .build();
     }
 
-    static RouteStopJpaEntity toEntity(RouteStopPlan stopPlan) {
-        return RouteStopJpaEntity.builder()
+    static OperationPointJpaEntity toEntity(RouteStopPlan stopPlan) {
+        return OperationPointJpaEntity.builder()
                 .id(stopPlan.getId())
                 .routeId(stopPlan.getRouteId())
                 .creator(stopPlan.getCreator())

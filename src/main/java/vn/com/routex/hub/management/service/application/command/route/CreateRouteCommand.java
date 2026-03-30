@@ -20,7 +20,7 @@ public class CreateRouteCommand {
     private String destination;
     private String plannedStartTime;
     private String plannedEndTime;
-    private List<RouteStopPointCommand> stopPoints;
+    private List<OperationPointCommand> operationPoints;
     private String requestId;
     private String requestDateTime;
     private String channel;

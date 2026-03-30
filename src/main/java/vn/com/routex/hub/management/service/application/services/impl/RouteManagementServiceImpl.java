@@ -12,8 +12,8 @@ import vn.com.routex.hub.management.service.application.command.route.DeleteRout
 import vn.com.routex.hub.management.service.application.command.route.DeleteRouteResult;
 import vn.com.routex.hub.management.service.application.command.route.FetchRouteQuery;
 import vn.com.routex.hub.management.service.application.command.route.FetchRouteResult;
-import vn.com.routex.hub.management.service.application.command.route.RouteStopPointCommand;
-import vn.com.routex.hub.management.service.application.command.route.RouteStopPointResult;
+import vn.com.routex.hub.management.service.application.command.route.OperationPointCommand;
+import vn.com.routex.hub.management.service.application.command.route.OperationPointResult;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteItemResult;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteQuery;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteResult;
@@ -31,7 +31,7 @@ import vn.com.routex.hub.management.service.domain.route.port.RouteProvincesLook
 import vn.com.routex.hub.management.service.domain.route.port.RouteQueryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteSaleEventPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteSeatAvailabilityPort;
-import vn.com.routex.hub.management.service.domain.route.port.RouteStopRepositoryPort;
+import vn.com.routex.hub.management.service.domain.route.port.OperationPointRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteVehicleRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.readmodel.RouteSearchView;
 import vn.com.routex.hub.management.service.infrastructure.kafka.event.RouteSellableEvent;
@@ -71,7 +71,7 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 public class RouteManagementServiceImpl implements RouteManagementService {
 
     private final RouteAggregateRepositoryPort routeAggregateRepositoryPort;
-    private final RouteStopRepositoryPort routeStopRepositoryPort;
+    private final OperationPointRepositoryPort operationPointRepositoryPort;
     private final RouteAssignmentRepositoryPort routeAssignmentRepositoryPort;
     private final RouteVehicleRepositoryPort routeVehicleRepositoryPort;
     private final RouteProvincesLookupPort routeProvincesLookupPort;
@@ -105,16 +105,16 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_START_TIME));
         }
 
-        List<RouteStopPointCommand> stopPoints =
-                Optional.ofNullable(command.getStopPoints())
+        List<OperationPointCommand> operationPoints =
+                Optional.ofNullable(command.getOperationPoints())
                         .orElseGet(List::of);
 
         // Validate stop points
-        validateStopPoints(command);
+        validateOperationPoints(command);
 
         OffsetDateTime now = OffsetDateTime.now();
         String routeId = UUID.randomUUID().toString();
-        List<RouteStopPlan> routeStopPlans = stopPoints.stream()
+        List<RouteStopPlan> routeStopPlans = operationPoints.stream()
                 .map(point -> {
                     OffsetDateTime arrival = OffsetDateTime.parse(point.getPlannedArrivalTime());
                     OffsetDateTime departure = OffsetDateTime.parse(point.getPlannedDepartureTime());
@@ -122,7 +122,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                     return RouteStopPlan.builder()
                             .id(UUID.randomUUID().toString())
                             .routeId(routeId)
-                            .stopOrder(Integer.parseInt(point.getStopOrder()))
+                            .stopOrder(Integer.parseInt(point.getOperationOrder()))
                             .creator(command.getCreator())
                             .createdAt(now)
                             .createdBy(command.getCreator())
@@ -147,7 +147,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
         );
 
         routeAggregateRepositoryPort.save(newRoute);
-        routeStopRepositoryPort.saveAll(routeStopPlans);
+        operationPointRepositoryPort.saveAll(routeStopPlans);
 
 
         return CreateRouteResult.builder()
@@ -160,7 +160,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .plannedStartTime(command.getPlannedStartTime())
                 .plannedEndTime(command.getPlannedEndTime())
                 .status(RouteStatus.PLANNED.name())
-                .stopPoints(new ArrayList<>(command.getStopPoints()))
+                .operationPoints(new ArrayList<>(command.getOperationPoints()))
                 .build();
     }
 
@@ -296,7 +296,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
         }
 
         Map<String, List<RouteStopPlan>> stopsByRouteId;
-        stopsByRouteId = routeIds.isEmpty() ? Map.of() : routeStopRepositoryPort.findByRouteIds(routeIds);
+        stopsByRouteId = routeIds.isEmpty() ? Map.of() : operationPointRepositoryPort.findByRouteIds(routeIds);
 
         List<SearchRouteItemResult> items = searchedRoutes.stream()
                 .map(r ->
@@ -314,8 +314,8 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                             .plannedEndTime(r.getPlannedEndTime())
                             .vehiclePlate(v == null ? null : v.getVehiclePlate())
                             .hasFloor(v != null && v.isHasFloor())
-                            .stopPoints(stopsByRouteId.getOrDefault(r.getId(), List.of()).stream()
-                                    .map(this::toStopPoints)
+                            .operationPoints(stopsByRouteId.getOrDefault(r.getId(), List.of()).stream()
+                                    .map(this::toOperationPoint)
                                     .toList())
                             .build();
                 })
@@ -341,8 +341,8 @@ public class RouteManagementServiceImpl implements RouteManagementService {
         Long availableSeats = routeSeatAvailabilityPort.countAvailableSeats(List.of(route.getId()))
                 .getOrDefault(route.getId(), 0L);
 
-        List<RouteStopPointResult> stopPoints = routeStopRepositoryPort.findByRouteId(route.getId()).stream()
-                .map(this::toStopPoints)
+        List<OperationPointResult> operationPoints = operationPointRepositoryPort.findByRouteId(route.getId()).stream()
+                .map(this::toOperationPoint)
                 .toList();
 
         return FetchRouteResult.builder()
@@ -362,7 +362,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .vehiclePlate(vehicle == null ? null : vehicle.getVehiclePlate())
                 .hasFloor(vehicle == null ? null : vehicle.isHasFloor())
                 .assignedAt(assignment == null ? null : assignment.getAssignedAt())
-                .stopPoints(stopPoints)
+                .operationPoints(operationPoints)
                 .build();
     }
 
@@ -393,10 +393,10 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .build();
     }
 
-    private RouteStopPointResult toStopPoints(RouteStopPlan s) {
-        return RouteStopPointResult.builder()
+    private OperationPointResult toOperationPoint(RouteStopPlan s) {
+        return OperationPointResult.builder()
                 .id(s.getId())
-                .stopOrder(String.valueOf(s.getStopOrder()))
+                .operationOrder(String.valueOf(s.getStopOrder()))
                 .routeId(s.getRouteId())
                 .plannedArrivalTime(s.getPlannedArrivalTime().toString())
                 .plannedDepartureTime(s.getPlannedDepartureTime().toString())
@@ -404,19 +404,19 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .build();
     }
 
-    private void validateStopPoints(CreateRouteCommand command) {
+    private void validateOperationPoints(CreateRouteCommand command) {
 
-        List<RouteStopPointCommand> stopPoints = command.getStopPoints();
+        List<OperationPointCommand> operationPoints = command.getOperationPoints();
 
         Set<Integer> setOfOrders = new HashSet<>();
 
-        for(RouteStopPointCommand point : stopPoints) {
-            if(point.getStopOrder() == null || Integer.parseInt(point.getStopOrder()) <= 0) {
+        for(OperationPointCommand point : operationPoints) {
+            if(point.getOperationOrder() == null || Integer.parseInt(point.getOperationOrder()) <= 0) {
                 throw new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
                         ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_STOP_ORDER));
             }
 
-            if(!setOfOrders.add(Integer.valueOf(point.getStopOrder()))) {
+            if(!setOfOrders.add(Integer.valueOf(point.getOperationOrder()))) {
                 throw new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
                         ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_STOP_ORDER));
             }

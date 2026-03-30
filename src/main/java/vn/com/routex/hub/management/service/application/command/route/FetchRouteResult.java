@@ -29,5 +29,5 @@ public class FetchRouteResult {
     private String vehiclePlate;
     private Boolean hasFloor;
     private OffsetDateTime assignedAt;
-    private List<RouteStopPointResult> stopPoints;
+    private List<OperationPointResult> operationPoints;
 }
