@@ -20,14 +20,14 @@ import vn.com.routex.hub.management.service.application.command.route.SearchRout
 import vn.com.routex.hub.management.service.application.services.RouteManagementService;
 import vn.com.routex.hub.management.service.application.specification.RouteSpecification;
 import vn.com.routex.hub.management.service.domain.route.RouteStatus;
-import vn.com.routex.hub.management.service.domain.route.model.LocationCodePair;
+import vn.com.routex.hub.management.service.domain.route.model.ProvincesCodePair;
 import vn.com.routex.hub.management.service.domain.route.model.RouteAggregate;
 import vn.com.routex.hub.management.service.domain.route.model.RouteAssignmentRecord;
 import vn.com.routex.hub.management.service.domain.route.model.RouteStopPlan;
 import vn.com.routex.hub.management.service.domain.route.model.VehicleSnapshot;
 import vn.com.routex.hub.management.service.domain.route.port.RouteAggregateRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteAssignmentRepositoryPort;
-import vn.com.routex.hub.management.service.domain.route.port.RouteLocationLookupPort;
+import vn.com.routex.hub.management.service.domain.route.port.RouteProvincesLookupPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteQueryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteSaleEventPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteSeatAvailabilityPort;
@@ -74,7 +74,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
     private final RouteStopRepositoryPort routeStopRepositoryPort;
     private final RouteAssignmentRepositoryPort routeAssignmentRepositoryPort;
     private final RouteVehicleRepositoryPort routeVehicleRepositoryPort;
-    private final RouteLocationLookupPort routeLocationLookupPort;
+    private final RouteProvincesLookupPort routeProvincesLookupPort;
     private final RouteSeatAvailabilityPort routeSeatAvailabilityPort;
     private final RouteQueryPort routeQueryPort;
     private final RouteSaleEventPort routeSaleEventPort;
@@ -93,7 +93,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
         OffsetDateTime plannedStartTime = OffsetDateTime.parse(command.getPlannedStartTime());
         OffsetDateTime plannedEndTime = OffsetDateTime.parse(command.getPlannedEndTime());
 
-        LocationCodePair codeResult = routeLocationLookupPort.getCodes(command.getOrigin(), command.getDestination());
+        ProvincesCodePair codeResult = routeProvincesLookupPort.getCodes(command.getOrigin(), command.getDestination());
 
         String originCode = codeResult.originCode();
         String destinationCode = codeResult.destinationCode();

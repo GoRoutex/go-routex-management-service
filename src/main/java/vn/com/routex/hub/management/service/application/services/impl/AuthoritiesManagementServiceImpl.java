@@ -14,7 +14,6 @@ import vn.com.routex.hub.management.service.application.command.authorities.SetR
 import vn.com.routex.hub.management.service.application.services.AuthoritiesManagementService;
 import vn.com.routex.hub.management.service.domain.authorities.model.PermissionProfile;
 import vn.com.routex.hub.management.service.domain.authorities.model.RoleAggregate;
-import vn.com.routex.hub.management.service.domain.authorities.model.UserAccountReference;
 import vn.com.routex.hub.management.service.domain.authorities.model.UserRoleAssignment;
 import vn.com.routex.hub.management.service.domain.authorities.port.PermissionRepositoryPort;
 import vn.com.routex.hub.management.service.domain.authorities.port.RoleRepositoryPort;
@@ -37,7 +36,6 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROLE_EXISTS_ERROR;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROLE_NOT_FOUND;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.USER_NOT_FOUND_MESSAGE;
 
 @Service
 @RequiredArgsConstructor
@@ -138,10 +136,6 @@ public class AuthoritiesManagementServiceImpl implements AuthoritiesManagementSe
         RoleAggregate roleAggregate = roleRepositoryPort.findById(command.getRoleId())
                 .orElseThrow(() -> new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, ROLE_NOT_FOUND)));
-
-        UserAccountReference user = userAccountLookupPort.findById(command.getUserId())
-                .orElseThrow(() -> new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
-                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, USER_NOT_FOUND_MESSAGE)));
 
         if(userRoleAssignmentRepositoryPort.exists(command.getUserId(), command.getRoleId())) {
             throw new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),

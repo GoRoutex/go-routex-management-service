@@ -21,5 +21,5 @@ public class ApiConstant {
     public static final String VEHICLE_SERVICE = "/vehicle-service";
     public static final String ADD_PATH = "/add";
     public static final String SEARCH_PATH = "/search";
-    public static final String LOCATION_SERVICE = "/location-service";
+    public static final String PROVINCES_SERVICE = "/provinces-service";
 }

@@ -46,7 +46,7 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 @RestController
 @RequestMapping(API_PATH + API_VERSION + MANAGEMENT_PATH)
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN') or hasAuthority('authorities:management')")
+//@PreAuthorize("hasRole('ADMIN') or hasAuthority('authorities:management')")
 public class AuthoritiesManagementController {
 
 
