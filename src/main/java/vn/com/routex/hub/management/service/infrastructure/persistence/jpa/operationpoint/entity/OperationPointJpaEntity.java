@@ -1,4 +1,4 @@
-package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.stoppoint.entity;
+package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.operationpoint.entity;
 
 
 import jakarta.persistence.Column;
@@ -21,7 +21,7 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "ROUTE_STOP")
 @SuperBuilder
-public class RouteStopJpaEntity extends AbstractAuditingEntity {
+public class OperationPointJpaEntity extends AbstractAuditingEntity {
 
     @Id
     private String id;

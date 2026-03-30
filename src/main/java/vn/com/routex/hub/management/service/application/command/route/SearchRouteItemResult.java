@@ -23,5 +23,5 @@ public class SearchRouteItemResult {
     private String vehiclePlate;
     private boolean hasFloor;
     private String routeCode;
-    private List<RouteStopPointResult> stopPoints;
+    private List<OperationPointResult> operationPoints;
 }

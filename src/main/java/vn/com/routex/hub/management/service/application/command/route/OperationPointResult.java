@@ -11,8 +11,10 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class RouteStopPointCommand {
-    private String stopOrder;
+public class OperationPointResult {
+    private String id;
+    private String operationOrder;
+    private String routeId;
     private String plannedArrivalTime;
     private String plannedDepartureTime;
     private String note;

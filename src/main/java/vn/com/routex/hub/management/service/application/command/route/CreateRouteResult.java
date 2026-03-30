@@ -21,5 +21,5 @@ public class CreateRouteResult {
     private String plannedStartTime;
     private String plannedEndTime;
     private String status;
-    private List<RouteStopPointCommand> stopPoints;
+    private List<OperationPointCommand> operationPoints;
 }

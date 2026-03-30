@@ -5,7 +5,7 @@ import vn.com.routex.hub.management.service.domain.route.model.RouteStopPlan;
 import java.util.List;
 import java.util.Map;
 
-public interface RouteStopRepositoryPort {
+public interface OperationPointRepositoryPort {
     void saveAll(List<RouteStopPlan> stopPlans);
 
     List<RouteStopPlan> findByRouteId(String routeId);

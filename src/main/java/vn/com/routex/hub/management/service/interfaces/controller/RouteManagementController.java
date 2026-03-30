@@ -20,8 +20,8 @@ import vn.com.routex.hub.management.service.application.command.route.DeleteRout
 import vn.com.routex.hub.management.service.application.command.route.DeleteRouteResult;
 import vn.com.routex.hub.management.service.application.command.route.FetchRouteQuery;
 import vn.com.routex.hub.management.service.application.command.route.FetchRouteResult;
-import vn.com.routex.hub.management.service.application.command.route.RouteStopPointCommand;
-import vn.com.routex.hub.management.service.application.command.route.RouteStopPointResult;
+import vn.com.routex.hub.management.service.application.command.route.OperationPointCommand;
+import vn.com.routex.hub.management.service.application.command.route.OperationPointResult;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteItemResult;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteQuery;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteResult;
@@ -69,12 +69,12 @@ public class RouteManagementController {
 
     @PostMapping(CREATE_PATH)
     public ResponseEntity<CreateRouteResponse> createRoute(@Valid @RequestBody CreateRouteRequest request) {
-        List<RouteStopPointCommand> stopPointCommands = new ArrayList<>();
-        if (request.getData().getStopPoints() != null) {
-            stopPointCommands = request.getData().getStopPoints().stream()
+        List<OperationPointCommand> operationPointCommands = new ArrayList<>();
+        if (request.getData().getOperationPoints() != null) {
+            operationPointCommands = request.getData().getOperationPoints().stream()
                     .map(point -> {
-                        RouteStopPointCommand command = new RouteStopPointCommand();
-                        command.setStopOrder(point.getStopOrder());
+                        OperationPointCommand command = new OperationPointCommand();
+                        command.setOperationOrder(point.getOperationOrder());
                         command.setPlannedArrivalTime(point.getPlannedArrivalTime());
                         command.setPlannedDepartureTime(point.getPlannedDepartureTime());
                         command.setNote(point.getNote());
@@ -90,22 +90,22 @@ public class RouteManagementController {
                 .destination(request.getData().getDestination())
                 .plannedStartTime(request.getData().getPlannedStartTime())
                 .plannedEndTime(request.getData().getPlannedEndTime())
-                .stopPoints(stopPointCommands)
+                .operationPoints(operationPointCommands)
                 .requestId(request.getRequestId())
                 .requestDateTime(request.getRequestDateTime())
                 .channel(request.getChannel())
                 .build());
 
-        List<CreateRouteRequest.RouteStopPoints> stopPointResponses = new ArrayList<>();
-        if (result.getStopPoints() != null) {
-            stopPointResponses = result.getStopPoints().stream()
+        List<CreateRouteRequest.OperationPoints> operationPointResponses = new ArrayList<>();
+        if (result.getOperationPoints() != null) {
+            operationPointResponses = result.getOperationPoints().stream()
                     .map(point -> {
-                        CreateRouteRequest.RouteStopPoints stopPoint = new CreateRouteRequest.RouteStopPoints();
-                        stopPoint.setStopOrder(point.getStopOrder());
-                        stopPoint.setPlannedArrivalTime(point.getPlannedArrivalTime());
-                        stopPoint.setPlannedDepartureTime(point.getPlannedDepartureTime());
-                        stopPoint.setNote(point.getNote());
-                        return stopPoint;
+                        CreateRouteRequest.OperationPoints op = new CreateRouteRequest.OperationPoints();
+                        op.setOperationOrder(point.getOperationOrder());
+                        op.setPlannedArrivalTime(point.getPlannedArrivalTime());
+                        op.setPlannedDepartureTime(point.getPlannedDepartureTime());
+                        op.setNote(point.getNote());
+                        return op;
                     })
                     .toList();
         }
@@ -122,7 +122,7 @@ public class RouteManagementController {
                         .plannedStartTime(result.getPlannedStartTime())
                         .plannedEndTime(result.getPlannedEndTime())
                         .status(result.getStatus())
-                        .stopPoints(stopPointResponses)
+                        .operationPoints(operationPointResponses)
                         .build())
                 .build();
 
@@ -209,8 +209,8 @@ public class RouteManagementController {
                         .vehiclePlate(result.getVehiclePlate())
                         .hasFloor(result.getHasFloor())
                         .assignedAt(result.getAssignedAt())
-                        .stopPoints(result.getStopPoints().stream()
-                                .map(this::toSearchStopPoint)
+                        .operationPoints(result.getOperationPoints().stream()
+                                .map(this::toSearchOperationPoint)
                                 .toList())
                         .build())
                 .build();
@@ -254,16 +254,16 @@ public class RouteManagementController {
                 .vehiclePlate(item.getVehiclePlate())
                 .hasFloor(item.isHasFloor())
                 .routeCode(item.getRouteCode())
-                .stopPoints(item.getStopPoints().stream()
-                        .map(this::toSearchStopPoint)
+                .operationPoints(item.getOperationPoints().stream()
+                        .map(this::toSearchOperationPoint)
                         .toList())
                 .build();
     }
 
-    private SearchRouteResponse.SearchStopPoints toSearchStopPoint(RouteStopPointResult point) {
-        return SearchRouteResponse.SearchStopPoints.builder()
+    private SearchRouteResponse.SearchOperationPoints toSearchOperationPoint(OperationPointResult point) {
+        return SearchRouteResponse.SearchOperationPoints.builder()
                 .id(point.getId())
-                .stopOrder(point.getStopOrder())
+                .operationOrder(point.getOperationOrder())
                 .routeId(point.getRouteId())
                 .plannedArrivalTime(point.getPlannedArrivalTime())
                 .plannedDepartureTime(point.getPlannedDepartureTime())

@@ -1,4 +1,4 @@
-package vn.com.routex.hub.management.service.domain.stoppoint;
+package vn.com.routex.hub.management.service.domain.operationpoint;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,13 +16,13 @@ import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEnti
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "STOP_POINT")
+@Table(name = "OPERATION_POINT")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class StopPoint extends AbstractAuditingEntity {
+public class OperationPoint extends AbstractAuditingEntity {
     @Id
     private String id;
 
@@ -35,10 +35,10 @@ public class StopPoint extends AbstractAuditingEntity {
     @Column(name = "LATITUDE")
     private BigDecimal latitude; // Vi Do
 
-    @Column(name = "LONGTITUDE")
-    private BigDecimal longtitude; // Kinh do
+    @Column(name = "LONGITUDE")
+    private BigDecimal longitude; // Kinh do
 
     @Column(name = "TYPE")
     @Enumerated(EnumType.STRING)
-    private StopType type;
+    private OperationPointType type;
 }
