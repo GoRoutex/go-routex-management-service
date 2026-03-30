@@ -1,4 +1,5 @@
-package vn.com.routex.hub.management.service.application.command.location;
+package vn.com.routex.hub.management.service.interfaces.models.provinces;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,15 +15,16 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class SearchLocationResult {
-    private List<SearchLocationItemResult> data;
+public class SearchProvincesResponse {
+
+    private List<SearchProvincesResponseData> data;
 
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
     @Builder
-    public static class SearchLocationItemResult {
+    public static class SearchProvincesResponseData {
         private int id;
         private String name;
         private String code;

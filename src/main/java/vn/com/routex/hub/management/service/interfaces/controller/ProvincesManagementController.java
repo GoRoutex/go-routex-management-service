@@ -11,45 +11,45 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
-import vn.com.routex.hub.management.service.application.command.location.SearchLocationQuery;
-import vn.com.routex.hub.management.service.application.command.location.SearchLocationResult;
-import vn.com.routex.hub.management.service.application.services.LocationManagementService;
-import vn.com.routex.hub.management.service.interfaces.models.location.SearchLocationResponse;
+import vn.com.routex.hub.management.service.application.command.provinces.SearchProvincesQuery;
+import vn.com.routex.hub.management.service.application.command.provinces.SearchProvincesResult;
+import vn.com.routex.hub.management.service.application.services.ProvincesManagementService;
+import vn.com.routex.hub.management.service.interfaces.models.provinces.SearchProvincesResponse;
 
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.API_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.API_VERSION;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.LOCATION_SERVICE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.MANAGEMENT_PATH;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.PROVINCES_SERVICE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.SEARCH_PATH;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(API_PATH + API_VERSION + MANAGEMENT_PATH)
-@PreAuthorize("hasAuthority('location:management') or hasRole('ADMIN')")
-public class LocationManagementController {
+@PreAuthorize("hasAuthority('provinces:management') or hasRole('ADMIN')")
+public class ProvincesManagementController {
 
 
-    private final LocationManagementService locationManagementService;
+    private final ProvincesManagementService provincesManagementService;
 
     @InitBinder
     public void initBinder(WebDataBinder webDataBinder, WebRequest webRequest) {
         webDataBinder.setDisallowedFields("requestId", "requestDateTime", "channel", "data");
     }
 
-    @GetMapping(LOCATION_SERVICE + SEARCH_PATH)
-    public ResponseEntity<SearchLocationResponse> searchLocation(
+    @GetMapping(PROVINCES_SERVICE + SEARCH_PATH)
+    public ResponseEntity<SearchProvincesResponse> searchProvinces(
             @RequestParam String keyword,
             @RequestParam int page,
             @RequestParam int size) {
-        SearchLocationResult result = locationManagementService.searchLocation(SearchLocationQuery.builder()
+        SearchProvincesResult result = provincesManagementService.searchProvinces(SearchProvincesQuery.builder()
                 .keyword(keyword)
                 .page(page)
                 .size(size)
                 .build());
 
-        SearchLocationResponse response = SearchLocationResponse.builder()
+        SearchProvincesResponse response = SearchProvincesResponse.builder()
                 .data(result.getData().stream()
-                        .map(item -> SearchLocationResponse.SearchLocationResponseData.builder()
+                        .map(item -> SearchProvincesResponse.SearchProvincesResponseData.builder()
                                 .id(item.getId())
                                 .name(item.getName())
                                 .code(item.getCode())

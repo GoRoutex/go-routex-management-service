@@ -1,4 +1,4 @@
-package vn.com.routex.hub.management.service.domain.location.readmodel;
+package vn.com.routex.hub.management.service.domain.provinces.readmodel;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class LocationSearchItem {
+public class ProvincesSearchItem {
     private int id;
     private String name;
     private String code;

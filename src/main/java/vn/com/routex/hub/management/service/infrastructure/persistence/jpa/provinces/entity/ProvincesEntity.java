@@ -1,4 +1,4 @@
-package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.location.entity;
+package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.provinces.entity;
 
 
 import jakarta.persistence.Column;
@@ -17,8 +17,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "LOCATION")
-public class LocationJpaEntity {
+@Table(name = "PROVINCES")
+public class ProvincesEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
