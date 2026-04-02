@@ -5,7 +5,7 @@ target/
 *.war
 *.ear
 *.log
-.m2
+.m2/
 
 # ===== IDE =====
 .idea/
