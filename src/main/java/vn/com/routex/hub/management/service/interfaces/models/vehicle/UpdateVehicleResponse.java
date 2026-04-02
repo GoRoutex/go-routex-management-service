@@ -1,6 +1,5 @@
 package vn.com.routex.hub.management.service.interfaces.models.vehicle;
 
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,18 +12,21 @@ import vn.com.routex.hub.management.service.interfaces.models.base.BaseResponse;
 @Setter
 @NoArgsConstructor
 @SuperBuilder
-public class AddVehicleResponse extends BaseResponse<AddVehicleResponse.AddVehicleResponseData> {
+public class UpdateVehicleResponse extends BaseResponse<UpdateVehicleResponse.UpdateVehicleResponseData> {
+
     @Getter
     @Setter
     @NoArgsConstructor
     @SuperBuilder
-    public static class AddVehicleResponseData {
+    public static class UpdateVehicleResponseData {
         private String id;
         private String creator;
         private VehicleType type;
         private String vehiclePlate;
-        private String seatCapacity;
+        private Integer seatCapacity;
+        private Boolean hasFloor;
         private String manufacturer;
         private VehicleStatus status;
     }
 }
+

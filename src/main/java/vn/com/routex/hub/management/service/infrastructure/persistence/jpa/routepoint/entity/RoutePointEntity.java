@@ -48,5 +48,22 @@ public class RoutePointEntity extends AbstractAuditingEntity {
 
     @Column(name = "NOTE")
     private String note;
-}
 
+    @Column(name = "OPERATION_POINT_ID")
+    private String operationPointId;
+
+    @Column(name = "STOP_NAME")
+    private String stopName;
+
+    @Column(name = "STOP_ADDRESS")
+    private String stopAddress;
+
+    @Column(name = "STOP_CITY")
+    private String stopCity;
+
+    @Column(name = "STOP_LATITUDE")
+    private Double stopLatitude;
+
+    @Column(name = "STOP_LONGITUDE")
+    private Double stopLongitude;
+}

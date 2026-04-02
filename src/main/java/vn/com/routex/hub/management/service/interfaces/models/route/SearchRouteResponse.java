@@ -45,5 +45,11 @@ public class SearchRouteResponse extends BaseResponse<List<SearchRouteResponse.S
         private String plannedArrivalTime;
         private String plannedDepartureTime;
         private String note;
+        private String operationPointId;
+        private String stopName;
+        private String stopAddress;
+        private String stopCity;
+        private Double stopLatitude;
+        private Double stopLongitude;
     }
 }

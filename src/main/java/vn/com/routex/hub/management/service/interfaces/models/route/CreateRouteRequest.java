@@ -73,5 +73,14 @@ public class CreateRouteRequest extends BaseRequest {
         private String plannedArrivalTime;
         private String plannedDepartureTime;
         private String note;
+
+        // Either reference an existing OperationPoint or provide a custom stop.
+        // Exactly one of (operationPointId) or (stopName) must be provided.
+        private String operationPointId;
+        private String stopName;
+        private String stopAddress;
+        private String stopCity;
+        private Double stopLatitude;
+        private Double stopLongitude;
     }
 }

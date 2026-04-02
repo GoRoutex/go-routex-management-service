@@ -13,6 +13,7 @@ import vn.com.routex.hub.management.service.domain.route.port.RouteSaleEventPort
 import vn.com.routex.hub.management.service.domain.route.port.RouteSeatAvailabilityPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteVehicleRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.readmodel.RouteFetchView;
+import vn.com.routex.hub.management.service.domain.operationpoint.port.OperationPointRepositoryPort;
 
 import java.util.List;
 
@@ -33,6 +34,7 @@ class RouteManagementServiceImplPagingTest {
         RouteSeatAvailabilityPort routeSeatAvailabilityPort = mock(RouteSeatAvailabilityPort.class);
         RouteQueryPort routeQueryPort = mock(RouteQueryPort.class);
         RouteSaleEventPort routeSaleEventPort = mock(RouteSaleEventPort.class);
+        OperationPointRepositoryPort operationPointRepositoryPort = mock(OperationPointRepositoryPort.class);
 
         RouteManagementServiceImpl service = new RouteManagementServiceImpl(
                 routeAggregateRepositoryPort,
@@ -42,7 +44,8 @@ class RouteManagementServiceImplPagingTest {
                 routeProvincesLookupPort,
                 routeSeatAvailabilityPort,
                 routeQueryPort,
-                routeSaleEventPort
+                routeSaleEventPort,
+                operationPointRepositoryPort
         );
 
         when(routeQueryPort.fetchRoutes(0, 10)).thenReturn(PagedResult.<RouteFetchView>builder()
@@ -78,6 +81,7 @@ class RouteManagementServiceImplPagingTest {
         RouteSeatAvailabilityPort routeSeatAvailabilityPort = mock(RouteSeatAvailabilityPort.class);
         RouteQueryPort routeQueryPort = mock(RouteQueryPort.class);
         RouteSaleEventPort routeSaleEventPort = mock(RouteSaleEventPort.class);
+        OperationPointRepositoryPort operationPointRepositoryPort = mock(OperationPointRepositoryPort.class);
 
         RouteManagementServiceImpl service = new RouteManagementServiceImpl(
                 routeAggregateRepositoryPort,
@@ -87,7 +91,8 @@ class RouteManagementServiceImplPagingTest {
                 routeProvincesLookupPort,
                 routeSeatAvailabilityPort,
                 routeQueryPort,
-                routeSaleEventPort
+                routeSaleEventPort,
+                operationPointRepositoryPort
         );
 
         when(routeQueryPort.fetchRoutes(0, 10)).thenReturn(PagedResult.<RouteFetchView>builder()

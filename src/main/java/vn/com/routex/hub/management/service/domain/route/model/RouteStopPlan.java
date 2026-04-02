@@ -21,6 +21,12 @@ public class RouteStopPlan {
     private OffsetDateTime plannedArrivalTime;
     private OffsetDateTime plannedDepartureTime;
     private String note;
+    private String operationPointId;
+    private String stopName;
+    private String stopAddress;
+    private String stopCity;
+    private Double stopLatitude;
+    private Double stopLongitude;
     private OffsetDateTime createdAt;
     private String createdBy;
 }

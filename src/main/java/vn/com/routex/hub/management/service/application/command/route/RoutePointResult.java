@@ -9,7 +9,12 @@ public record RoutePointResult(
         String routeId,
         String plannedArrivalTime,
         String plannedDepartureTime,
-        String note
+        String note,
+        String operationPointId,
+        String stopName,
+        String stopAddress,
+        String stopCity,
+        Double stopLatitude,
+        Double stopLongitude
 ) {
 }
-

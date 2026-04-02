@@ -128,6 +128,12 @@ public class RouteManagementController {
                             .plannedArrivalTime(point.getPlannedArrivalTime())
                             .plannedDepartureTime(point.getPlannedDepartureTime())
                             .note(point.getNote())
+                            .operationPointId(point.getOperationPointId())
+                            .stopName(point.getStopName())
+                            .stopAddress(point.getStopAddress())
+                            .stopCity(point.getStopCity())
+                            .stopLatitude(point.getStopLatitude())
+                            .stopLongitude(point.getStopLongitude())
                             .build())
                     .toList();
         }
@@ -154,6 +160,12 @@ public class RouteManagementController {
                         rp.setPlannedArrivalTime(point.plannedArrivalTime());
                         rp.setPlannedDepartureTime(point.plannedDepartureTime());
                         rp.setNote(point.note());
+                        rp.setOperationPointId(point.operationPointId());
+                        rp.setStopName(point.stopName());
+                        rp.setStopAddress(point.stopAddress());
+                        rp.setStopCity(point.stopCity());
+                        rp.setStopLatitude(point.stopLatitude());
+                        rp.setStopLongitude(point.stopLongitude());
                         return rp;
                     })
                     .toList();

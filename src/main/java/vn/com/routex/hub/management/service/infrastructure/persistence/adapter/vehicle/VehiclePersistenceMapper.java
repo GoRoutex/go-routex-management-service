@@ -8,6 +8,22 @@ final class VehiclePersistenceMapper {
     private VehiclePersistenceMapper() {
     }
 
+    static VehicleProfile toDomain(VehicleEntity entity) {
+        if (entity == null) return null;
+        return VehicleProfile.builder()
+                .id(entity.getId())
+                .creator(entity.getCreator())
+                .status(entity.getStatus())
+                .type(entity.getType())
+                .vehiclePlate(entity.getVehiclePlate())
+                .seatCapacity(entity.getSeatCapacity())
+                .hasFloor(entity.isHasFloor())
+                .manufacturer(entity.getManufacturer())
+                .createdAt(entity.getCreatedAt())
+                .createdBy(entity.getCreatedBy())
+                .build();
+    }
+
     static VehicleEntity toEntity(VehicleProfile vehicleProfile) {
         return VehicleEntity.builder()
                 .id(vehicleProfile.getId())

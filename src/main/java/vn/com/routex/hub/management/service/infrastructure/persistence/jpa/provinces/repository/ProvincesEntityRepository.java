@@ -9,6 +9,9 @@ import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.provi
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.provinces.projection.ProvincesCodeProjection;
 
 public interface ProvincesEntityRepository extends JpaRepository<ProvincesEntity, Integer> {
+    boolean existsByCode(String code);
+
+    boolean existsByName(String name);
 
     @Query(value = """
             
