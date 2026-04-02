@@ -20,11 +20,11 @@ public record UpdateRouteCommand(
         OffsetDateTime actualStartTime,
         OffsetDateTime actualEndTime,
         RouteStatus status,
-        List<UpdateRouteCommand.UpdateOperationPointCommand> operationPoints
+        List<UpdateRouteCommand.UpdateRoutePointCommand> routePoints
 ) {
 
     @Builder
-    public record UpdateOperationPointCommand(
+    public record UpdateRoutePointCommand(
         String id,
         String operationOrder,
         OffsetDateTime plannedArrivalTime,

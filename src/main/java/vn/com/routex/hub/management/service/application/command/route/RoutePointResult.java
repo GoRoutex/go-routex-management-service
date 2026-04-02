@@ -3,7 +3,7 @@ package vn.com.routex.hub.management.service.application.command.route;
 import lombok.Builder;
 
 @Builder
-public record OperationPointResult(
+public record RoutePointResult(
         String id,
         String operationOrder,
         String routeId,
@@ -12,3 +12,4 @@ public record OperationPointResult(
         String note
 ) {
 }
+

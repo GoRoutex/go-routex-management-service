@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import vn.com.routex.hub.management.service.application.command.route.FetchRoutesQuery;
 import vn.com.routex.hub.management.service.application.command.route.FetchRoutesResult;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
-import vn.com.routex.hub.management.service.domain.route.port.OperationPointRepositoryPort;
+import vn.com.routex.hub.management.service.domain.route.port.RoutePointRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteAggregateRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteAssignmentRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteProvincesLookupPort;
@@ -26,7 +26,7 @@ class RouteManagementServiceImplPagingTest {
     @Test
     void fetchRoutes_usesOneBasedPageNumberExternally() {
         RouteAggregateRepositoryPort routeAggregateRepositoryPort = mock(RouteAggregateRepositoryPort.class);
-        OperationPointRepositoryPort operationPointRepositoryPort = mock(OperationPointRepositoryPort.class);
+        RoutePointRepositoryPort routePointRepositoryPort = mock(RoutePointRepositoryPort.class);
         RouteAssignmentRepositoryPort routeAssignmentRepositoryPort = mock(RouteAssignmentRepositoryPort.class);
         RouteVehicleRepositoryPort routeVehicleRepositoryPort = mock(RouteVehicleRepositoryPort.class);
         RouteProvincesLookupPort routeProvincesLookupPort = mock(RouteProvincesLookupPort.class);
@@ -36,7 +36,7 @@ class RouteManagementServiceImplPagingTest {
 
         RouteManagementServiceImpl service = new RouteManagementServiceImpl(
                 routeAggregateRepositoryPort,
-                operationPointRepositoryPort,
+                routePointRepositoryPort,
                 routeAssignmentRepositoryPort,
                 routeVehicleRepositoryPort,
                 routeProvincesLookupPort,
@@ -71,7 +71,7 @@ class RouteManagementServiceImplPagingTest {
     @Test
     void fetchRoutes_defaultsToPage1AndSize10WhenMissing() {
         RouteAggregateRepositoryPort routeAggregateRepositoryPort = mock(RouteAggregateRepositoryPort.class);
-        OperationPointRepositoryPort operationPointRepositoryPort = mock(OperationPointRepositoryPort.class);
+        RoutePointRepositoryPort routePointRepositoryPort = mock(RoutePointRepositoryPort.class);
         RouteAssignmentRepositoryPort routeAssignmentRepositoryPort = mock(RouteAssignmentRepositoryPort.class);
         RouteVehicleRepositoryPort routeVehicleRepositoryPort = mock(RouteVehicleRepositoryPort.class);
         RouteProvincesLookupPort routeProvincesLookupPort = mock(RouteProvincesLookupPort.class);
@@ -81,7 +81,7 @@ class RouteManagementServiceImplPagingTest {
 
         RouteManagementServiceImpl service = new RouteManagementServiceImpl(
                 routeAggregateRepositoryPort,
-                operationPointRepositoryPort,
+                routePointRepositoryPort,
                 routeAssignmentRepositoryPort,
                 routeVehicleRepositoryPort,
                 routeProvincesLookupPort,
@@ -111,4 +111,3 @@ class RouteManagementServiceImplPagingTest {
         assertEquals(10, result.pageSize());
     }
 }
-

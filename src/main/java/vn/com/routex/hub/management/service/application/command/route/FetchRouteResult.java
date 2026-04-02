@@ -23,6 +23,6 @@ public record FetchRouteResult(
         String vehiclePlate,
         Boolean hasFloor,
         OffsetDateTime assignedAt,
-        List<OperationPointResult> operationPoints
+        List<RoutePointResult> routePoints
 ) {
 }

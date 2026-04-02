@@ -40,7 +40,7 @@ public class UpdateRouteRequest extends BaseRequest {
         private String actualStartTime;
         private String actualEndTime;
         private RouteStatus status;
-        private List<UpdateOperationPointRequest> operationPoints;
+        private List<UpdateRoutePointRequest> routePoints;
     }
 
     @Getter
@@ -48,7 +48,7 @@ public class UpdateRouteRequest extends BaseRequest {
     @AllArgsConstructor
     @SuperBuilder
     @NoArgsConstructor
-    public static class UpdateOperationPointRequest {
+    public static class UpdateRoutePointRequest {
         private String id;
         private String operationOrder;
         private String routeId;

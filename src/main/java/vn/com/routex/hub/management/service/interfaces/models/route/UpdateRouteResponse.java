@@ -34,7 +34,7 @@ public class UpdateRouteResponse extends BaseResponse<UpdateRouteResponse.Update
         private OffsetDateTime actualStartTime;
         private OffsetDateTime actualEndTime;
         private RouteStatus status;
-        private List<UpdateOperationPointResponse> operationPoints;
+        private List<UpdateRoutePointResponse> routePoints;
     }
 
     @Getter
@@ -42,7 +42,7 @@ public class UpdateRouteResponse extends BaseResponse<UpdateRouteResponse.Update
     @AllArgsConstructor
     @NoArgsConstructor
     @SuperBuilder
-    public static class UpdateOperationPointResponse {
+    public static class UpdateRoutePointResponse {
         private String id;
         private String operationOrder;
         private String routeId;
@@ -51,4 +51,3 @@ public class UpdateRouteResponse extends BaseResponse<UpdateRouteResponse.Update
         private String note;
     }
 }
-

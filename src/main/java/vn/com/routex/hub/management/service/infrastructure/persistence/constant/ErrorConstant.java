@@ -14,7 +14,7 @@ public class ErrorConstant {
     public static final String AUTHORITIES_NOT_FOUND = "Authorities not found";
     public static final String ROUTE_NOT_FOUND = "Route with Id %s not found";
     public static final String SEAT_NOT_FOUND = "Seats not found";
-    public static final String OPERATION_POINT_NOT_FOUND = "Operation Point not found";
+    public static final String ROUTE_POINT_NOT_FOUND = "Route Point not found";
     public static final String VEHICLE_NOT_FOUND = "Vehicle not found";
     public static final String ROUTE_SEAT_NOT_FOUND = "Rout Seat with Route Id %s is not exists";
     public static final String RECORD_NOT_FOUND_MESSAGE = "Record not found";

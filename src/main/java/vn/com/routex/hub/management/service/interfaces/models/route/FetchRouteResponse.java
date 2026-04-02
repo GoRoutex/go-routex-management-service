@@ -45,7 +45,7 @@ public class FetchRouteResponse extends BaseResponse<FetchRouteResponse.FetchRou
         private String vehiclePlate;
         private Boolean hasFloor;
         private OffsetDateTime assignedAt;
-        private List<SearchRouteResponse.SearchOperationPoints> operationPoints;
+        private List<SearchRouteResponse.SearchRoutePoints> routePoints;
     }
 
     @Getter

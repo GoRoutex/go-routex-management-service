@@ -2,7 +2,7 @@ package vn.com.routex.hub.management.service.interfaces.mapper;
 
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.management.service.application.command.route.FetchRouteResult;
-import vn.com.routex.hub.management.service.application.command.route.OperationPointResult;
+import vn.com.routex.hub.management.service.application.command.route.RoutePointResult;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteItemResult;
 import vn.com.routex.hub.management.service.interfaces.models.route.FetchRouteResponse;
 import vn.com.routex.hub.management.service.interfaces.models.route.SearchRouteResponse;
@@ -28,8 +28,8 @@ public class RouteResponseMapper {
                 .vehiclePlate(item.vehiclePlate())
                 .hasFloor(item.hasFloor())
                 .assignedAt(item.assignedAt())
-                .operationPoints(item.operationPoints() == null ? null : item.operationPoints().stream()
-                        .map(this::toSearchOperationPoint)
+                .routePoints(item.routePoints() == null ? null : item.routePoints().stream()
+                        .map(this::toSearchRoutePoint)
                         .toList())
                 .build();
     }
@@ -46,14 +46,14 @@ public class RouteResponseMapper {
                 .vehiclePlate(item.vehiclePlate())
                 .hasFloor(item.hasFloor())
                 .routeCode(item.routeCode())
-                .operationPoints(item.operationPoints().stream()
-                        .map(this::toSearchOperationPoint)
+                .routePoints(item.routePoints().stream()
+                        .map(this::toSearchRoutePoint)
                         .toList())
                 .build();
     }
 
-    public SearchRouteResponse.SearchOperationPoints toSearchOperationPoint(OperationPointResult point) {
-        return SearchRouteResponse.SearchOperationPoints.builder()
+    public SearchRouteResponse.SearchRoutePoints toSearchRoutePoint(RoutePointResult point) {
+        return SearchRouteResponse.SearchRoutePoints.builder()
                 .id(point.id())
                 .operationOrder(point.operationOrder())
                 .routeId(point.routeId())
