@@ -60,6 +60,12 @@ public class RouteResponseMapper {
                 .plannedArrivalTime(point.plannedArrivalTime())
                 .plannedDepartureTime(point.plannedDepartureTime())
                 .note(point.note())
+                .operationPointId(point.operationPointId())
+                .stopName(point.stopName())
+                .stopAddress(point.stopAddress())
+                .stopCity(point.stopCity())
+                .stopLatitude(point.stopLatitude())
+                .stopLongitude(point.stopLongitude())
                 .build();
     }
 }

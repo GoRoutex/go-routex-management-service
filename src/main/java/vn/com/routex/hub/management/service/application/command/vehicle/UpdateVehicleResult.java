@@ -5,13 +5,15 @@ import vn.com.routex.hub.management.service.domain.vehicle.VehicleStatus;
 import vn.com.routex.hub.management.service.domain.vehicle.VehicleType;
 
 @Builder
-public record AddVehicleResult(
+public record UpdateVehicleResult(
         String id,
         String creator,
         VehicleType type,
         String vehiclePlate,
-        String seatCapacity,
+        Integer seatCapacity,
+        Boolean hasFloor,
         String manufacturer,
         VehicleStatus status
 ) {
 }
+

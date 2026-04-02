@@ -39,6 +39,7 @@ import vn.com.routex.hub.management.service.domain.route.port.RouteSeatAvailabil
 import vn.com.routex.hub.management.service.domain.route.port.RouteVehicleRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.readmodel.RouteFetchView;
 import vn.com.routex.hub.management.service.domain.route.readmodel.RouteSearchView;
+import vn.com.routex.hub.management.service.domain.operationpoint.port.OperationPointRepositoryPort;
 import vn.com.routex.hub.management.service.infrastructure.kafka.event.RouteSellableEvent;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.DateTimeUtils;
@@ -68,6 +69,7 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_POINT_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_NOT_FOUND;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.OPERATION_POINT_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.VEHICLE_NOT_FOUND;
 
 
@@ -83,6 +85,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
     private final RouteSeatAvailabilityPort routeSeatAvailabilityPort;
     private final RouteQueryPort routeQueryPort;
     private final RouteSaleEventPort routeSaleEventPort;
+    private final OperationPointRepositoryPort operationPointRepositoryPort;
 
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
     private static final ZoneId DEFAULT_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
@@ -146,6 +149,12 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                             .plannedArrivalTime(arrival)
                             .plannedDepartureTime(departure)
                             .note(point.note())
+                            .operationPointId(point.operationPointId())
+                            .stopName(point.stopName())
+                            .stopAddress(point.stopAddress())
+                            .stopCity(point.stopCity())
+                            .stopLatitude(point.stopLatitude())
+                            .stopLongitude(point.stopLongitude())
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -535,6 +544,12 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .plannedArrivalTime(s.getPlannedArrivalTime() == null ? null : s.getPlannedArrivalTime().toString())
                 .plannedDepartureTime(s.getPlannedDepartureTime() == null ? null : s.getPlannedDepartureTime().toString())
                 .note(s.getNote())
+                .operationPointId(s.getOperationPointId())
+                .stopName(s.getStopName())
+                .stopAddress(s.getStopAddress())
+                .stopCity(s.getStopCity())
+                .stopLatitude(s.getStopLatitude())
+                .stopLongitude(s.getStopLongitude())
                 .build();
     }
 
@@ -566,6 +581,26 @@ public class RouteManagementServiceImpl implements RouteManagementService {
             if(!plannedArrivalTime.isBefore(plannedDepartureTime)) {
                 throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
                         ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PLANNED_TIME));
+            }
+
+            boolean hasOpId = point.operationPointId() != null && !point.operationPointId().isBlank();
+            boolean hasCustomName = point.stopName() != null && !point.stopName().isBlank();
+            if (hasOpId == hasCustomName) {
+                throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+                        ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, "Either operationPointId or stopName is required (but not both)"));
+            }
+
+            if (hasOpId) {
+                operationPointRepositoryPort.findById(point.operationPointId().trim())
+                        .orElseThrow(() -> new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+                                ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND,
+                                        String.format(OPERATION_POINT_NOT_FOUND, point.operationPointId().trim()))));
+            } else {
+                // custom stop: basic coordinate sanity
+                if (point.stopLatitude() != null ^ point.stopLongitude() != null) {
+                    throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+                            ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, "stopLatitude and stopLongitude must be provided together"));
+                }
             }
         }
 

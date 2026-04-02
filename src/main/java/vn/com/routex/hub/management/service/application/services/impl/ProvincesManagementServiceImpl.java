@@ -4,30 +4,40 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import vn.com.routex.hub.management.service.application.command.provinces.FetchProvincesQuery;
 import vn.com.routex.hub.management.service.application.command.provinces.FetchProvincesResult;
+import vn.com.routex.hub.management.service.application.command.provinces.CreateProvinceCommand;
+import vn.com.routex.hub.management.service.application.command.provinces.CreateProvinceResult;
+import vn.com.routex.hub.management.service.application.command.provinces.UpdateProvinceCommand;
+import vn.com.routex.hub.management.service.application.command.provinces.UpdateProvinceResult;
+import vn.com.routex.hub.management.service.application.command.provinces.DeleteProvinceCommand;
+import vn.com.routex.hub.management.service.application.command.provinces.DeleteProvinceResult;
 import vn.com.routex.hub.management.service.application.command.provinces.SearchProvincesQuery;
 import vn.com.routex.hub.management.service.application.command.provinces.SearchProvincesResult;
-import vn.com.routex.hub.management.service.application.command.route.FetchRouteResult;
-import vn.com.routex.hub.management.service.application.command.route.FetchRoutesResult;
 import vn.com.routex.hub.management.service.application.services.ProvincesManagementService;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
 import vn.com.routex.hub.management.service.domain.provinces.port.ProvincesQueryPort;
 import vn.com.routex.hub.management.service.domain.provinces.readmodel.ProvincesFetchView;
+import vn.com.routex.hub.management.service.domain.provinces.model.Province;
+import vn.com.routex.hub.management.service.domain.provinces.port.ProvincesRepositoryPort;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.DateTimeUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_NUMBER;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_SIZE;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ERROR;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_PROVINCE;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.PROVINCE_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
 public class ProvincesManagementServiceImpl implements ProvincesManagementService {
 
     private final ProvincesQueryPort provincesQueryPort;
+    private final ProvincesRepositoryPort provincesRepositoryPort;
 
     private static final int DEFAULT_PAGE_SIZE = 10;
     private static final int DEFAULT_PAGE_NUMBER = 1;
@@ -90,6 +100,74 @@ public class ProvincesManagementServiceImpl implements ProvincesManagementServic
                             .totalElements(page.getTotalElements())
                             .totalPages(page.getTotalPages())
                             .build();
+    }
+
+    @Override
+    public CreateProvinceResult createProvince(CreateProvinceCommand command) {
+        String name = command.name() == null ? null : command.name().trim();
+        String code = command.code() == null ? null : command.code().trim();
+
+        if (name == null || name.isBlank() || code == null || code.isBlank()) {
+            throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
+                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, "name and code are required"));
+        }
+
+        if (provincesRepositoryPort.existsByName(name) || provincesRepositoryPort.existsByCode(code)) {
+            throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
+                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(DUPLICATE_PROVINCE, code)));
+        }
+
+        Province saved = provincesRepositoryPort.save(Province.builder()
+                .name(name)
+                .code(code)
+                .build());
+
+        return CreateProvinceResult.builder()
+                .id(saved.getId())
+                .name(saved.getName())
+                .code(saved.getCode())
+                .build();
+    }
+
+    @Override
+    public UpdateProvinceResult updateProvince(UpdateProvinceCommand command) {
+        Province existing = provincesRepositoryPort.findById(command.id())
+                .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
+                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(PROVINCE_NOT_FOUND, command.id()))));
+
+        String name = command.name() == null ? null : command.name().trim();
+        String code = command.code() == null ? null : command.code().trim();
+
+        if (name != null && !name.isBlank() && !name.equals(existing.getName()) && provincesRepositoryPort.existsByName(name)) {
+            throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
+                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(DUPLICATE_PROVINCE, name)));
+        }
+        if (code != null && !code.isBlank() && !code.equals(existing.getCode()) && provincesRepositoryPort.existsByCode(code)) {
+            throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
+                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(DUPLICATE_PROVINCE, code)));
+        }
+
+        Province saved = provincesRepositoryPort.save(existing.toBuilder()
+                .name(name == null || name.isBlank() ? existing.getName() : name)
+                .code(code == null || code.isBlank() ? existing.getCode() : code)
+                .build());
+
+        return UpdateProvinceResult.builder()
+                .id(saved.getId())
+                .name(saved.getName())
+                .code(saved.getCode())
+                .build();
+    }
+
+    @Override
+    public DeleteProvinceResult deleteProvince(DeleteProvinceCommand command) {
+        Province existing = provincesRepositoryPort.findById(command.id())
+                .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
+                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(PROVINCE_NOT_FOUND, command.id()))));
+        provincesRepositoryPort.deleteById(existing.getId());
+        return DeleteProvinceResult.builder()
+                .id(existing.getId())
+                .build();
     }
 
     private static int parseIntOrDefault(
