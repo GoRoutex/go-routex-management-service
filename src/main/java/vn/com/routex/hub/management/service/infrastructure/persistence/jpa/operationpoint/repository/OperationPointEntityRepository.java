@@ -2,20 +2,14 @@ package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.oper
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import vn.com.routex.hub.management.service.domain.route.model.RouteStopPlan;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.operationpoint.entity.OperationPointEntity;
 
-import java.util.List;
 import java.util.Optional;
+
 
 @Repository
 public interface OperationPointEntityRepository extends JpaRepository<OperationPointEntity, String> {
+    Optional<OperationPointEntity> findByCode(String code);
 
-    OperationPointEntity findByRouteId(String routeId);
-
-    List<OperationPointEntity> findAllByRouteId(String routeId);
-
-    List<OperationPointEntity> findByRouteIdIn(List<String> routeIds);
-
-    Optional<OperationPointEntity> findByRouteIdAndStopOrder(String routeId, String stopOrder);
+    boolean existsByCode(String code);
 }

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public interface OperationPointRepositoryPort {
+public interface RoutePointRepositoryPort {
     void saveAll(List<RouteStopPlan> stopPlans);
 
     void save(RouteStopPlan routeStopPlan);
@@ -17,3 +17,4 @@ public interface OperationPointRepositoryPort {
 
     Optional<RouteStopPlan> findByRouteIdAndStopOrder(String routeId, String stopOrder);
 }
+

@@ -30,7 +30,7 @@ public class SearchRouteResponse extends BaseResponse<List<SearchRouteResponse.S
         private String vehiclePlate;
         private boolean hasFloor;
         private String routeCode;
-        private List<SearchOperationPoints> operationPoints;
+        private List<SearchRoutePoints> routePoints;
     }
 
     @Getter
@@ -38,7 +38,7 @@ public class SearchRouteResponse extends BaseResponse<List<SearchRouteResponse.S
     @AllArgsConstructor
     @NoArgsConstructor
     @SuperBuilder
-    public static class SearchOperationPoints {
+    public static class SearchRoutePoints {
         private String id;
         private String operationOrder;
         private String routeId;

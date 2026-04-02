@@ -12,7 +12,7 @@ public record CreateRouteCommand(
         String destination,
         String plannedStartTime,
         String plannedEndTime,
-        List<OperationPointCommand> operationPoints,
+        List<RoutePointCommand> routePoints,
         String requestId,
         String requestDateTime,
         String channel

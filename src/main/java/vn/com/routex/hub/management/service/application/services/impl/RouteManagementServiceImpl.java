@@ -13,8 +13,8 @@ import vn.com.routex.hub.management.service.application.command.route.DeleteRout
 import vn.com.routex.hub.management.service.application.command.route.FetchRouteResult;
 import vn.com.routex.hub.management.service.application.command.route.FetchRoutesQuery;
 import vn.com.routex.hub.management.service.application.command.route.FetchRoutesResult;
-import vn.com.routex.hub.management.service.application.command.route.OperationPointCommand;
-import vn.com.routex.hub.management.service.application.command.route.OperationPointResult;
+import vn.com.routex.hub.management.service.application.command.route.RoutePointCommand;
+import vn.com.routex.hub.management.service.application.command.route.RoutePointResult;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteItemResult;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteQuery;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteResult;
@@ -29,7 +29,7 @@ import vn.com.routex.hub.management.service.domain.route.model.RouteAggregate;
 import vn.com.routex.hub.management.service.domain.route.model.RouteAssignmentRecord;
 import vn.com.routex.hub.management.service.domain.route.model.RouteStopPlan;
 import vn.com.routex.hub.management.service.domain.route.model.VehicleSnapshot;
-import vn.com.routex.hub.management.service.domain.route.port.OperationPointRepositoryPort;
+import vn.com.routex.hub.management.service.domain.route.port.RoutePointRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteAggregateRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteAssignmentRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteProvincesLookupPort;
@@ -65,7 +65,7 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_SEARCH_TIME;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_START_TIME;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_STOP_ORDER;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.OPERATION_POINT_NOT_FOUND;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_POINT_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.VEHICLE_NOT_FOUND;
@@ -76,7 +76,7 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 public class RouteManagementServiceImpl implements RouteManagementService {
 
     private final RouteAggregateRepositoryPort routeAggregateRepositoryPort;
-    private final OperationPointRepositoryPort operationPointRepositoryPort;
+    private final RoutePointRepositoryPort routePointRepositoryPort;
     private final RouteAssignmentRepositoryPort routeAssignmentRepositoryPort;
     private final RouteVehicleRepositoryPort routeVehicleRepositoryPort;
     private final RouteProvincesLookupPort routeProvincesLookupPort;
@@ -122,16 +122,16 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_START_TIME));
         }
 
-        List<OperationPointCommand> operationPoints =
-                Optional.ofNullable(command.operationPoints())
+        List<RoutePointCommand> routePoints =
+                Optional.ofNullable(command.routePoints())
                         .orElseGet(List::of);
 
         // Validate stop points
-        validateOperationPoints(command);
+        validateRoutePoints(command);
 
         OffsetDateTime now = OffsetDateTime.now();
         String routeId = UUID.randomUUID().toString();
-        List<RouteStopPlan> routeStopPlans = operationPoints.stream()
+        List<RouteStopPlan> routeStopPlans = routePoints.stream()
                 .map(point -> {
                     OffsetDateTime arrival = OffsetDateTime.parse(point.plannedArrivalTime());
                     OffsetDateTime departure = OffsetDateTime.parse(point.plannedDepartureTime());
@@ -164,7 +164,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
         );
 
         routeAggregateRepositoryPort.save(newRoute);
-        operationPointRepositoryPort.saveAll(routeStopPlans);
+        routePointRepositoryPort.saveAll(routeStopPlans);
 
 
         return CreateRouteResult.builder()
@@ -177,8 +177,8 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .plannedStartTime(command.plannedStartTime())
                 .plannedEndTime(command.plannedEndTime())
                 .status(RouteStatus.PLANNED.name())
-                .operationPoints(command.operationPoints() != null ?
-                        command.operationPoints() : null)
+                .routePoints(command.routePoints() != null ?
+                        command.routePoints() : null)
                 .build();
     }
 
@@ -248,11 +248,11 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, command.routeId()))));
 
-        if(command.operationPoints() != null) {
-            command.operationPoints().forEach(point -> {
-                RouteStopPlan routeStopPlan = operationPointRepositoryPort.findByRouteIdAndStopOrder(command.routeId(), point.operationOrder())
+        if(command.routePoints() != null) {
+            command.routePoints().forEach(point -> {
+                RouteStopPlan routeStopPlan = routePointRepositoryPort.findByRouteIdAndStopOrder(command.routeId(), point.operationOrder())
                         .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                                ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, OPERATION_POINT_NOT_FOUND)));
+                                ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, ROUTE_POINT_NOT_FOUND)));
 
                 Optional.ofNullable(point.plannedArrivalTime())
                         .ifPresent(routeStopPlan::setPlannedArrivalTime);
@@ -263,7 +263,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 Optional.ofNullable(point.note())
                         .ifPresent(routeStopPlan::setNote);
 
-                operationPointRepositoryPort.save(routeStopPlan);
+                routePointRepositoryPort.save(routeStopPlan);
             });
         }
         Optional.ofNullable(command.pickupBranch())
@@ -289,9 +289,9 @@ public class RouteManagementServiceImpl implements RouteManagementService {
 
         routeAggregateRepositoryPort.save(route);
 
-        List<UpdateRouteResult.UpdateOperationPointResult> operationPointResults = command.operationPoints() != null ?
-                command.operationPoints().stream()
-                .map(point -> UpdateRouteResult.UpdateOperationPointResult.builder()
+        List<UpdateRouteResult.UpdateRoutePointResult> routePointResults = command.routePoints() != null ?
+                command.routePoints().stream()
+                .map(point -> UpdateRouteResult.UpdateRoutePointResult.builder()
                         .id(point.id())
                         .operationOrder(point.id())
                         .plannedArrivalTime(point.plannedArrivalTime())
@@ -311,7 +311,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .actualStartTime(command.actualStartTime())
                 .actualEndTime(command.actualEndTime())
                 .status(command.status())
-                .operationPoints(operationPointResults)
+                .routePoints(routePointResults)
                 .build();
     }
 
@@ -387,7 +387,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
         }
 
         Map<String, List<RouteStopPlan>> stopsByRouteId;
-        stopsByRouteId = routeIds.isEmpty() ? Map.of() : operationPointRepositoryPort.findByRouteIds(routeIds);
+        stopsByRouteId = routeIds.isEmpty() ? Map.of() : routePointRepositoryPort.findByRouteIds(routeIds);
 
         List<SearchRouteItemResult> items = searchedRoutes.stream()
                 .map(r ->
@@ -405,8 +405,8 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                             .plannedEndTime(r.getPlannedEndTime())
                             .vehiclePlate(v == null ? null : v.getVehiclePlate())
                             .hasFloor(v != null && v.isHasFloor())
-                            .operationPoints(stopsByRouteId.getOrDefault(r.getId(), List.of()).stream()
-                                    .map(this::toOperationPoint)
+                            .routePoints(stopsByRouteId.getOrDefault(r.getId(), List.of()).stream()
+                                    .map(this::toRoutePoint)
                                     .toList())
                             .build();
                 })
@@ -461,7 +461,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
         }
 
         Map<String, List<RouteStopPlan>> stopsByRouteId =
-                routeIds.isEmpty() ? Map.of() : operationPointRepositoryPort.findByRouteIds(routeIds);
+                routeIds.isEmpty() ? Map.of() : routePointRepositoryPort.findByRouteIds(routeIds);
 
         List<FetchRouteResult> items = routes.stream()
                 .map(r -> {
@@ -484,8 +484,8 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                             .vehiclePlate(v == null ? null : v.getVehiclePlate())
                             .hasFloor(v != null && v.isHasFloor())
                             .assignedAt(ra == null ? null : ra.getAssignedAt())
-                            .operationPoints(stopsByRouteId.getOrDefault(r.getId(), List.of()).stream()
-                                    .map(this::toOperationPoint)
+                            .routePoints(stopsByRouteId.getOrDefault(r.getId(), List.of()).stream()
+                                    .map(this::toRoutePoint)
                                     .toList())
                             .build();
                 })
@@ -527,24 +527,24 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .build();
     }
 
-    private OperationPointResult toOperationPoint(RouteStopPlan s) {
-        return OperationPointResult.builder()
+    private RoutePointResult toRoutePoint(RouteStopPlan s) {
+        return RoutePointResult.builder()
                 .id(s.getId())
                 .operationOrder(String.valueOf(s.getStopOrder()))
                 .routeId(s.getRouteId())
-                .plannedArrivalTime(s.getPlannedArrivalTime().toString())
-                .plannedDepartureTime(s.getPlannedDepartureTime().toString())
+                .plannedArrivalTime(s.getPlannedArrivalTime() == null ? null : s.getPlannedArrivalTime().toString())
+                .plannedDepartureTime(s.getPlannedDepartureTime() == null ? null : s.getPlannedDepartureTime().toString())
                 .note(s.getNote())
                 .build();
     }
 
-    private void validateOperationPoints(CreateRouteCommand command) {
-
-        List<OperationPointCommand> operationPoints = command.operationPoints();
+    private void validateRoutePoints(CreateRouteCommand command) {
+        List<RoutePointCommand> routePoints = command.routePoints();
+        if (routePoints == null || routePoints.isEmpty()) return;
 
         Set<Integer> setOfOrders = new HashSet<>();
 
-        for(OperationPointCommand point : operationPoints) {
+        for(RoutePointCommand point : routePoints) {
             if(point.operationOrder() == null || Integer.parseInt(point.operationOrder()) <= 0) {
                 throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
                         ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_STOP_ORDER));

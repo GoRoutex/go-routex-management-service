@@ -17,6 +17,6 @@ public record SearchRouteItemResult(
         String vehiclePlate,
         boolean hasFloor,
         String routeCode,
-        List<OperationPointResult> operationPoints
+        List<RoutePointResult> routePoints
 ) {
 }

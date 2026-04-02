@@ -15,6 +15,6 @@ public record CreateRouteResult(
         String plannedStartTime,
         String plannedEndTime,
         String status,
-        List<OperationPointCommand> operationPoints
+        List<RoutePointCommand> routePoints
 ) {
 }

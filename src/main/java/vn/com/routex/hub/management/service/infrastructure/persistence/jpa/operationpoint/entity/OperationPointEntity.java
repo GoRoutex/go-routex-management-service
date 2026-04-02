@@ -3,6 +3,8 @@ package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.oper
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -10,43 +12,44 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
-
-import java.time.OffsetDateTime;
+import vn.com.routex.hub.management.service.domain.operationpoint.OperationPointStatus;
+import vn.com.routex.hub.management.service.domain.operationpoint.OperationPointType;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "ROUTE_STOP")
 @SuperBuilder
+@Entity
+@Table(name = "OPERATION_POINT")
 public class OperationPointEntity extends AbstractAuditingEntity {
-
     @Id
     private String id;
 
-    @Column(name = "ROUTE_ID")
-    private String routeId;
+    @Column(name = "CODE")
+    private String code;
 
-    @Column(name = "CREATOR")
-    private String creator;
+    @Column(name = "NAME")
+    private String name;
 
-    @Column(name = "STOP_ORDER")
-    private String stopOrder;
+    @Column(name = "TYPE")
+    @Enumerated(EnumType.STRING)
+    private OperationPointType type;
 
-    @Column(name = "PLANNED_ARRIVAL_TIME")
-    private OffsetDateTime plannedArrivalTime;
+    @Column(name = "ADDRESS")
+    private String address;
 
-    @Column(name = "PLANNED_DEPARTURE_TIME")
-    private OffsetDateTime plannedDepartureTime;
+    @Column(name = "CITY")
+    private String city;
 
-    @Column(name = "ACTUAL_ARRIVAL_TIME")
-    private OffsetDateTime actualArrivalTime;
+    @Column(name = "LATITUDE")
+    private Double latitude;
 
-    @Column(name = "ACTUAL_DEPARTURE_TIME")
-    private OffsetDateTime actualDepartureTime;
+    @Column(name = "LONGITUDE")
+    private Double longitude;
 
-    @Column(name = "NOTE")
-    private String note;
+    @Column(name = "STATUS")
+    @Enumerated(EnumType.STRING)
+    private OperationPointStatus status;
 }

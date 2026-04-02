@@ -17,9 +17,9 @@ import vn.com.routex.hub.management.service.application.command.route.CreateRout
 import vn.com.routex.hub.management.service.application.command.route.CreateRouteResult;
 import vn.com.routex.hub.management.service.application.command.route.DeleteRouteCommand;
 import vn.com.routex.hub.management.service.application.command.route.DeleteRouteResult;
-import vn.com.routex.hub.management.service.application.command.route.OperationPointCommand;
+import vn.com.routex.hub.management.service.application.command.route.RoutePointCommand;
 import vn.com.routex.hub.management.service.application.command.route.UpdateRouteCommand;
-import vn.com.routex.hub.management.service.application.command.route.UpdateRouteCommand.UpdateOperationPointCommand;
+import vn.com.routex.hub.management.service.application.command.route.UpdateRouteCommand.UpdateRoutePointCommand;
 import vn.com.routex.hub.management.service.application.command.route.UpdateRouteResult;
 import vn.com.routex.hub.management.service.application.services.RouteManagementService;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.HttpUtils;
@@ -63,15 +63,18 @@ public class RouteManagementController {
 
     @PostMapping(UPDATE_PATH)
     public ResponseEntity<UpdateRouteResponse> updateRoute(@Valid @RequestBody UpdateRouteRequest request) {
-        List<UpdateOperationPointCommand> operationPointCommandList = request.getData().getOperationPoints().stream().map(
-                point -> UpdateOperationPointCommand.builder()
-                        .id(point.getId())
-                        .operationOrder(point.getOperationOrder())
-                        .plannedArrivalTime(OffsetDateTime.parse(point.getPlannedArrivalTime()))
-                        .plannedDepartureTime(OffsetDateTime.parse(point.getPlannedDepartureTime()))
-                        .note(point.getNote())
-                        .build()
-        ).toList();
+        List<UpdateRoutePointCommand> routePointCommandList = null;
+        if (request.getData().getRoutePoints() != null) {
+            routePointCommandList = request.getData().getRoutePoints().stream().map(
+                    point -> UpdateRoutePointCommand.builder()
+                            .id(point.getId())
+                            .operationOrder(point.getOperationOrder())
+                            .plannedArrivalTime(OffsetDateTime.parse(point.getPlannedArrivalTime()))
+                            .plannedDepartureTime(OffsetDateTime.parse(point.getPlannedDepartureTime()))
+                            .note(point.getNote())
+                            .build()
+            ).toList();
+        }
 
         UpdateRouteResult result = routeManagementService.updateRoute(UpdateRouteCommand.builder()
                 .context(HttpUtils.toContext(request))
@@ -85,7 +88,7 @@ public class RouteManagementController {
                 .actualStartTime(OffsetDateTime.parse(request.getData().getActualStartTime()))
                 .actualEndTime(OffsetDateTime.parse(request.getData().getActualEndTime()))
                 .status(request.getData().getStatus())
-                .operationPoints(operationPointCommandList)
+                .routePoints(routePointCommandList)
                 .build());
 
         UpdateRouteResponse response = UpdateRouteResponse.builder()
@@ -100,8 +103,8 @@ public class RouteManagementController {
                         .actualStartTime(result.actualStartTime())
                         .actualEndTime(result.actualEndTime())
                         .status(result.status())
-                        .operationPoints(result.operationPoints().stream().map(
-                                point -> UpdateRouteResponse.UpdateOperationPointResponse.builder()
+                        .routePoints(result.routePoints() == null ? null : result.routePoints().stream().map(
+                                point -> UpdateRouteResponse.UpdateRoutePointResponse.builder()
                                         .id(point.id())
                                         .operationOrder(point.operationOrder())
                                         .plannedArrivalTime(point.plannedArrivalTime())
@@ -117,10 +120,10 @@ public class RouteManagementController {
 
     @PostMapping(CREATE_PATH)
     public ResponseEntity<CreateRouteResponse> createRoute(@Valid @RequestBody CreateRouteRequest request) {
-        List<OperationPointCommand> operationPointCommands = new ArrayList<>();
-        if (request.getData().getOperationPoints() != null) {
-            operationPointCommands = request.getData().getOperationPoints().stream()
-                    .map(point -> OperationPointCommand.builder()
+        List<RoutePointCommand> routePointCommands = new ArrayList<>();
+        if (request.getData().getRoutePoints() != null) {
+            routePointCommands = request.getData().getRoutePoints().stream()
+                    .map(point -> RoutePointCommand.builder()
                             .operationOrder(point.getOperationOrder())
                             .plannedArrivalTime(point.getPlannedArrivalTime())
                             .plannedDepartureTime(point.getPlannedDepartureTime())
@@ -136,22 +139,22 @@ public class RouteManagementController {
                 .destination(request.getData().getDestination())
                 .plannedStartTime(request.getData().getPlannedStartTime())
                 .plannedEndTime(request.getData().getPlannedEndTime())
-                .operationPoints(operationPointCommands)
+                .routePoints(routePointCommands)
                 .requestId(request.getRequestId())
                 .requestDateTime(request.getRequestDateTime())
                 .channel(request.getChannel())
                 .build());
 
-        List<CreateRouteRequest.OperationPoints> operationPointResponses = new ArrayList<>();
-        if (result.operationPoints() != null) {
-            operationPointResponses = result.operationPoints().stream()
+        List<CreateRouteRequest.RoutePoints> routePointResponses = new ArrayList<>();
+        if (result.routePoints() != null) {
+            routePointResponses = result.routePoints().stream()
                     .map(point -> {
-                        CreateRouteRequest.OperationPoints op = new CreateRouteRequest.OperationPoints();
-                        op.setOperationOrder(point.operationOrder());
-                        op.setPlannedArrivalTime(point.plannedArrivalTime());
-                        op.setPlannedDepartureTime(point.plannedDepartureTime());
-                        op.setNote(point.note());
-                        return op;
+                        CreateRouteRequest.RoutePoints rp = new CreateRouteRequest.RoutePoints();
+                        rp.setOperationOrder(point.operationOrder());
+                        rp.setPlannedArrivalTime(point.plannedArrivalTime());
+                        rp.setPlannedDepartureTime(point.plannedDepartureTime());
+                        rp.setNote(point.note());
+                        return rp;
                     })
                     .toList();
         }
@@ -168,7 +171,7 @@ public class RouteManagementController {
                         .plannedStartTime(result.plannedStartTime())
                         .plannedEndTime(result.plannedEndTime())
                         .status(result.status())
-                        .operationPoints(operationPointResponses)
+                        .routePoints(routePointResponses)
                         .build())
                 .build();
 

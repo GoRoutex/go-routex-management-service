@@ -29,6 +29,6 @@ public class CreateRouteResponse extends BaseResponse<CreateRouteResponse.Create
         private String plannedStartTime;
         private String plannedEndTime;
         private String status;
-        private List<CreateRouteRequest.OperationPoints> operationPoints;
+        private List<CreateRouteRequest.RoutePoints> routePoints;
     }
 }

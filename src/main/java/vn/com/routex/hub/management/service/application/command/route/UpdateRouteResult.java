@@ -19,10 +19,10 @@ public record UpdateRouteResult(
         OffsetDateTime actualStartTime,
         OffsetDateTime actualEndTime,
         RouteStatus status,
-        List<UpdateOperationPointResult> operationPoints
+        List<UpdateRoutePointResult> routePoints
 ) {
     @Builder
-    public record UpdateOperationPointResult(
+    public record UpdateRoutePointResult(
             String id,
             String operationOrder,
             OffsetDateTime plannedArrivalTime,
