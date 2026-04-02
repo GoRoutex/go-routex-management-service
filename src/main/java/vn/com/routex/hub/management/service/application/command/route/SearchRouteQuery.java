@@ -1,26 +1,19 @@
 package vn.com.routex.hub.management.service.application.command.route;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
+import lombok.Builder;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@SuperBuilder
-public class SearchRouteQuery {
-    private String origin;
-    private String destination;
-    private String departureDate;
-    private String seat;
-    private String fromTime;
-    private String toTime;
-    private String pageSize;
-    private String pageNumber;
-    private String requestId;
-    private String requestDateTime;
-    private String channel;
+@Builder
+public record SearchRouteQuery(
+        String origin,
+        String destination,
+        String departureDate,
+        String seat,
+        String fromTime,
+        String toTime,
+        String pageSize,
+        String pageNumber,
+        String requestId,
+        String requestDateTime,
+        String channel
+) {
 }

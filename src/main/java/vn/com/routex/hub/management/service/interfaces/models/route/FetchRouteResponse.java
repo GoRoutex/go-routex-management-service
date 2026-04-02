@@ -13,7 +13,16 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @SuperBuilder
-public class FetchRouteResponse extends BaseResponse<FetchRouteResponse.FetchRouteResponseData> {
+public class FetchRouteResponse extends BaseResponse<FetchRouteResponse.FetchRouteResponsePage> {
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @SuperBuilder
+    public static class FetchRouteResponsePage {
+        private List<FetchRouteResponseData> items;
+        private Pagination pagination;
+    }
 
     @Getter
     @Setter
@@ -37,5 +46,16 @@ public class FetchRouteResponse extends BaseResponse<FetchRouteResponse.FetchRou
         private Boolean hasFloor;
         private OffsetDateTime assignedAt;
         private List<SearchRouteResponse.SearchOperationPoints> operationPoints;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @SuperBuilder
+    public static class Pagination {
+        private int pageNumber;
+        private int pageSize;
+        private long totalElements;
+        private int totalPages;
     }
 }

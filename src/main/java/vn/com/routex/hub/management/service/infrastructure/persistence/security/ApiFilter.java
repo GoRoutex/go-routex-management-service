@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 import vn.com.routex.hub.management.service.infrastructure.persistence.config.RequestAttributes;
+import vn.com.routex.hub.management.service.infrastructure.persistence.security.envelope.RequestEnvelopeExtractor;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -41,7 +41,7 @@ public class ApiFilter extends OncePerRequestFilter {
                     cachedHttpServletRequestWrapper.getInputStream().readAllBytes(),
                     StandardCharsets.UTF_8
             );
-            BaseRequest apiRequest = objectMapper.readValue(jsonStringBody, BaseRequest.class);
+            BaseRequest apiRequest = RequestEnvelopeExtractor.extract(request, jsonStringBody, objectMapper);
             request.setAttribute(RequestAttributes.REQUEST_ID, apiRequest.getRequestId());
             request.setAttribute(RequestAttributes.REQUEST_DATE_TIME, apiRequest.getRequestDateTime());
             request.setAttribute(RequestAttributes.CHANNEL, apiRequest.getChannel());

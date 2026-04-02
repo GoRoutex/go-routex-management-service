@@ -1,27 +1,22 @@
 package vn.com.routex.hub.management.service.application.command.route;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
+import lombok.Builder;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@SuperBuilder
-public class SearchRouteItemResult {
-    private String id;
-    private String pickupBranch;
-    private String origin;
-    private String destination;
-    private Long availableSeats;
-    private OffsetDateTime plannedStartTime;
-    private OffsetDateTime plannedEndTime;
-    private String vehiclePlate;
-    private boolean hasFloor;
-    private String routeCode;
-    private List<OperationPointResult> operationPoints;
+@Builder
+public record SearchRouteItemResult(
+        String id,
+        String pickupBranch,
+        String origin,
+        String destination,
+        Long availableSeats,
+        OffsetDateTime plannedStartTime,
+        OffsetDateTime plannedEndTime,
+        String vehiclePlate,
+        boolean hasFloor,
+        String routeCode,
+        List<OperationPointResult> operationPoints
+) {
 }

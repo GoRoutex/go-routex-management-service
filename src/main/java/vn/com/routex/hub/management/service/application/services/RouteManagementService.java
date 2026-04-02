@@ -6,10 +6,12 @@ import vn.com.routex.hub.management.service.application.command.route.CreateRout
 import vn.com.routex.hub.management.service.application.command.route.CreateRouteResult;
 import vn.com.routex.hub.management.service.application.command.route.DeleteRouteCommand;
 import vn.com.routex.hub.management.service.application.command.route.DeleteRouteResult;
-import vn.com.routex.hub.management.service.application.command.route.FetchRouteQuery;
-import vn.com.routex.hub.management.service.application.command.route.FetchRouteResult;
+import vn.com.routex.hub.management.service.application.command.route.FetchRoutesQuery;
+import vn.com.routex.hub.management.service.application.command.route.FetchRoutesResult;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteQuery;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteResult;
+import vn.com.routex.hub.management.service.application.command.route.UpdateRouteCommand;
+import vn.com.routex.hub.management.service.application.command.route.UpdateRouteResult;
 
 public interface RouteManagementService {
 
@@ -17,9 +19,11 @@ public interface RouteManagementService {
 
     AssignRouteResult assignRoute(AssignRouteCommand command);
 
+    UpdateRouteResult updateRoute(UpdateRouteCommand command);
+
     SearchRouteResult searchRoute(SearchRouteQuery query);
 
-    FetchRouteResult fetchRoute(FetchRouteQuery query);
+    FetchRoutesResult fetchRoutes(FetchRoutesQuery query);
 
     DeleteRouteResult deleteRoute(DeleteRouteCommand command);
 }

@@ -1,25 +1,20 @@
 package vn.com.routex.hub.management.service.application.command.route;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
+import lombok.Builder;
 
 import java.util.List;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@SuperBuilder
-public class CreateRouteResult {
-    private String id;
-    private String creator;
-    private String pickupBranch;
-    private String routeCode;
-    private String origin;
-    private String destination;
-    private String plannedStartTime;
-    private String plannedEndTime;
-    private String status;
-    private List<OperationPointCommand> operationPoints;
+@Builder
+public record CreateRouteResult(
+        String id,
+        String creator,
+        String pickupBranch,
+        String routeCode,
+        String origin,
+        String destination,
+        String plannedStartTime,
+        String plannedEndTime,
+        String status,
+        List<OperationPointCommand> operationPoints
+) {
 }

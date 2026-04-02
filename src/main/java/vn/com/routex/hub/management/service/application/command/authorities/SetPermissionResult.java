@@ -1,17 +1,12 @@
 package vn.com.routex.hub.management.service.application.command.authorities;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
+import lombok.Builder;
 
 import java.util.Set;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@SuperBuilder
-public class SetPermissionResult {
-    private String roleId;
-    private Set<String> authorities;
+@Builder
+public record SetPermissionResult(
+        String roleId,
+        Set<String> authorities
+) {
 }

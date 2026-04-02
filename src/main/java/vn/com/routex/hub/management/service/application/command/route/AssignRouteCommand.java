@@ -1,22 +1,15 @@
 package vn.com.routex.hub.management.service.application.command.route;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
+import lombok.Builder;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@SuperBuilder
-public class AssignRouteCommand {
-    private String creator;
-    private String routeId;
-    private String vehicleId;
-    private String driverId;
-    private String requestId;
-    private String requestDateTime;
-    private String channel;
+@Builder
+public record AssignRouteCommand(
+        String creator,
+        String routeId,
+        String vehicleId,
+        String driverId,
+        String requestId,
+        String requestDateTime,
+        String channel
+) {
 }

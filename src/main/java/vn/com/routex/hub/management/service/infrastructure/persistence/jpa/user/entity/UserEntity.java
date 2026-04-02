@@ -15,7 +15,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.domain.profile.Gender;
 import vn.com.routex.hub.management.service.domain.user.UserStatus;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.entity.AbstractAuditingJpaEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -27,7 +27,7 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class UserEntity extends AbstractAuditingJpaEntity {
+public class UserEntity extends AbstractAuditingEntity {
 
     @Id
     private String id;

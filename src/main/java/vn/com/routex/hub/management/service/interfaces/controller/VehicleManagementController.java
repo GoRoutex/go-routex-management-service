@@ -15,7 +15,7 @@ import org.springframework.web.context.request.WebRequest;
 import vn.com.routex.hub.management.service.application.command.vehicle.AddVehicleCommand;
 import vn.com.routex.hub.management.service.application.command.vehicle.AddVehicleResult;
 import vn.com.routex.hub.management.service.application.services.VehicleManagementService;
-import vn.com.routex.hub.management.service.infrastructure.persistence.utils.HttpResponseUtil;
+import vn.com.routex.hub.management.service.infrastructure.persistence.utils.HttpUtils;
 import vn.com.routex.hub.management.service.interfaces.models.result.ApiResult;
 import vn.com.routex.hub.management.service.interfaces.models.vehicle.AddVehicleRequest;
 import vn.com.routex.hub.management.service.interfaces.models.vehicle.AddVehicleResponse;
@@ -61,15 +61,15 @@ public class VehicleManagementController {
                         .description(SUCCESS_MESSAGE)
                         .build())
                 .data(AddVehicleResponse.AddVehicleResponseData.builder()
-                        .creator(result.getCreator())
-                        .type(result.getType())
-                        .vehiclePlate(result.getVehiclePlate())
-                        .seatCapacity(result.getSeatCapacity())
-                        .manufacturer(result.getManufacturer())
-                        .status(result.getStatus())
+                        .creator(result.creator())
+                        .type(result.type())
+                        .vehiclePlate(result.vehiclePlate())
+                        .seatCapacity(result.seatCapacity())
+                        .manufacturer(result.manufacturer())
+                        .status(result.status())
                         .build())
                 .build();
 
-        return HttpResponseUtil.buildResponse(request, response);
+        return HttpUtils.buildResponse(request, response);
     }
 }

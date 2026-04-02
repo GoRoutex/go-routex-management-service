@@ -1,15 +1,17 @@
 package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.authorities;
 
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 import vn.com.routex.hub.management.service.domain.authorities.model.UserRoleAssignment;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity.UserRoleJpaEntity;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity.UserRoleJpaId;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity.UserRoleIdEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity.UserRolesEntity;
 
+
+@Component
+@NoArgsConstructor
 final class UserRolePersistenceMapper {
-
-    private UserRolePersistenceMapper() {
-    }
-
-    static UserRoleAssignment toAssignment(UserRoleJpaEntity userRoleJpaEntity) {
+    
+    public UserRoleAssignment toAssignment(UserRolesEntity userRoleJpaEntity) {
         return UserRoleAssignment.builder()
                 .userId(userRoleJpaEntity.getId().getUserId())
                 .roleId(userRoleJpaEntity.getId().getRoleId())
@@ -17,9 +19,9 @@ final class UserRolePersistenceMapper {
                 .build();
     }
 
-    static UserRoleJpaEntity toEntity(UserRoleAssignment assignment) {
-        return UserRoleJpaEntity.builder()
-                .id(UserRoleJpaId.builder()
+    public UserRolesEntity toEntity(UserRoleAssignment assignment) {
+        return UserRolesEntity.builder()
+                .id(UserRoleIdEntity.builder()
                         .userId(assignment.getUserId())
                         .roleId(assignment.getRoleId())
                         .build())

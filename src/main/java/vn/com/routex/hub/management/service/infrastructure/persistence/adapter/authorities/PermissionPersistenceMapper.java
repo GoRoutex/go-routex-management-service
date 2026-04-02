@@ -1,14 +1,16 @@
 package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.authorities;
 
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 import vn.com.routex.hub.management.service.domain.authorities.model.PermissionProfile;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity.AuthorityJpaEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity.AuthoritiesEntity;
 
+
+@Component
+@NoArgsConstructor
 final class PermissionPersistenceMapper {
 
-    private PermissionPersistenceMapper() {
-    }
-
-    static PermissionProfile toProfile(AuthorityJpaEntity authorityJpaEntity) {
+    static PermissionProfile toProfile(AuthoritiesEntity authorityJpaEntity) {
         return PermissionProfile.builder()
                 .id(authorityJpaEntity.getId())
                 .code(authorityJpaEntity.getCode())
@@ -20,8 +22,8 @@ final class PermissionPersistenceMapper {
                 .build();
     }
 
-    static AuthorityJpaEntity toEntity(PermissionProfile permissionProfile) {
-        return AuthorityJpaEntity.builder()
+    static AuthoritiesEntity toEntity(PermissionProfile permissionProfile) {
+        return AuthoritiesEntity.builder()
                 .id(permissionProfile.getId())
                 .code(permissionProfile.getCode())
                 .name(permissionProfile.getName())

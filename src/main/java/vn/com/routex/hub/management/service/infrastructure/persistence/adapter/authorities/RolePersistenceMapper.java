@@ -1,20 +1,19 @@
 package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.authorities;
 
+import org.springframework.stereotype.Component;
 import vn.com.routex.hub.management.service.domain.authorities.model.RoleAggregate;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity.AuthorityJpaEntity;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity.RoleJpaEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity.AuthoritiesEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity.RolesEntity;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Component
 final class RolePersistenceMapper {
 
-    private RolePersistenceMapper() {
-    }
-
-    static RoleAggregate toAggregate(RoleJpaEntity roleJpaEntity) {
+    static RoleAggregate toAggregate(RolesEntity roleJpaEntity) {
         Set<String> authorityCodes = roleJpaEntity.getAuthorities() == null ? Set.of() : roleJpaEntity.getAuthorities().stream()
-                .map(AuthorityJpaEntity::getCode)
+                .map(AuthoritiesEntity::getCode)
                 .collect(Collectors.toSet());
 
         return RoleAggregate.builder()

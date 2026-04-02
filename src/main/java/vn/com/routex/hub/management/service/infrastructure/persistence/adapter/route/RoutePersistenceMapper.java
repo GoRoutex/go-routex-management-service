@@ -1,20 +1,20 @@
 package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.route;
 
+import org.springframework.stereotype.Component;
 import vn.com.routex.hub.management.service.domain.route.model.RouteAggregate;
 import vn.com.routex.hub.management.service.domain.route.model.RouteAssignmentRecord;
 import vn.com.routex.hub.management.service.domain.route.model.RouteStopPlan;
 import vn.com.routex.hub.management.service.domain.route.model.VehicleSnapshot;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.assignment.entity.RouteAssignmentJpaEntity;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.route.entity.RouteJpaEntity;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.operationpoint.entity.OperationPointJpaEntity;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.vehicle.entity.VehicleJpaEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.assignment.entity.RouteAssignmentEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.operationpoint.entity.OperationPointEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.route.entity.RouteEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.vehicle.entity.VehicleEntity;
 
+
+@Component
 final class RoutePersistenceMapper {
 
-    private RoutePersistenceMapper() {
-    }
-
-    static RouteAggregate toAggregate(RouteJpaEntity route) {
+    public RouteAggregate toAggregate(RouteEntity route) {
         return RouteAggregate.builder()
                 .id(route.getId())
                 .routeCode(route.getRouteCode())
@@ -34,8 +34,8 @@ final class RoutePersistenceMapper {
                 .build();
     }
 
-    static RouteJpaEntity toEntity(RouteAggregate aggregate) {
-        return RouteJpaEntity.builder()
+    public RouteEntity toEntity(RouteAggregate aggregate) {
+        return RouteEntity.builder()
                 .id(aggregate.getId())
                 .routeCode(aggregate.getRouteCode())
                 .creator(aggregate.getCreator())
@@ -54,7 +54,7 @@ final class RoutePersistenceMapper {
                 .build();
     }
 
-    static RouteStopPlan toStopPlan(OperationPointJpaEntity routeStop) {
+    public RouteStopPlan toStopPlan(OperationPointEntity routeStop) {
         return RouteStopPlan.builder()
                 .id(routeStop.getId())
                 .routeId(routeStop.getRouteId())
@@ -68,8 +68,8 @@ final class RoutePersistenceMapper {
                 .build();
     }
 
-    static OperationPointJpaEntity toEntity(RouteStopPlan stopPlan) {
-        return OperationPointJpaEntity.builder()
+    public OperationPointEntity toEntity(RouteStopPlan stopPlan) {
+        return OperationPointEntity.builder()
                 .id(stopPlan.getId())
                 .routeId(stopPlan.getRouteId())
                 .creator(stopPlan.getCreator())
@@ -82,7 +82,7 @@ final class RoutePersistenceMapper {
                 .build();
     }
 
-    static RouteAssignmentRecord toAssignmentRecord(RouteAssignmentJpaEntity assignment) {
+    public RouteAssignmentRecord toAssignmentRecord(RouteAssignmentEntity assignment) {
         return RouteAssignmentRecord.builder()
                 .id(assignment.getId())
                 .routeId(assignment.getRouteId())
@@ -97,8 +97,8 @@ final class RoutePersistenceMapper {
                 .build();
     }
 
-    static RouteAssignmentJpaEntity toEntity(RouteAssignmentRecord record) {
-        return RouteAssignmentJpaEntity.builder()
+    public RouteAssignmentEntity toEntity(RouteAssignmentRecord record) {
+        return RouteAssignmentEntity.builder()
                 .id(record.getId())
                 .routeId(record.getRouteId())
                 .creator(record.getCreator())
@@ -112,7 +112,7 @@ final class RoutePersistenceMapper {
                 .build();
     }
 
-    static VehicleSnapshot toVehicleSnapshot(VehicleJpaEntity vehicle) {
+    public VehicleSnapshot toVehicleSnapshot(VehicleEntity vehicle) {
         return VehicleSnapshot.builder()
                 .id(vehicle.getId())
                 .vehiclePlate(vehicle.getVehiclePlate())

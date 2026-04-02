@@ -48,104 +48,104 @@ public class AuthoritiesManagementServiceImpl implements AuthoritiesManagementSe
 
     @Override
     public AddRoleResult addRole(AddRoleCommand command) {
-        if (roleRepositoryPort.existsByCode(command.getCode())) {
-            throw new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
-                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(ROLE_EXISTS_ERROR, command.getCode())));
+        if (roleRepositoryPort.existsByCode(command.code())) {
+            throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(ROLE_EXISTS_ERROR, command.code())));
         }
 
         RoleAggregate roleAggregate = RoleAggregate.create(
                 UUID.randomUUID().toString(),
-                command.getCode(),
-                command.getName(),
-                command.getDescription(),
-                command.isEnabled(),
-                command.getCreator(),
+                command.code(),
+                command.name(),
+                command.description(),
+                command.enabled(),
+                command.creator(),
                 OffsetDateTime.now()
         );
 
         roleRepositoryPort.save(roleAggregate);
 
         return AddRoleResult.builder()
-                .code(command.getCode())
-                .name(command.getName())
-                .creator(command.getCreator())
-                .description(command.getDescription())
+                .code(command.code())
+                .name(command.name())
+                .creator(command.creator())
+                .description(command.description())
                 .build();
     }
 
     @Override
     public AddPermissionResult addPermission(AddPermissionCommand command) {
 
-        if (permissionRepositoryPort.existsByCode(command.getCode())) {
-            throw new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
-                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(PERMISSION_EXISTS_ERROR, command.getCode())));
+        if (permissionRepositoryPort.existsByCode(command.code())) {
+            throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(PERMISSION_EXISTS_ERROR, command.code())));
         }
 
         PermissionProfile permissionProfile = PermissionProfile.create(
-                command.getCode(),
-                command.getName(),
-                command.getDescription(),
-                command.isEnabled(),
-                command.getCreator(),
+                command.code(),
+                command.name(),
+                command.description(),
+                command.enabled(),
+                command.creator(),
                 OffsetDateTime.now()
         );
 
         permissionRepositoryPort.save(permissionProfile);
 
         return AddPermissionResult.builder()
-                .code(command.getCode())
-                .name(command.getName())
-                .creator(command.getCreator())
-                .description(command.getDescription())
+                .code(command.code())
+                .name(command.name())
+                .creator(command.creator())
+                .description(command.description())
                 .build();
     }
 
     @Override
     public SetPermissionResult setPermission(SetPermissionCommand command) {
-        RoleAggregate roleAggregate = roleRepositoryPort.findById(command.getRoleId())
-                .orElseThrow(() -> new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
+        RoleAggregate roleAggregate = roleRepositoryPort.findById(command.roleId())
+                .orElseThrow(() -> new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, ROLE_NOT_FOUND)));
 
-        List<PermissionProfile> authoritiesList = permissionRepositoryPort.findByCodes(command.getAuthoritiesCode());
+        List<PermissionProfile> authoritiesList = permissionRepositoryPort.findByCodes(command.authoritiesCode());
 
-        if(authoritiesList.size() != command.getAuthoritiesCode().size()) {
+        if(authoritiesList.size() != command.authoritiesCode().size()) {
             Set<String> foundCodes = authoritiesList.stream()
                     .map(PermissionProfile::getCode)
                     .collect(Collectors.toSet());
 
-            Set<String> missingCodes = new HashSet<>(command.getAuthoritiesCode());
+            Set<String> missingCodes = new HashSet<>(command.authoritiesCode());
             missingCodes.removeAll(foundCodes);
 
-            throw new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
+            throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
                     ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, AUTHORITIES_NOT_FOUND));
         }
 
-        roleAggregate.assignAuthorities(command.getAuthoritiesCode());
+        roleAggregate.assignAuthorities(command.authoritiesCode());
         roleRepositoryPort.save(roleAggregate);
 
 
         return SetPermissionResult.builder()
-                .roleId(command.getRoleId())
-                .authorities(command.getAuthoritiesCode())
+                .roleId(command.roleId())
+                .authorities(command.authoritiesCode())
                 .build();
     }
 
     @Override
     @Transactional
     public SetRoleResult setRole(SetRoleCommand command) {
-        RoleAggregate roleAggregate = roleRepositoryPort.findById(command.getRoleId())
-                .orElseThrow(() -> new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
+        RoleAggregate roleAggregate = roleRepositoryPort.findById(command.roleId())
+                .orElseThrow(() -> new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, ROLE_NOT_FOUND)));
 
-        if(userRoleAssignmentRepositoryPort.exists(command.getUserId(), command.getRoleId())) {
-            throw new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
+        if(userRoleAssignmentRepositoryPort.exists(command.userId(), command.roleId())) {
+            throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
                     ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, DUPLICATE_USER_ROLE_MESSAGE));
         }
 
-        userRoleAssignmentRepositoryPort.deleteByUserId(command.getUserId());
+        userRoleAssignmentRepositoryPort.deleteByUserId(command.userId());
 
         UserRoleAssignment userRoleAssignment = UserRoleAssignment.assign(
-                command.getUserId(),
+                command.userId(),
                 roleAggregate.getId(),
                 OffsetDateTime.now()
         );
@@ -153,8 +153,8 @@ public class AuthoritiesManagementServiceImpl implements AuthoritiesManagementSe
         userRoleAssignmentRepositoryPort.save(userRoleAssignment);
 
         return SetRoleResult.builder()
-                .userId(command.getUserId())
-                .roleId(command.getRoleId())
+                .userId(command.userId())
+                .roleId(command.roleId())
                 .assignedAt(OffsetDateTime.now())
                 .build();
 
