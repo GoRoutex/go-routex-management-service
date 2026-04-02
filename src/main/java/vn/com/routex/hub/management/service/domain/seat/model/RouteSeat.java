@@ -13,7 +13,7 @@ import java.time.OffsetDateTime;
  * Domain model for route seat.
  *
  * Persistence concerns (JPA annotations, table/column mapping) live in infrastructure layer:
- * {@code infrastructure.persistence.jpa.route.entity.RouteSeatJpaEntity}.
+ * {@code infrastructure.persistence.jpa.route.entity.RouteSeatEntity}.
  */
 @Getter
 @Setter

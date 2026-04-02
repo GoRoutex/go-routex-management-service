@@ -1,20 +1,13 @@
 package vn.com.routex.hub.management.service.application.command.authorities;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
+import lombok.Builder;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@SuperBuilder
-public class SetRoleCommand {
-    private String userId;
-    private String roleId;
-    private String requestId;
-    private String requestDateTime;
-    private String channel;
+@Builder
+public record SetRoleCommand(
+        String userId,
+        String roleId,
+        String requestId,
+        String requestDateTime,
+        String channel
+) {
 }

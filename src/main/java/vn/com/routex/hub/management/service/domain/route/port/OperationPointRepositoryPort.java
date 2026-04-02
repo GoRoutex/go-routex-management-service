@@ -4,11 +4,16 @@ import vn.com.routex.hub.management.service.domain.route.model.RouteStopPlan;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface OperationPointRepositoryPort {
     void saveAll(List<RouteStopPlan> stopPlans);
 
+    void save(RouteStopPlan routeStopPlan);
+
     List<RouteStopPlan> findByRouteId(String routeId);
 
     Map<String, List<RouteStopPlan>> findByRouteIds(List<String> routeIds);
+
+    Optional<RouteStopPlan> findByRouteIdAndStopOrder(String routeId, String stopOrder);
 }

@@ -1,15 +1,15 @@
 package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.vehicle;
 
 import vn.com.routex.hub.management.service.domain.vehicle.model.VehicleProfile;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.vehicle.entity.VehicleJpaEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.vehicle.entity.VehicleEntity;
 
 final class VehiclePersistenceMapper {
 
     private VehiclePersistenceMapper() {
     }
 
-    static VehicleJpaEntity toEntity(VehicleProfile vehicleProfile) {
-        return VehicleJpaEntity.builder()
+    static VehicleEntity toEntity(VehicleProfile vehicleProfile) {
+        return VehicleEntity.builder()
                 .id(vehicleProfile.getId())
                 .creator(vehicleProfile.getCreator())
                 .status(vehicleProfile.getStatus())

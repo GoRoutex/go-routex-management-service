@@ -21,7 +21,8 @@ import vn.com.routex.hub.management.service.application.command.authorities.SetP
 import vn.com.routex.hub.management.service.application.command.authorities.SetRoleCommand;
 import vn.com.routex.hub.management.service.application.command.authorities.SetRoleResult;
 import vn.com.routex.hub.management.service.application.services.AuthoritiesManagementService;
-import vn.com.routex.hub.management.service.infrastructure.persistence.utils.HttpResponseUtil;
+import vn.com.routex.hub.management.service.infrastructure.persistence.utils.HttpUtils;
+import vn.com.routex.hub.management.service.interfaces.factory.ApiResultFactory;
 import vn.com.routex.hub.management.service.interfaces.models.authorities.AddPermissionRequest;
 import vn.com.routex.hub.management.service.interfaces.models.authorities.AddPermissionResponse;
 import vn.com.routex.hub.management.service.interfaces.models.authorities.AddRoleRequest;
@@ -30,7 +31,6 @@ import vn.com.routex.hub.management.service.interfaces.models.authorities.SetPer
 import vn.com.routex.hub.management.service.interfaces.models.authorities.SetPermissionResponse;
 import vn.com.routex.hub.management.service.interfaces.models.authorities.SetRoleRequest;
 import vn.com.routex.hub.management.service.interfaces.models.authorities.SetRoleResponse;
-import vn.com.routex.hub.management.service.interfaces.models.result.ApiResult;
 
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.ADD_PERMISSIONS;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.ADD_ROLES;
@@ -40,9 +40,6 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.MANAGEMENT_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.SET_PERMISSIONS;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.SET_ROLE;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_CODE;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_MESSAGE;
-
 @RestController
 @RequestMapping(API_PATH + API_VERSION + MANAGEMENT_PATH)
 @RequiredArgsConstructor
@@ -51,6 +48,7 @@ public class AuthoritiesManagementController {
 
 
     private final AuthoritiesManagementService authoritiesManagementService;
+    private final ApiResultFactory apiResultFactory;
 
     @InitBinder
     public void initBinder(WebDataBinder webDataBinder, WebRequest webRequest) {
@@ -71,15 +69,15 @@ public class AuthoritiesManagementController {
                 .build());
 
         AddRoleResponse response = AddRoleResponse.builder()
-                .result(successResult())
+                .result(apiResultFactory.buildSuccess())
                 .data(AddRoleResponse.AddRoleResponseData.builder()
-                        .code(result.getCode())
-                        .name(result.getName())
-                        .creator(result.getCreator())
-                        .description(result.getDescription())
+                        .code(result.code())
+                        .name(result.name())
+                        .creator(result.creator())
+                        .description(result.description())
                         .build())
                 .build();
-        return HttpResponseUtil.buildResponse(request, response);
+        return HttpUtils.buildResponse(request, response);
     }
     @PostMapping(AUTHORITIES_PATH + ADD_PERMISSIONS)
     public ResponseEntity<AddPermissionResponse> addPermission(@Valid @RequestBody AddPermissionRequest request) {
@@ -95,15 +93,15 @@ public class AuthoritiesManagementController {
                 .build());
 
         AddPermissionResponse response = AddPermissionResponse.builder()
-                .result(successResult())
+                .result(apiResultFactory.buildSuccess())
                 .data(AddPermissionResponse.AddPermissionResponseData.builder()
-                        .code(result.getCode())
-                        .name(result.getName())
-                        .creator(result.getCreator())
-                        .description(result.getDescription())
+                        .code(result.code())
+                        .name(result.name())
+                        .creator(result.creator())
+                        .description(result.description())
                         .build())
                 .build();
-        return HttpResponseUtil.buildResponse(request, response);
+        return HttpUtils.buildResponse(request, response);
     }
 
     @PostMapping(AUTHORITIES_PATH + SET_ROLE)
@@ -117,14 +115,14 @@ public class AuthoritiesManagementController {
                 .build());
 
         SetRoleResponse response = SetRoleResponse.builder()
-                .result(successResult())
+                .result(apiResultFactory.buildSuccess())
                 .data(SetRoleResponse.SetRoleResponseData.builder()
-                        .userId(result.getUserId())
-                        .roleId(result.getRoleId())
-                        .assignedAt(result.getAssignedAt())
+                        .userId(result.userId())
+                        .roleId(result.roleId())
+                        .assignedAt(result.assignedAt())
                         .build())
                 .build();
-        return HttpResponseUtil.buildResponse(request, response);
+        return HttpUtils.buildResponse(request, response);
     }
 
     @PostMapping(AUTHORITIES_PATH + SET_PERMISSIONS)
@@ -138,20 +136,13 @@ public class AuthoritiesManagementController {
                 .build());
 
         SetPermissionResponse response = SetPermissionResponse.builder()
-                .result(successResult())
+                .result(apiResultFactory.buildSuccess())
                 .data(SetPermissionResponse.SetPermissionResponseData.builder()
-                        .roleId(result.getRoleId())
-                        .authorities(result.getAuthorities())
+                        .roleId(result.roleId())
+                        .authorities(result.authorities())
                         .build())
                 .build();
-        return HttpResponseUtil.buildResponse(request, response);
-    }
-
-    private ApiResult successResult() {
-        return ApiResult.builder()
-                .responseCode(SUCCESS_CODE)
-                .description(SUCCESS_MESSAGE)
-                .build();
+        return HttpUtils.buildResponse(request, response);
     }
 
 }

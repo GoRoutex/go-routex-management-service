@@ -1,21 +1,16 @@
 package vn.com.routex.hub.management.service.application.command.vehicle;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
+import lombok.Builder;
 import vn.com.routex.hub.management.service.domain.vehicle.VehicleStatus;
 import vn.com.routex.hub.management.service.domain.vehicle.VehicleType;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@SuperBuilder
-public class AddVehicleResult {
-    private String creator;
-    private VehicleType type;
-    private String vehiclePlate;
-    private String seatCapacity;
-    private String manufacturer;
-    private VehicleStatus status;
+@Builder
+public record AddVehicleResult(
+        String creator,
+        VehicleType type,
+        String vehiclePlate,
+        String seatCapacity,
+        String manufacturer,
+        VehicleStatus status
+) {
 }

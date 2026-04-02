@@ -4,7 +4,6 @@ package vn.com.routex.hub.management.service.interfaces.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,53 +17,102 @@ import vn.com.routex.hub.management.service.application.command.route.CreateRout
 import vn.com.routex.hub.management.service.application.command.route.CreateRouteResult;
 import vn.com.routex.hub.management.service.application.command.route.DeleteRouteCommand;
 import vn.com.routex.hub.management.service.application.command.route.DeleteRouteResult;
-import vn.com.routex.hub.management.service.application.command.route.FetchRouteQuery;
-import vn.com.routex.hub.management.service.application.command.route.FetchRouteResult;
 import vn.com.routex.hub.management.service.application.command.route.OperationPointCommand;
-import vn.com.routex.hub.management.service.application.command.route.OperationPointResult;
-import vn.com.routex.hub.management.service.application.command.route.SearchRouteItemResult;
-import vn.com.routex.hub.management.service.application.command.route.SearchRouteQuery;
-import vn.com.routex.hub.management.service.application.command.route.SearchRouteResult;
+import vn.com.routex.hub.management.service.application.command.route.UpdateRouteCommand;
+import vn.com.routex.hub.management.service.application.command.route.UpdateRouteCommand.UpdateOperationPointCommand;
+import vn.com.routex.hub.management.service.application.command.route.UpdateRouteResult;
 import vn.com.routex.hub.management.service.application.services.RouteManagementService;
-import vn.com.routex.hub.management.service.infrastructure.persistence.utils.HttpResponseUtil;
+import vn.com.routex.hub.management.service.infrastructure.persistence.utils.HttpUtils;
+import vn.com.routex.hub.management.service.interfaces.factory.ApiResultFactory;
 import vn.com.routex.hub.management.service.interfaces.models.assignment.AssignRouteRequest;
 import vn.com.routex.hub.management.service.interfaces.models.assignment.AssignRouteResponse;
-import vn.com.routex.hub.management.service.interfaces.models.result.ApiResult;
 import vn.com.routex.hub.management.service.interfaces.models.route.CreateRouteRequest;
 import vn.com.routex.hub.management.service.interfaces.models.route.CreateRouteResponse;
 import vn.com.routex.hub.management.service.interfaces.models.route.DeleteRouteRequest;
 import vn.com.routex.hub.management.service.interfaces.models.route.DeleteRouteResponse;
-import vn.com.routex.hub.management.service.interfaces.models.route.FetchRouteRequest;
-import vn.com.routex.hub.management.service.interfaces.models.route.FetchRouteResponse;
-import vn.com.routex.hub.management.service.interfaces.models.route.SearchRouteRequest;
-import vn.com.routex.hub.management.service.interfaces.models.route.SearchRouteResponse;
+import vn.com.routex.hub.management.service.interfaces.models.route.UpdateRouteRequest;
+import vn.com.routex.hub.management.service.interfaces.models.route.UpdateRouteResponse;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.API_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.API_VERSION;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.ASSIGNMENT_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.CREATE_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.DELETE_PATH;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.FETCH_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.MANAGEMENT_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.ROUTE_SERVICE;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.SEARCH_PATH;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_CODE;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.SUCCESS_MESSAGE;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.UPDATE_PATH;
 
 @RestController
 @RequestMapping(API_PATH + API_VERSION + MANAGEMENT_PATH + ROUTE_SERVICE)
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('route:management') or hasRole('ADMIN')")
+//@PreAuthorize("hasAuthority('route:management') or hasRole('ADMIN')")
 public class RouteManagementController {
 
     private final RouteManagementService routeManagementService;
+    private final ApiResultFactory apiResultFactory;
 
     @InitBinder
     public void initBinder(WebDataBinder webDataBinder, WebRequest webRequest) {
         webDataBinder.setDisallowedFields("requestId", "requestDateTime", "channel", "data");
+    }
+
+    @PostMapping(UPDATE_PATH)
+    public ResponseEntity<UpdateRouteResponse> updateRoute(@Valid @RequestBody UpdateRouteRequest request) {
+        List<UpdateOperationPointCommand> operationPointCommandList = request.getData().getOperationPoints().stream().map(
+                point -> UpdateOperationPointCommand.builder()
+                        .id(point.getId())
+                        .operationOrder(point.getOperationOrder())
+                        .plannedArrivalTime(OffsetDateTime.parse(point.getPlannedArrivalTime()))
+                        .plannedDepartureTime(OffsetDateTime.parse(point.getPlannedDepartureTime()))
+                        .note(point.getNote())
+                        .build()
+        ).toList();
+
+        UpdateRouteResult result = routeManagementService.updateRoute(UpdateRouteCommand.builder()
+                .context(HttpUtils.toContext(request))
+                .routeId(request.getRouteId())
+                .creator(request.getCreator())
+                .pickupBranch(request.getData().getPickupBranch())
+                .origin(request.getData().getOrigin())
+                .destination(request.getData().getDestination())
+                .plannedStartTime(OffsetDateTime.parse(request.getData().getPlannedStartTime()))
+                .plannedEndTime(OffsetDateTime.parse(request.getData().getPlannedEndTime()))
+                .actualStartTime(OffsetDateTime.parse(request.getData().getActualStartTime()))
+                .actualEndTime(OffsetDateTime.parse(request.getData().getActualEndTime()))
+                .status(request.getData().getStatus())
+                .operationPoints(operationPointCommandList)
+                .build());
+
+        UpdateRouteResponse response = UpdateRouteResponse.builder()
+                .routeId(result.routeId())
+                .creator(result.creator())
+                .data(UpdateRouteResponse.UpdateRouteResponseData.builder()
+                        .pickupBranch(result.pickupBranch())
+                        .origin(result.origin())
+                        .destination(result.destination())
+                        .plannedStartTime(result.plannedStartTime())
+                        .plannedEndTime(result.plannedEndTime())
+                        .actualStartTime(result.actualStartTime())
+                        .actualEndTime(result.actualEndTime())
+                        .status(result.status())
+                        .operationPoints(result.operationPoints().stream().map(
+                                point -> UpdateRouteResponse.UpdateOperationPointResponse.builder()
+                                        .id(point.id())
+                                        .operationOrder(point.operationOrder())
+                                        .plannedArrivalTime(point.plannedArrivalTime())
+                                        .plannedDepartureTime(point.plannedDepartureTime())
+                                        .note(point.note())
+                                        .build()
+                        ).collect(Collectors.toList()))
+                        .build())
+                .build();
+
+        return HttpUtils.buildResponse(request, response);
     }
 
     @PostMapping(CREATE_PATH)
@@ -72,14 +120,12 @@ public class RouteManagementController {
         List<OperationPointCommand> operationPointCommands = new ArrayList<>();
         if (request.getData().getOperationPoints() != null) {
             operationPointCommands = request.getData().getOperationPoints().stream()
-                    .map(point -> {
-                        OperationPointCommand command = new OperationPointCommand();
-                        command.setOperationOrder(point.getOperationOrder());
-                        command.setPlannedArrivalTime(point.getPlannedArrivalTime());
-                        command.setPlannedDepartureTime(point.getPlannedDepartureTime());
-                        command.setNote(point.getNote());
-                        return command;
-                    })
+                    .map(point -> OperationPointCommand.builder()
+                            .operationOrder(point.getOperationOrder())
+                            .plannedArrivalTime(point.getPlannedArrivalTime())
+                            .plannedDepartureTime(point.getPlannedDepartureTime())
+                            .note(point.getNote())
+                            .build())
                     .toList();
         }
 
@@ -97,36 +143,36 @@ public class RouteManagementController {
                 .build());
 
         List<CreateRouteRequest.OperationPoints> operationPointResponses = new ArrayList<>();
-        if (result.getOperationPoints() != null) {
-            operationPointResponses = result.getOperationPoints().stream()
+        if (result.operationPoints() != null) {
+            operationPointResponses = result.operationPoints().stream()
                     .map(point -> {
                         CreateRouteRequest.OperationPoints op = new CreateRouteRequest.OperationPoints();
-                        op.setOperationOrder(point.getOperationOrder());
-                        op.setPlannedArrivalTime(point.getPlannedArrivalTime());
-                        op.setPlannedDepartureTime(point.getPlannedDepartureTime());
-                        op.setNote(point.getNote());
+                        op.setOperationOrder(point.operationOrder());
+                        op.setPlannedArrivalTime(point.plannedArrivalTime());
+                        op.setPlannedDepartureTime(point.plannedDepartureTime());
+                        op.setNote(point.note());
                         return op;
                     })
                     .toList();
         }
 
         CreateRouteResponse response = CreateRouteResponse.builder()
-                .result(successResult())
+                .result(apiResultFactory.buildSuccess())
                 .data(CreateRouteResponse.CreateRouteResponseData.builder()
-                        .id(result.getId())
-                        .creator(result.getCreator())
-                        .pickupBranch(result.getPickupBranch())
-                        .routeCode(result.getRouteCode())
-                        .origin(result.getOrigin())
-                        .destination(result.getDestination())
-                        .plannedStartTime(result.getPlannedStartTime())
-                        .plannedEndTime(result.getPlannedEndTime())
-                        .status(result.getStatus())
+                        .id(result.id())
+                        .creator(result.creator())
+                        .pickupBranch(result.pickupBranch())
+                        .routeCode(result.routeCode())
+                        .origin(result.origin())
+                        .destination(result.destination())
+                        .plannedStartTime(result.plannedStartTime())
+                        .plannedEndTime(result.plannedEndTime())
+                        .status(result.status())
                         .operationPoints(operationPointResponses)
                         .build())
                 .build();
 
-        return HttpResponseUtil.buildResponse(request, response);
+        return HttpUtils.buildResponse(request, response);
     }
 
     @PostMapping(ASSIGNMENT_PATH)
@@ -141,81 +187,17 @@ public class RouteManagementController {
                 .build());
 
         AssignRouteResponse response = AssignRouteResponse.builder()
-                .result(successResult())
+                .result(apiResultFactory.buildSuccess())
                 .data(AssignRouteResponse.AssignRouteResponseData.builder()
-                        .creator(result.getCreator())
-                        .routeId(result.getRouteId())
-                        .vehicleId(result.getVehicleId())
-                        .assignedAt(result.getAssignedAt())
-                        .status(result.getStatus())
+                        .creator(result.creator())
+                        .routeId(result.routeId())
+                        .vehicleId(result.vehicleId())
+                        .assignedAt(result.assignedAt())
+                        .status(result.status())
                         .build())
                 .build();
 
-        return HttpResponseUtil.buildResponse(request, response);
-    }
-
-
-    @PostMapping(SEARCH_PATH)
-    public ResponseEntity<SearchRouteResponse> searchRoute(@Valid @RequestBody SearchRouteRequest request) {
-        SearchRouteResult result = routeManagementService.searchRoute(SearchRouteQuery.builder()
-                .origin(request.getData().getOrigin())
-                .destination(request.getData().getDestination())
-                .departureDate(request.getData().getDepartureDate())
-                .seat(request.getData().getSeat())
-                .fromTime(request.getData().getFromTime())
-                .toTime(request.getData().getToTime())
-                .pageSize(request.getData().getPageSize())
-                .pageNumber(request.getData().getPageNumber())
-                .requestId(request.getRequestId())
-                .requestDateTime(request.getRequestDateTime())
-                .channel(request.getChannel())
-                .build());
-
-        SearchRouteResponse response = SearchRouteResponse.builder()
-                .result(successResult())
-                .data(result.getData().stream()
-                        .map(this::toSearchRouteResponseData)
-                        .toList())
-                .build();
-
-        return HttpResponseUtil.buildResponse(request, response);
-    }
-
-    @PostMapping(FETCH_PATH)
-    public ResponseEntity<FetchRouteResponse> fetchRoute(@Valid @RequestBody FetchRouteRequest request) {
-        FetchRouteResult result = routeManagementService.fetchRoute(FetchRouteQuery.builder()
-                .routeId(request.getData().getRouteId())
-                .requestId(request.getRequestId())
-                .requestDateTime(request.getRequestDateTime())
-                .channel(request.getChannel())
-                .build());
-
-        FetchRouteResponse response = FetchRouteResponse.builder()
-                .result(successResult())
-                .data(FetchRouteResponse.FetchRouteResponseData.builder()
-                        .id(result.getId())
-                        .creator(result.getCreator())
-                        .pickupBranch(result.getPickupBranch())
-                        .routeCode(result.getRouteCode())
-                        .origin(result.getOrigin())
-                        .destination(result.getDestination())
-                        .plannedStartTime(result.getPlannedStartTime())
-                        .plannedEndTime(result.getPlannedEndTime())
-                        .actualStartTime(result.getActualStartTime())
-                        .actualEndTime(result.getActualEndTime())
-                        .status(result.getStatus())
-                        .availableSeats(result.getAvailableSeats())
-                        .vehicleId(result.getVehicleId())
-                        .vehiclePlate(result.getVehiclePlate())
-                        .hasFloor(result.getHasFloor())
-                        .assignedAt(result.getAssignedAt())
-                        .operationPoints(result.getOperationPoints().stream()
-                                .map(this::toSearchOperationPoint)
-                                .toList())
-                        .build())
-                .build();
-
-        return HttpResponseUtil.buildResponse(request, response);
+        return HttpUtils.buildResponse(request, response);
     }
 
     @PostMapping(DELETE_PATH)
@@ -229,53 +211,18 @@ public class RouteManagementController {
                 .build());
 
         DeleteRouteResponse response = DeleteRouteResponse.builder()
-                .result(successResult())
+                .result(apiResultFactory.buildSuccess())
                 .data(DeleteRouteResponse.DeleteRouteResponseData.builder()
-                        .creator(result.getCreator())
-                        .routeId(result.getRouteId())
-                        .routeCode(result.getRouteCode())
-                        .status(result.getStatus())
-                        .updatedAt(result.getUpdatedAt())
+                        .creator(result.creator())
+                        .routeId(result.routeId())
+                        .routeCode(result.routeCode())
+                        .status(result.status())
+                        .updatedAt(result.updatedAt())
                         .build())
                 .build();
 
-        return HttpResponseUtil.buildResponse(request, response);
+        return HttpUtils.buildResponse(request, response);
     }
 
-    private SearchRouteResponse.SearchRouteResponseData toSearchRouteResponseData(SearchRouteItemResult item) {
-        return SearchRouteResponse.SearchRouteResponseData.builder()
-                .id(item.getId())
-                .pickupBranch(item.getPickupBranch())
-                .origin(item.getOrigin())
-                .destination(item.getDestination())
-                .availableSeats(item.getAvailableSeats())
-                .plannedStartTime(item.getPlannedStartTime())
-                .plannedEndTime(item.getPlannedEndTime())
-                .vehiclePlate(item.getVehiclePlate())
-                .hasFloor(item.isHasFloor())
-                .routeCode(item.getRouteCode())
-                .operationPoints(item.getOperationPoints().stream()
-                        .map(this::toSearchOperationPoint)
-                        .toList())
-                .build();
-    }
-
-    private SearchRouteResponse.SearchOperationPoints toSearchOperationPoint(OperationPointResult point) {
-        return SearchRouteResponse.SearchOperationPoints.builder()
-                .id(point.getId())
-                .operationOrder(point.getOperationOrder())
-                .routeId(point.getRouteId())
-                .plannedArrivalTime(point.getPlannedArrivalTime())
-                .plannedDepartureTime(point.getPlannedDepartureTime())
-                .note(point.getNote())
-                .build();
-    }
-
-    private ApiResult successResult() {
-        return ApiResult.builder()
-                .responseCode(SUCCESS_CODE)
-                .description(SUCCESS_MESSAGE)
-                .build();
-    }
 
 }

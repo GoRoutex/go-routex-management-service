@@ -27,29 +27,29 @@ public class VehicleManagementServiceImpl implements VehicleManagementService {
     @Override
     @Transactional
     public AddVehicleResult addVehicle(AddVehicleCommand command) {
-        if(vehicleProfileRepositoryPort.existsByVehiclePlate(command.getVehiclePlate())) {
-            throw new BusinessException(command.getRequestId(), command.getRequestDateTime(), command.getChannel(),
-                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(DUPLICATE_VEHICLE, command.getVehiclePlate())));
+        if(vehicleProfileRepositoryPort.existsByVehiclePlate(command.vehiclePlate())) {
+            throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(DUPLICATE_VEHICLE, command.vehiclePlate())));
         }
 
         VehicleProfile newVehicle = VehicleProfile.register(
                 UUID.randomUUID().toString(),
-                command.getCreator(),
-                VehicleType.valueOf(command.getType()),
-                command.getVehiclePlate(),
-                Integer.valueOf(command.getSeatCapacity()),
-                command.getManufacturer(),
+                command.creator(),
+                VehicleType.valueOf(command.type()),
+                command.vehiclePlate(),
+                Integer.valueOf(command.seatCapacity()),
+                command.manufacturer(),
                 OffsetDateTime.now()
         );
 
         vehicleProfileRepositoryPort.save(newVehicle);
 
         return AddVehicleResult.builder()
-                .creator(command.getCreator())
+                .creator(command.creator())
                 .type(newVehicle.getType())
-                .vehiclePlate(command.getVehiclePlate())
-                .seatCapacity(command.getSeatCapacity())
-                .manufacturer(command.getManufacturer())
+                .vehiclePlate(command.vehiclePlate())
+                .seatCapacity(command.seatCapacity())
+                .manufacturer(command.manufacturer())
                 .status(VehicleStatus.AVAILABLE)
                 .build();
     }

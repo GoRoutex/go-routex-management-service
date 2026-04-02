@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
 import vn.com.routex.hub.management.service.domain.route.RouteStatus;
 
 import java.time.OffsetDateTime;
@@ -16,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
-public class RouteAggregate {
+public class RouteAggregate extends AbstractAuditingEntity {
     private String id;
     private String routeCode;
     private String creator;
@@ -28,10 +29,6 @@ public class RouteAggregate {
     private OffsetDateTime actualStartTime;
     private OffsetDateTime actualEndTime;
     private RouteStatus status;
-    private OffsetDateTime createdAt;
-    private String createdBy;
-    private OffsetDateTime updatedAt;
-    private String updatedBy;
     private List<RouteStopPlan> stopPlans;
 
     public static RouteAggregate plan(
@@ -68,7 +65,7 @@ public class RouteAggregate {
 
     public void cancel(String actor, OffsetDateTime updatedAt) {
         this.status = RouteStatus.CANCELED;
-        this.updatedBy = actor;
-        this.updatedAt = updatedAt;
+        this.setCreatedBy(actor);
+        this.setUpdatedAt(updatedAt);
     }
 }

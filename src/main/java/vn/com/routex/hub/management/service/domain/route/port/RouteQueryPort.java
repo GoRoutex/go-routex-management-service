@@ -1,5 +1,7 @@
 package vn.com.routex.hub.management.service.domain.route.port;
 
+import vn.com.routex.hub.management.service.domain.common.PagedResult;
+import vn.com.routex.hub.management.service.domain.route.readmodel.RouteFetchView;
 import vn.com.routex.hub.management.service.domain.route.readmodel.RouteSearchView;
 
 import java.time.OffsetDateTime;
@@ -14,4 +16,6 @@ public interface RouteQueryPort {
             int pageNumber,
             int pageSize
     );
+
+    PagedResult<RouteFetchView> fetchRoutes(int pageNumber, int pageSize);
 }

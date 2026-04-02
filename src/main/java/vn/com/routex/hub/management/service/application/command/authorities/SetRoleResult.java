@@ -1,18 +1,13 @@
 package vn.com.routex.hub.management.service.application.command.authorities;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
+import lombok.Builder;
 
 import java.time.OffsetDateTime;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@SuperBuilder
-public class SetRoleResult {
-    private String userId;
-    private String roleId;
-    private OffsetDateTime assignedAt;
+@Builder
+public record SetRoleResult(
+        String userId,
+        String roleId,
+        OffsetDateTime assignedAt
+) {
 }
