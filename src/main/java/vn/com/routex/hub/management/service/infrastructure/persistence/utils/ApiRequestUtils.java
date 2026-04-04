@@ -24,4 +24,21 @@ public class ApiRequestUtils {
                 .channel(requestChannel)
                 .build();
     }
+
+    public static int parseIntOrDefault(
+            String v,
+            int defaultValue,
+            String field,
+            String requestId,
+            String requestDateTime,
+            String channel
+    ) {
+        if (v == null || v.isBlank()) return defaultValue;
+        return DateTimeUtils.parseIntOrThrow(v, field, requestId, requestDateTime, channel);
+    }
+
+
+    public static String firstNonBlank(String value, String fallback) {
+        return (value == null || value.isBlank()) ? fallback : value.trim();
+    }
 }

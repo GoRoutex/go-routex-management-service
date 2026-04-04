@@ -12,10 +12,10 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
 
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.HOUR_MINUTES_REGEX;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.ONLY_CHARACTER_REGEX;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.ONLY_NUMBER_REGEX;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.YEAR_MONTH_DATE_REGEX;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.RegexConstant.HOUR_MINUTES_REGEX;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.RegexConstant.ONLY_CHARACTER_REGEX;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.RegexConstant.ONLY_NUMBER_REGEX;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.RegexConstant.YEAR_MONTH_DATE_REGEX;
 
 @Getter
 @Setter

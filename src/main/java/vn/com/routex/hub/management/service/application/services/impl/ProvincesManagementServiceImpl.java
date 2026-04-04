@@ -31,6 +31,7 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_PROVINCE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.PROVINCE_NOT_FOUND;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils.parseIntOrDefault;
 
 @Service
 @RequiredArgsConstructor
@@ -168,17 +169,5 @@ public class ProvincesManagementServiceImpl implements ProvincesManagementServic
         return DeleteProvinceResult.builder()
                 .id(existing.getId())
                 .build();
-    }
-
-    private static int parseIntOrDefault(
-            String v,
-            int defaultValue,
-            String field,
-            String requestId,
-            String requestDateTime,
-            String channel
-    ) {
-        if (v == null || v.isBlank()) return defaultValue;
-        return DateTimeUtils.parseIntOrThrow(v, field, requestId, requestDateTime, channel);
     }
 }

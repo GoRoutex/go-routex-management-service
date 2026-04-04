@@ -30,36 +30,17 @@ spring:
         max.poll.records: 500
 
     events:
-      booking-created: "routex.booking.created"
-      booking-confirmed: "routex.booking.confirmed"
-      booking-cancelled: "routex.booking.cancelled"
-      booking-failed: "routex.booking.failed"
-      payment-initiated: "routex.payment.initiated"
-      payment-completed: "routex.payment.completed"
-      payment-failed: "routex.payment.failed"
-      payment-refunded: "routex.payment.refunded"
-      seat-reserved: "routex.seat.reserved"
-      seat-released: "routex.seat.released"
-      seat-locked: "routex.seat.locked"
       route-ready-for-sale: "routex.route.ready-for-sale"
+      route-assigned: "routex.route.assigned"
       notification-email: "routex.notification.email"
       notification-sms: "routex.notification.sms"
 
     topics:
-      routes: "route.event.management"
-      bookings: "booking.event.management"
-      payments: "payment.event.management"
-      seats: "seat.event.management"
-      notifications: "notification.event.management"
-      dead-letter: "bus-dead-letter-queue"
+      routes: "route.management.event"
+      booking: "route.bookings.event"
 
     listener:
       ack-mode: manual
-
-  retry:
-    max-attempts: 3
-    backoff-ms: 1000
-    backoff-multiplier: 2
 
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -82,20 +63,6 @@ management:
     readinessstate:
       enabled: true
 
-jms:
-  thread:
-    receive:
-      timeout-seconds: ${JMS_THREAD_RECEIVE_TIMEOUT_SECONDS:30}
-    send:
-      timeout-seconds: ${JMS_THREAD_SEND_TIMEOUT_SECONDS:5}
-  receive:
-    timeout: ${JMS_RECEIVE_TIMEOUT:30000}
-  caching:
-    session-cache-size: ${JMS_CACHING_SESSION_CACHE_SIZE:256}
-  time-to-live-milliseconds: ${JMS_TIME_TO_LIVE_MILLISECONDS:20000}
-  recovery-interval: ${JMS_RECOVERY_INTERVAL:5000}
-  max-message: ${JMS_MAX_MESSAGE:1}
-
 server:
   port: ${SERVER_PORT:8000}
 
@@ -106,7 +73,6 @@ identity:
     audience: ${JWT_AUDIENCE:management-service}
     authority-claim-name: ${JWT_CLAIM_NAME:roles}
     authority-prefix: ${JWT_AUTH_PREFIX:ROLE_}
-
 
 logging:
   level:

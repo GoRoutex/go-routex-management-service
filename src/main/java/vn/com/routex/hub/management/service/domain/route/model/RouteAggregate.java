@@ -59,10 +59,6 @@ public class RouteAggregate extends AbstractAuditingEntity {
                 .build();
     }
 
-    public void assign() {
-        this.status = RouteStatus.ASSIGNED;
-    }
-
     public void cancel(String actor, OffsetDateTime updatedAt) {
         this.status = RouteStatus.CANCELED;
         this.setCreatedBy(actor);

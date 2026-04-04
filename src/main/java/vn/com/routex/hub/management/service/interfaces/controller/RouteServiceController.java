@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.management.service.application.command.route.FetchRoutesQuery;
 import vn.com.routex.hub.management.service.application.command.route.FetchRoutesResult;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteQuery;
@@ -39,9 +40,11 @@ public class RouteServiceController {
     private final RouteManagementService routeManagementService;
     private final ApiResultFactory apiResultFactory;
     private final RouteResponseMapper routeResponseMapper;
+    private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @PostMapping(SEARCH_PATH)
     public ResponseEntity<SearchRouteResponse> searchRoute(@Valid @RequestBody SearchRouteRequest request) {
+        sLog.info("[ROUTE-SERVICE] Search Route Request: {}", request);
         SearchRouteResult result = routeManagementService.searchRoute(SearchRouteQuery.builder()
                 .origin(request.getData().getOrigin())
                 .destination(request.getData().getDestination())

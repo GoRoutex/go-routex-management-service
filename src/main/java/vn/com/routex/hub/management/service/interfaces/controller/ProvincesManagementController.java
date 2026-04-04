@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
+import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.management.service.application.command.provinces.CreateProvinceCommand;
 import vn.com.routex.hub.management.service.application.command.provinces.CreateProvinceResult;
 import vn.com.routex.hub.management.service.application.command.provinces.DeleteProvinceCommand;
@@ -59,6 +60,7 @@ public class ProvincesManagementController {
 
     private final ApiResultFactory apiResultFactory;
     private final ProvincesManagementService provincesManagementService;
+    private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @InitBinder
     public void initBinder(WebDataBinder webDataBinder, WebRequest webRequest) {
@@ -92,6 +94,7 @@ public class ProvincesManagementController {
     @PostMapping(PROVINCES_SERVICE + CREATE_PATH)
     @PreAuthorize("hasAuthority('provinces:management') or hasRole('ADMIN')")
     public ResponseEntity<CreateProvinceResponse> createProvince(@Valid @RequestBody CreateProvinceRequest request) {
+        sLog.info("[PROVINCE-MANAGEMENT] Create Province Request: {}", request);
         CreateProvinceResult result = provincesManagementService.createProvince(CreateProvinceCommand.builder()
                 .context(HttpUtils.toContext(request))
                 .name(request.getData().getName())
@@ -106,13 +109,14 @@ public class ProvincesManagementController {
                         .code(result.code())
                         .build())
                 .build();
-
+        sLog.info("[PROVINCE-MANAGEMENT] Create Province Response: {}", response);
         return HttpUtils.buildResponse(request, response);
     }
 
     @PostMapping(PROVINCES_SERVICE + UPDATE_PATH)
     @PreAuthorize("hasAuthority('provinces:management') or hasRole('ADMIN')")
     public ResponseEntity<UpdateProvinceResponse> updateProvince(@Valid @RequestBody UpdateProvinceRequest request) {
+        sLog.info("[PROVINCE-MANAGEMENT] Update Province Request: {}", request);
         UpdateProvinceResult result = provincesManagementService.updateProvince(UpdateProvinceCommand.builder()
                 .context(HttpUtils.toContext(request))
                 .id(request.getData().getId())
@@ -129,12 +133,14 @@ public class ProvincesManagementController {
                         .build())
                 .build();
 
+        sLog.info("[PROVINCE-MANAGEMENT] Update Province Response: {}", response);
         return HttpUtils.buildResponse(request, response);
     }
 
     @PostMapping(PROVINCES_SERVICE + DELETE_PATH)
     @PreAuthorize("hasAuthority('provinces:management') or hasRole('ADMIN')")
     public ResponseEntity<DeleteProvinceResponse> deleteProvince(@Valid @RequestBody DeleteProvinceRequest request) {
+        sLog.info("[PROVINCE-MANAGEMENT] Delete Province: {}", request);
         DeleteProvinceResult result = provincesManagementService.deleteProvince(DeleteProvinceCommand.builder()
                 .context(HttpUtils.toContext(request))
                 .id(request.getData().getId())
@@ -147,6 +153,7 @@ public class ProvincesManagementController {
                         .build())
                 .build();
 
+        sLog.info("[PROVINCE-MANAGEMENT] Delete Province: {}", response);
         return HttpUtils.buildResponse(request, response);
     }
 

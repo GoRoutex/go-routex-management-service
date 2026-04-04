@@ -4,7 +4,6 @@ package vn.com.routex.hub.management.service.interfaces.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
+import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.management.service.application.command.authorities.AddPermissionCommand;
 import vn.com.routex.hub.management.service.application.command.authorities.AddPermissionResult;
 import vn.com.routex.hub.management.service.application.command.authorities.AddRoleCommand;
@@ -49,6 +49,7 @@ public class AuthoritiesManagementController {
 
     private final AuthoritiesManagementService authoritiesManagementService;
     private final ApiResultFactory apiResultFactory;
+    private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @InitBinder
     public void initBinder(WebDataBinder webDataBinder, WebRequest webRequest) {
@@ -57,6 +58,7 @@ public class AuthoritiesManagementController {
 
     @PostMapping(AUTHORITIES_PATH + ADD_ROLES)
     public ResponseEntity<AddRoleResponse> addRole(@Valid @RequestBody AddRoleRequest request) {
+        sLog.info("[ROLE-MANAGEMENT] Add Role Request: {}", request);
         AddRoleResult result = authoritiesManagementService.addRole(AddRoleCommand.builder()
                 .code(request.getData().getCode())
                 .name(request.getData().getName())
@@ -77,10 +79,13 @@ public class AuthoritiesManagementController {
                         .description(result.description())
                         .build())
                 .build();
+
+        sLog.info("[ROLE-MANAGEMENT] Add Role Response: {}", response);
         return HttpUtils.buildResponse(request, response);
     }
     @PostMapping(AUTHORITIES_PATH + ADD_PERMISSIONS)
     public ResponseEntity<AddPermissionResponse> addPermission(@Valid @RequestBody AddPermissionRequest request) {
+        sLog.info("[PERMISSION-MANAGEMENT] Add Permission Request: {}", request);
         AddPermissionResult result = authoritiesManagementService.addPermission(AddPermissionCommand.builder()
                 .code(request.getData().getCode())
                 .name(request.getData().getName())
@@ -101,11 +106,15 @@ public class AuthoritiesManagementController {
                         .description(result.description())
                         .build())
                 .build();
+
+
+        sLog.info("[PERMISSION-MANAGEMENT] Add Permission Response: {}", response);
         return HttpUtils.buildResponse(request, response);
     }
 
     @PostMapping(AUTHORITIES_PATH + SET_ROLE)
     public ResponseEntity<SetRoleResponse> setRole(@Valid @RequestBody SetRoleRequest request) {
+        sLog.info("[ROLE-MANAGEMENT] Set Role Request: {}", request);
         SetRoleResult result = authoritiesManagementService.setRole(SetRoleCommand.builder()
                 .userId(request.getData().getUserId())
                 .roleId(request.getData().getRoleId())
@@ -122,11 +131,14 @@ public class AuthoritiesManagementController {
                         .assignedAt(result.assignedAt())
                         .build())
                 .build();
+
+        sLog.info("[ROLE-MANAGEMENT] Set Role Response: {}", response);
         return HttpUtils.buildResponse(request, response);
     }
 
     @PostMapping(AUTHORITIES_PATH + SET_PERMISSIONS)
     public ResponseEntity<SetPermissionResponse> setPermission(@Valid @RequestBody SetPermissionRequest request) {
+        sLog.info("[PERMISSION-MANAGEMENT] Set Permission Request: {}", request);
         SetPermissionResult result = authoritiesManagementService.setPermission(SetPermissionCommand.builder()
                 .roleId(request.getData().getRoleId())
                 .authoritiesCode(request.getData().getAuthoritiesCode())
@@ -142,6 +154,7 @@ public class AuthoritiesManagementController {
                         .authorities(result.authorities())
                         .build())
                 .build();
+        sLog.info("[PERMISSION-MANAGEMENT] Set Permission Response: {}", response);
         return HttpUtils.buildResponse(request, response);
     }
 
