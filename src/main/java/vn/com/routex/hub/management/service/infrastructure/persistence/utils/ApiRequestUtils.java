@@ -2,12 +2,13 @@ package vn.com.routex.hub.management.service.infrastructure.persistence.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.experimental.UtilityClass;
+import vn.com.routex.hub.management.service.application.command.common.RequestContext;
 import vn.com.routex.hub.management.service.infrastructure.persistence.config.RequestAttributes;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
 
 @UtilityClass
 public class ApiRequestUtils {
-    public static BaseRequest getBaseRequestOrDefault(HttpServletRequest request) {
+    public BaseRequest getBaseRequestOrDefault(HttpServletRequest request) {
 
         String requestId =
                 (String) request.getAttribute(RequestAttributes.REQUEST_ID);
@@ -25,7 +26,15 @@ public class ApiRequestUtils {
                 .build();
     }
 
-    public static int parseIntOrDefault(
+    public BaseRequest getHeader(RequestContext context) {
+        return BaseRequest.builder()
+                .requestId(context.requestId())
+                .requestDateTime(context.requestDateTime())
+                .channel(context.channel())
+                .build();
+    }
+
+    public int parseIntOrDefault(
             String v,
             int defaultValue,
             String field,
@@ -38,7 +47,7 @@ public class ApiRequestUtils {
     }
 
 
-    public static String firstNonBlank(String value, String fallback) {
+    public String firstNonBlank(String value, String fallback) {
         return (value == null || value.isBlank()) ? fallback : value.trim();
     }
 }

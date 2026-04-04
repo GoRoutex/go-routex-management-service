@@ -2,6 +2,7 @@ package vn.com.routex.hub.management.service.application.services.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.management.service.application.command.route.AssignRouteCommand;
@@ -20,6 +21,7 @@ import vn.com.routex.hub.management.service.application.command.route.SearchRout
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteResult;
 import vn.com.routex.hub.management.service.application.command.route.UpdateRouteCommand;
 import vn.com.routex.hub.management.service.application.command.route.UpdateRouteResult;
+import vn.com.routex.hub.management.service.application.services.OutBoxService;
 import vn.com.routex.hub.management.service.application.services.RouteManagementService;
 import vn.com.routex.hub.management.service.application.specification.RouteSpecification;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
@@ -31,12 +33,10 @@ import vn.com.routex.hub.management.service.domain.route.model.RouteAssignmentRe
 import vn.com.routex.hub.management.service.domain.route.model.RouteStopPlan;
 import vn.com.routex.hub.management.service.domain.route.model.VehicleSnapshot;
 import vn.com.routex.hub.management.service.domain.route.port.RouteAggregateRepositoryPort;
-import vn.com.routex.hub.management.service.domain.route.port.RouteAssignmentEventPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteAssignmentRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RoutePointRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteProvincesLookupPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteQueryPort;
-import vn.com.routex.hub.management.service.domain.route.port.RouteSaleEventPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteSeatAvailabilityPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteVehicleRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.readmodel.RouteFetchView;
@@ -44,6 +44,7 @@ import vn.com.routex.hub.management.service.domain.route.readmodel.RouteSearchVi
 import vn.com.routex.hub.management.service.infrastructure.kafka.event.RouteAssignedEvent;
 import vn.com.routex.hub.management.service.infrastructure.kafka.event.RouteSellableEvent;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
+import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.DateTimeUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 
@@ -75,7 +76,6 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_POINT_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.VEHICLE_NOT_FOUND;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils.parseIntOrDefault;
 
 
 @Service
@@ -87,11 +87,20 @@ public class RouteManagementServiceImpl implements RouteManagementService {
     private final RouteAssignmentRepositoryPort routeAssignmentRepositoryPort;
     private final RouteVehicleRepositoryPort routeVehicleRepositoryPort;
     private final RouteProvincesLookupPort routeProvincesLookupPort;
-    private final RouteAssignmentEventPort routeAssignmentEventPort;
     private final RouteSeatAvailabilityPort routeSeatAvailabilityPort;
     private final RouteQueryPort routeQueryPort;
-    private final RouteSaleEventPort routeSaleEventPort;
     private final OperationPointRepositoryPort operationPointRepositoryPort;
+    private final OutBoxService outBoxService;
+
+    @Value("${spring.kafka.topics.routes}")
+    private String routeTopic;
+
+    @Value("${spring.kafka.events.route-assigned}")
+    private String routeAssignedEvent;
+
+    @Value("${spring.kafka.events.route-ready-for-sale}")
+    private String routeReadyForSaleEvent;
+
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @Override
@@ -185,16 +194,16 @@ public class RouteManagementServiceImpl implements RouteManagementService {
     @Transactional
     public AssignRouteResult assignRoute(AssignRouteCommand command) {
         if(routeAssignmentRepositoryPort.existsActiveByRouteId(command.routeId())) {
-            throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+            throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                     ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(DUPLICATE_ROUTE_ASSIGNMENT, command.routeId())));
         }
 
         VehicleSnapshot vehicle = routeVehicleRepositoryPort.findById(command.vehicleId())
-                .orElseThrow(() -> new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+                .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, VEHICLE_NOT_FOUND)));
 
         RouteAggregate route = routeAggregateRepositoryPort.findById(command.routeId())
-                        .orElseThrow(() -> new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+                        .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                                 ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, command.routeId()))));
 
         OffsetDateTime assignedAt = OffsetDateTime.now();
@@ -213,7 +222,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
 
         sLog.info("[ASSIGN-ROUTE] Route Assigned successfully with VehicleId: {} DriverId: {}", vehicle.getId(), command.driverId());
 
-        RouteSellableEvent event = RouteSellableEvent
+        RouteSellableEvent sellableEvent = RouteSellableEvent
                 .builder()
                 .routeId(routeAssignment.getRouteId())
                 .vehicleId(routeAssignment.getVehicleId())
@@ -225,31 +234,25 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .creator(command.creator())
                 .build();
 
+        outBoxService.generateEvent(routeAssignment.getRouteId(), routeTopic, routeReadyForSaleEvent, routeAssignment.getId(), sellableEvent, ApiRequestUtils.getHeader(command.context()));
+
         RouteAssignedEvent assignedEvent = RouteAssignedEvent
                 .builder()
                 .routeId(routeAssignment.getRouteId())
+                .driverUserId(routeAssignment.getDriverId()) // TODO: Get User Id from driverId
                 .driverId(routeAssignment.getDriverId())
                 .vehicleId(routeAssignment.getVehicleId())
+                .originName(route.getOrigin())
+                .destinationName(route.getDestination())
+                .departureTime(route.getPlannedStartTime())
                 .status(route.getStatus())
                 .assignedBy(command.creator())
                 .assignedAt(routeAssignment.getAssignedAt())
                 .build();
 
-        routeAssignmentEventPort.publishAssignedRoute(
-                command.requestId(),
-                command.requestDateTime(),
-                command.channel(),
-                routeAssignment.getRouteId(),
-                assignedEvent
-        );
 
-        routeSaleEventPort.publishRouteReadyForSale(
-                command.requestId(),
-                command.requestDateTime(),
-                command.channel(),
-                routeAssignment.getRouteId(),
-                event
-        );
+        outBoxService.generateEvent(routeAssignment.getRouteId(), routeTopic, routeAssignedEvent, routeAssignment.getId(), assignedEvent, ApiRequestUtils.getHeader(command.context()));
+
         return AssignRouteResult.builder()
                 .creator(command.creator())
                 .assignedAt(routeAssignment.getAssignedAt().toString())
@@ -336,9 +339,9 @@ public class RouteManagementServiceImpl implements RouteManagementService {
 
     @Override
     public SearchRouteResult searchRoute(SearchRouteQuery query) {
-        int pageSize = parseIntOrDefault(query.pageSize(), DEFAULT_PAGE_SIZE, "pageSize",
+        int pageSize = ApiRequestUtils.parseIntOrDefault(query.pageSize(), DEFAULT_PAGE_SIZE, "pageSize",
                 query.requestId(), query.requestDateTime(), query.channel());
-        int pageNumber = parseIntOrDefault(query.pageNumber(), DEFAULT_PAGE_NUMBER, "pageNumber",
+        int pageNumber = ApiRequestUtils.parseIntOrDefault(query.pageNumber(), DEFAULT_PAGE_NUMBER, "pageNumber",
                 query.requestId(), query.requestDateTime(), query.channel());
 
         if (pageSize < 1 || pageSize > 100) {
@@ -438,9 +441,9 @@ public class RouteManagementServiceImpl implements RouteManagementService {
 
     @Override
     public FetchRoutesResult fetchRoutes(FetchRoutesQuery query) {
-        int pageSize = parseIntOrDefault(query.pageSize(), DEFAULT_PAGE_SIZE, "pageSize",
+        int pageSize = ApiRequestUtils.parseIntOrDefault(query.pageSize(), DEFAULT_PAGE_SIZE, "pageSize",
                 query.requestId(), query.requestDateTime(), query.channel());
-        int pageNumber = parseIntOrDefault(query.pageNumber(), DEFAULT_PAGE_NUMBER, "pageNumber",
+        int pageNumber = ApiRequestUtils.parseIntOrDefault(query.pageNumber(), DEFAULT_PAGE_NUMBER, "pageNumber",
                 query.requestId(), query.requestDateTime(), query.channel());
 
         if (pageSize < 1 || pageSize > 100) {

@@ -2,36 +2,35 @@ package vn.com.routex.hub.management.service.application.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import vn.com.routex.hub.management.service.application.command.provinces.FetchProvincesQuery;
-import vn.com.routex.hub.management.service.application.command.provinces.FetchProvincesResult;
 import vn.com.routex.hub.management.service.application.command.provinces.CreateProvinceCommand;
 import vn.com.routex.hub.management.service.application.command.provinces.CreateProvinceResult;
-import vn.com.routex.hub.management.service.application.command.provinces.UpdateProvinceCommand;
-import vn.com.routex.hub.management.service.application.command.provinces.UpdateProvinceResult;
 import vn.com.routex.hub.management.service.application.command.provinces.DeleteProvinceCommand;
 import vn.com.routex.hub.management.service.application.command.provinces.DeleteProvinceResult;
+import vn.com.routex.hub.management.service.application.command.provinces.FetchProvincesQuery;
+import vn.com.routex.hub.management.service.application.command.provinces.FetchProvincesResult;
 import vn.com.routex.hub.management.service.application.command.provinces.SearchProvincesQuery;
 import vn.com.routex.hub.management.service.application.command.provinces.SearchProvincesResult;
+import vn.com.routex.hub.management.service.application.command.provinces.UpdateProvinceCommand;
+import vn.com.routex.hub.management.service.application.command.provinces.UpdateProvinceResult;
 import vn.com.routex.hub.management.service.application.services.ProvincesManagementService;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
-import vn.com.routex.hub.management.service.domain.provinces.port.ProvincesQueryPort;
-import vn.com.routex.hub.management.service.domain.provinces.readmodel.ProvincesFetchView;
 import vn.com.routex.hub.management.service.domain.provinces.model.Province;
+import vn.com.routex.hub.management.service.domain.provinces.port.ProvincesQueryPort;
 import vn.com.routex.hub.management.service.domain.provinces.port.ProvincesRepositoryPort;
+import vn.com.routex.hub.management.service.domain.provinces.readmodel.ProvincesFetchView;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
-import vn.com.routex.hub.management.service.infrastructure.persistence.utils.DateTimeUtils;
+import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 
 import java.util.List;
 
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ERROR;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_PROVINCE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_NUMBER;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_SIZE;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ERROR;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_PROVINCE;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.PROVINCE_NOT_FOUND;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils.parseIntOrDefault;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -64,10 +63,10 @@ public class ProvincesManagementServiceImpl implements ProvincesManagementServic
 
     @Override
     public FetchProvincesResult fetchProvinces(FetchProvincesQuery query) {
-        int pageSize = parseIntOrDefault(query.pageSize(), DEFAULT_PAGE_SIZE, "pageSize",
-        query.context().requestId(), query.context().requestDateTime(), query.context().channel());
+        int pageSize = ApiRequestUtils.parseIntOrDefault(query.pageSize(), DEFAULT_PAGE_SIZE, "pageSize",
+                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
 
-        int pageNumber = parseIntOrDefault(query.pageNumber(), DEFAULT_PAGE_NUMBER, "pageNumber",
+        int pageNumber = ApiRequestUtils.parseIntOrDefault(query.pageNumber(), DEFAULT_PAGE_NUMBER, "pageNumber",
                 query.context().requestId(), query.context().requestDateTime(), query.context().channel());
 
 
