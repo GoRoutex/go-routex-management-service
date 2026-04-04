@@ -3,15 +3,14 @@ package vn.com.routex.hub.management.service.application.services.impl;
 import org.junit.jupiter.api.Test;
 import vn.com.routex.hub.management.service.application.command.route.FetchRoutesQuery;
 import vn.com.routex.hub.management.service.application.command.route.FetchRoutesResult;
+import vn.com.routex.hub.management.service.application.services.OutBoxService;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
 import vn.com.routex.hub.management.service.domain.operationpoint.port.OperationPointRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteAggregateRepositoryPort;
-import vn.com.routex.hub.management.service.domain.route.port.RouteAssignmentEventPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteAssignmentRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RoutePointRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteProvincesLookupPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteQueryPort;
-import vn.com.routex.hub.management.service.domain.route.port.RouteSaleEventPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteSeatAvailabilityPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteVehicleRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.readmodel.RouteFetchView;
@@ -34,9 +33,8 @@ class RouteManagementServiceImplPagingTest {
         RouteProvincesLookupPort routeProvincesLookupPort = mock(RouteProvincesLookupPort.class);
         RouteSeatAvailabilityPort routeSeatAvailabilityPort = mock(RouteSeatAvailabilityPort.class);
         RouteQueryPort routeQueryPort = mock(RouteQueryPort.class);
-        RouteSaleEventPort routeSaleEventPort = mock(RouteSaleEventPort.class);
         OperationPointRepositoryPort operationPointRepositoryPort = mock(OperationPointRepositoryPort.class);
-        RouteAssignmentEventPort routeAssignmentEventPort = mock(RouteAssignmentEventPort.class);
+        OutBoxService outBoxService = mock(OutBoxService.class);
 
         RouteManagementServiceImpl service = new RouteManagementServiceImpl(
                 routeAggregateRepositoryPort,
@@ -44,11 +42,10 @@ class RouteManagementServiceImplPagingTest {
                 routeAssignmentRepositoryPort,
                 routeVehicleRepositoryPort,
                 routeProvincesLookupPort,
-                routeAssignmentEventPort,
                 routeSeatAvailabilityPort,
                 routeQueryPort,
-                routeSaleEventPort,
-                operationPointRepositoryPort
+                operationPointRepositoryPort,
+                outBoxService
         );
 
         when(routeQueryPort.fetchRoutes(0, 10)).thenReturn(PagedResult.<RouteFetchView>builder()
@@ -83,9 +80,8 @@ class RouteManagementServiceImplPagingTest {
         RouteProvincesLookupPort routeProvincesLookupPort = mock(RouteProvincesLookupPort.class);
         RouteSeatAvailabilityPort routeSeatAvailabilityPort = mock(RouteSeatAvailabilityPort.class);
         RouteQueryPort routeQueryPort = mock(RouteQueryPort.class);
-        RouteSaleEventPort routeSaleEventPort = mock(RouteSaleEventPort.class);
         OperationPointRepositoryPort operationPointRepositoryPort = mock(OperationPointRepositoryPort.class);
-        RouteAssignmentEventPort routeAssignmentEventPort = mock(RouteAssignmentEventPort.class);
+        OutBoxService outBoxService = mock(OutBoxService.class);
 
         RouteManagementServiceImpl service = new RouteManagementServiceImpl(
                 routeAggregateRepositoryPort,
@@ -93,11 +89,10 @@ class RouteManagementServiceImplPagingTest {
                 routeAssignmentRepositoryPort,
                 routeVehicleRepositoryPort,
                 routeProvincesLookupPort,
-                routeAssignmentEventPort,
                 routeSeatAvailabilityPort,
                 routeQueryPort,
-                routeSaleEventPort,
-                operationPointRepositoryPort
+                operationPointRepositoryPort,
+                outBoxService
         );
 
         when(routeQueryPort.fetchRoutes(0, 10)).thenReturn(PagedResult.<RouteFetchView>builder()

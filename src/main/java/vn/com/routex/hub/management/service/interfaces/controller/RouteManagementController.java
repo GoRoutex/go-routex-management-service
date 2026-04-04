@@ -203,9 +203,7 @@ public class RouteManagementController {
                 .creator(request.getData().getCreator())
                 .routeId(request.getData().getRouteId())
                 .vehicleId(request.getData().getVehicleId())
-                .requestId(request.getRequestId())
-                .requestDateTime(request.getRequestDateTime())
-                .channel(request.getChannel())
+                .context(HttpUtils.toContext(request))
                 .build());
 
         AssignRouteResponse response = AssignRouteResponse.builder()

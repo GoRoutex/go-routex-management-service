@@ -66,6 +66,15 @@ management:
 server:
   port: ${SERVER_PORT:8000}
 
+
+
+locking:
+  batch: 100
+
+scheduled:
+  polling:
+    time: 500
+
 identity:
   jwt:
     secret: ${JWT_SECRET:CZZRadv0Xe8z3stWFWYdtiJ2E86gUgJvFEfbCYFgJhQ}

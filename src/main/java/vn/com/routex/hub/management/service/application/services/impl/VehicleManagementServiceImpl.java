@@ -18,6 +18,7 @@ import vn.com.routex.hub.management.service.domain.vehicle.VehicleType;
 import vn.com.routex.hub.management.service.domain.vehicle.model.VehicleProfile;
 import vn.com.routex.hub.management.service.domain.vehicle.port.VehicleProfileRepositoryPort;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
+import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 
 import java.time.OffsetDateTime;
@@ -31,8 +32,6 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_SIZE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.VEHICLE_NOT_FOUND_BY_ID;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils.firstNonBlank;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils.parseIntOrDefault;
 
 @Service
 @RequiredArgsConstructor
@@ -89,13 +88,13 @@ public class VehicleManagementServiceImpl implements VehicleManagementService {
         }
 
         VehicleProfile updated = existing.toBuilder()
-                .creator(firstNonBlank(command.creator(), existing.getCreator()))
+                .creator(ApiRequestUtils.firstNonBlank(command.creator(), existing.getCreator()))
                 .type(command.type() == null || command.type().isBlank() ? existing.getType() : VehicleType.valueOf(command.type().trim()))
-                .vehiclePlate(firstNonBlank(command.vehiclePlate(), existing.getVehiclePlate()))
+                .vehiclePlate(ApiRequestUtils.firstNonBlank(command.vehiclePlate(), existing.getVehiclePlate()))
                 .seatCapacity(command.seatCapacity() == null || command.seatCapacity().isBlank()
                         ? existing.getSeatCapacity()
                         : Integer.valueOf(command.seatCapacity().trim()))
-                .manufacturer(firstNonBlank(command.manufacturer(), existing.getManufacturer()))
+                .manufacturer(ApiRequestUtils.firstNonBlank(command.manufacturer(), existing.getManufacturer()))
                 .hasFloor(command.hasFloor() == null ? existing.isHasFloor() : command.hasFloor())
                 .status(command.status() == null ? existing.getStatus() : command.status())
                 .build();
@@ -134,9 +133,9 @@ public class VehicleManagementServiceImpl implements VehicleManagementService {
 
     @Override
     public FetchVehiclesResult fetchVehicles(FetchVehiclesQuery query) {
-        int pageSize = parseIntOrDefault(query.pageSize(), DEFAULT_PAGE_SIZE, "pageSize",
+        int pageSize = ApiRequestUtils.parseIntOrDefault(query.pageSize(), DEFAULT_PAGE_SIZE, "pageSize",
                 query.context().requestId(), query.context().requestDateTime(), query.context().channel());
-        int pageNumber = parseIntOrDefault(query.pageNumber(), DEFAULT_PAGE_NUMBER, "pageNumber",
+        int pageNumber = ApiRequestUtils.parseIntOrDefault(query.pageNumber(), DEFAULT_PAGE_NUMBER, "pageNumber",
                 query.context().requestId(), query.context().requestDateTime(), query.context().channel());
 
         if (pageSize < 1 || pageSize > 100) {

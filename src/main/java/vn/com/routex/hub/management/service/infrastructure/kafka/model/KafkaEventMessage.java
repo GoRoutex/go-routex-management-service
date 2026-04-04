@@ -10,7 +10,7 @@ public record KafkaEventMessage<T> (
         String requestDateTime,
         String channel,
         String eventId,
-        String eventName,
+        String eventType,
         String aggregateId,
         String source,
         Integer version,
