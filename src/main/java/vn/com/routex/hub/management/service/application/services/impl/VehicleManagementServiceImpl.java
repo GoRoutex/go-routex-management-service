@@ -13,12 +13,11 @@ import vn.com.routex.hub.management.service.application.command.vehicle.UpdateVe
 import vn.com.routex.hub.management.service.application.command.vehicle.UpdateVehicleResult;
 import vn.com.routex.hub.management.service.application.services.VehicleManagementService;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
-import vn.com.routex.hub.management.service.domain.vehicle.model.VehicleProfile;
-import vn.com.routex.hub.management.service.domain.vehicle.port.VehicleProfileRepositoryPort;
 import vn.com.routex.hub.management.service.domain.vehicle.VehicleStatus;
 import vn.com.routex.hub.management.service.domain.vehicle.VehicleType;
+import vn.com.routex.hub.management.service.domain.vehicle.model.VehicleProfile;
+import vn.com.routex.hub.management.service.domain.vehicle.port.VehicleProfileRepositoryPort;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
-import vn.com.routex.hub.management.service.infrastructure.persistence.utils.DateTimeUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 
 import java.time.OffsetDateTime;
@@ -32,6 +31,9 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_SIZE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.VEHICLE_NOT_FOUND_BY_ID;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils.firstNonBlank;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils.parseIntOrDefault;
+
 @Service
 @RequiredArgsConstructor
 public class VehicleManagementServiceImpl implements VehicleManagementService {
@@ -167,21 +169,5 @@ public class VehicleManagementServiceImpl implements VehicleManagementService {
                 .totalElements(page.getTotalElements())
                 .totalPages(page.getTotalPages())
                 .build();
-    }
-
-    private static int parseIntOrDefault(
-            String v,
-            int defaultValue,
-            String field,
-            String requestId,
-            String requestDateTime,
-            String channel
-    ) {
-        if (v == null || v.isBlank()) return defaultValue;
-        return DateTimeUtils.parseIntOrThrow(v, field, requestId, requestDateTime, channel);
-    }
-
-    private static String firstNonBlank(String value, String fallback) {
-        return (value == null || value.isBlank()) ? fallback : value.trim();
     }
 }

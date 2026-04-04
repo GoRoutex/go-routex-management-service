@@ -12,9 +12,9 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
 
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.ONLY_CHARACTER_REGEX;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.ONLY_NUMBER_REGEX;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.VEHICLE_PLATE_REGEX;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.RegexConstant.ONLY_CHARACTER_REGEX;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.RegexConstant.ONLY_NUMBER_REGEX;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.RegexConstant.VEHICLE_PLATE_REGEX;
 
 @Getter
 @Setter

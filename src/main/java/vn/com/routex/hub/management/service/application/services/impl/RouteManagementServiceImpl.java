@@ -23,15 +23,17 @@ import vn.com.routex.hub.management.service.application.command.route.UpdateRout
 import vn.com.routex.hub.management.service.application.services.RouteManagementService;
 import vn.com.routex.hub.management.service.application.specification.RouteSpecification;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
+import vn.com.routex.hub.management.service.domain.operationpoint.port.OperationPointRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.RouteStatus;
 import vn.com.routex.hub.management.service.domain.route.model.ProvincesCodePair;
 import vn.com.routex.hub.management.service.domain.route.model.RouteAggregate;
 import vn.com.routex.hub.management.service.domain.route.model.RouteAssignmentRecord;
 import vn.com.routex.hub.management.service.domain.route.model.RouteStopPlan;
 import vn.com.routex.hub.management.service.domain.route.model.VehicleSnapshot;
-import vn.com.routex.hub.management.service.domain.route.port.RoutePointRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteAggregateRepositoryPort;
+import vn.com.routex.hub.management.service.domain.route.port.RouteAssignmentEventPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteAssignmentRepositoryPort;
+import vn.com.routex.hub.management.service.domain.route.port.RoutePointRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteProvincesLookupPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteQueryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteSaleEventPort;
@@ -39,7 +41,7 @@ import vn.com.routex.hub.management.service.domain.route.port.RouteSeatAvailabil
 import vn.com.routex.hub.management.service.domain.route.port.RouteVehicleRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.readmodel.RouteFetchView;
 import vn.com.routex.hub.management.service.domain.route.readmodel.RouteSearchView;
-import vn.com.routex.hub.management.service.domain.operationpoint.port.OperationPointRepositoryPort;
+import vn.com.routex.hub.management.service.infrastructure.kafka.event.RouteAssignedEvent;
 import vn.com.routex.hub.management.service.infrastructure.kafka.event.RouteSellableEvent;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.DateTimeUtils;
@@ -48,7 +50,6 @@ import vn.com.routex.hub.management.service.infrastructure.persistence.utils.Exc
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.DEFAULT_PAGE_NUMBER;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.DEFAULT_PAGE_SIZE;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.DEFAULT_ZONE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ERROR;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ROUTE_ASSIGNMENT;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
@@ -66,11 +70,12 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_SEARCH_TIME;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_START_TIME;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_STOP_ORDER;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_POINT_NOT_FOUND;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.OPERATION_POINT_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_NOT_FOUND;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.OPERATION_POINT_NOT_FOUND;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_POINT_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.VEHICLE_NOT_FOUND;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils.parseIntOrDefault;
 
 
 @Service
@@ -82,27 +87,12 @@ public class RouteManagementServiceImpl implements RouteManagementService {
     private final RouteAssignmentRepositoryPort routeAssignmentRepositoryPort;
     private final RouteVehicleRepositoryPort routeVehicleRepositoryPort;
     private final RouteProvincesLookupPort routeProvincesLookupPort;
+    private final RouteAssignmentEventPort routeAssignmentEventPort;
     private final RouteSeatAvailabilityPort routeSeatAvailabilityPort;
     private final RouteQueryPort routeQueryPort;
     private final RouteSaleEventPort routeSaleEventPort;
     private final OperationPointRepositoryPort operationPointRepositoryPort;
-
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
-    private static final ZoneId DEFAULT_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
-    private static final int DEFAULT_PAGE_SIZE = 10;
-    private static final int DEFAULT_PAGE_NUMBER = 1;
-
-    private static int parseIntOrDefault(
-            String v,
-            int defaultValue,
-            String field,
-            String requestId,
-            String requestDateTime,
-            String channel
-    ) {
-        if (v == null || v.isBlank()) return defaultValue;
-        return DateTimeUtils.parseIntOrThrow(v, field, requestId, requestDateTime, channel);
-    }
 
     @Override
     @Transactional
@@ -217,9 +207,11 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 assignedAt
         );
 
-        route.assign();
+        route.setStatus(RouteStatus.ASSIGNED);
         routeAggregateRepositoryPort.save(route);
         routeAssignmentRepositoryPort.save(routeAssignment);
+
+        sLog.info("[ASSIGN-ROUTE] Route Assigned successfully with VehicleId: {} DriverId: {}", vehicle.getId(), command.driverId());
 
         RouteSellableEvent event = RouteSellableEvent
                 .builder()
@@ -232,6 +224,24 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .hasFloor(vehicle.isHasFloor())
                 .creator(command.creator())
                 .build();
+
+        RouteAssignedEvent assignedEvent = RouteAssignedEvent
+                .builder()
+                .routeId(routeAssignment.getRouteId())
+                .driverId(routeAssignment.getDriverId())
+                .vehicleId(routeAssignment.getVehicleId())
+                .status(route.getStatus())
+                .assignedBy(command.creator())
+                .assignedAt(routeAssignment.getAssignedAt())
+                .build();
+
+        routeAssignmentEventPort.publishAssignedRoute(
+                command.requestId(),
+                command.requestDateTime(),
+                command.channel(),
+                routeAssignment.getRouteId(),
+                assignedEvent
+        );
 
         routeSaleEventPort.publishRouteReadyForSale(
                 command.requestId(),

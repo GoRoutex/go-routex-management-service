@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
+import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.management.service.application.command.vehicle.AddVehicleCommand;
 import vn.com.routex.hub.management.service.application.command.vehicle.AddVehicleResult;
 import vn.com.routex.hub.management.service.application.command.vehicle.DeleteVehicleCommand;
@@ -59,6 +60,7 @@ public class VehicleManagementController {
 
     private final VehicleManagementService vehicleManagementService;
     private final ApiResultFactory apiResultFactory;
+    private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @InitBinder
     public void initBinder(WebDataBinder webDataBinder, WebRequest webRequest) {
@@ -68,6 +70,7 @@ public class VehicleManagementController {
 
     @PostMapping(VEHICLE_SERVICE + ADD_PATH)
     public ResponseEntity<AddVehicleResponse> addVehicle(@Valid @RequestBody AddVehicleRequest request) {
+        sLog.info("[VEHICLE-MANAGEMENT] Add Vehicle Request: {}", request);
         AddVehicleResult result = vehicleManagementService.addVehicle(AddVehicleCommand.builder()
                 .creator(request.getData().getCreator())
                 .type(request.getData().getType())
@@ -95,11 +98,13 @@ public class VehicleManagementController {
                         .build())
                 .build();
 
+        sLog.info("[VEHICLE-MANAGEMENT] Add Vehicle Response: {}", response);
         return HttpUtils.buildResponse(request, response);
     }
 
     @PostMapping(VEHICLE_SERVICE + UPDATE_PATH)
     public ResponseEntity<UpdateVehicleResponse> updateVehicle(@Valid @RequestBody UpdateVehicleRequest request) {
+        sLog.info("[VEHICLE-MANAGEMENT] Update Vehicle Request: {}", request);
         UpdateVehicleResult result = vehicleManagementService.updateVehicle(UpdateVehicleCommand.builder()
                 .creator(request.getData().getCreator())
                 .vehicleId(request.getData().getVehicleId())
@@ -128,11 +133,13 @@ public class VehicleManagementController {
                         .build())
                 .build();
 
+        sLog.info("[VEHICLE-MANAGEMENT] Update Vehicle Response: {}", response);
         return HttpUtils.buildResponse(request, response);
     }
 
     @PostMapping(VEHICLE_SERVICE + DELETE_PATH)
     public ResponseEntity<DeleteVehicleResponse> deleteVehicle(@Valid @RequestBody DeleteVehicleRequest request) {
+        sLog.info("[VEHICLE-MANAGEMENT] Delete Vehicle Request: {}", request);
         DeleteVehicleResult result = vehicleManagementService.deleteVehicle(DeleteVehicleCommand.builder()
                 .creator(request.getData().getCreator())
                 .vehicleId(request.getData().getVehicleId())
@@ -149,6 +156,7 @@ public class VehicleManagementController {
                         .build())
                 .build();
 
+        sLog.info("[VEHICLE-MANAGEMENT] Delete Vehicle Response: {}", response);
         return HttpUtils.buildResponse(request, response);
     }
 

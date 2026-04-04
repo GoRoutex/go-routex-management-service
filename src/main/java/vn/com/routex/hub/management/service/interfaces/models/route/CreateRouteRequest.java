@@ -14,7 +14,7 @@ import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
 
 import java.util.List;
 
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.OFFSET_DATE_TIME_REGEX;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.RegexConstant.OFFSET_DATE_TIME_REGEX;
 
 @Getter
 @Setter

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
+import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.management.service.application.command.route.AssignRouteCommand;
 import vn.com.routex.hub.management.service.application.command.route.AssignRouteResult;
 import vn.com.routex.hub.management.service.application.command.route.CreateRouteCommand;
@@ -55,6 +56,7 @@ public class RouteManagementController {
 
     private final RouteManagementService routeManagementService;
     private final ApiResultFactory apiResultFactory;
+    private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @InitBinder
     public void initBinder(WebDataBinder webDataBinder, WebRequest webRequest) {
@@ -63,6 +65,7 @@ public class RouteManagementController {
 
     @PostMapping(UPDATE_PATH)
     public ResponseEntity<UpdateRouteResponse> updateRoute(@Valid @RequestBody UpdateRouteRequest request) {
+        sLog.info("[UPDATE-ROUTE] Update Route Request: {}", request);
         List<UpdateRoutePointCommand> routePointCommandList = null;
         if (request.getData().getRoutePoints() != null) {
             routePointCommandList = request.getData().getRoutePoints().stream().map(
@@ -115,11 +118,13 @@ public class RouteManagementController {
                         .build())
                 .build();
 
+        sLog.info("[UPDATE-ROUTE] Update Route Response: {}", response);
         return HttpUtils.buildResponse(request, response);
     }
 
     @PostMapping(CREATE_PATH)
     public ResponseEntity<CreateRouteResponse> createRoute(@Valid @RequestBody CreateRouteRequest request) {
+        sLog.info("[CREATE-ROUTE] Create Route Request: {}", request);
         List<RoutePointCommand> routePointCommands = new ArrayList<>();
         if (request.getData().getRoutePoints() != null) {
             routePointCommands = request.getData().getRoutePoints().stream()
@@ -187,11 +192,13 @@ public class RouteManagementController {
                         .build())
                 .build();
 
+        sLog.info("[CREATE-ROUTE] Create Route Response: {}", response);
         return HttpUtils.buildResponse(request, response);
     }
 
     @PostMapping(ASSIGNMENT_PATH)
     public ResponseEntity<AssignRouteResponse> assignRoute(@Valid @RequestBody AssignRouteRequest request) {
+        sLog.info("[ASSIGN-ROUTE] Assign Route Request: {}", request);
         AssignRouteResult result = routeManagementService.assignRoute(AssignRouteCommand.builder()
                 .creator(request.getData().getCreator())
                 .routeId(request.getData().getRouteId())
@@ -212,11 +219,13 @@ public class RouteManagementController {
                         .build())
                 .build();
 
+        sLog.info("[ASSIGN-ROUTE] Assign Route Response: {}", response);
         return HttpUtils.buildResponse(request, response);
     }
 
     @PostMapping(DELETE_PATH)
     public ResponseEntity<DeleteRouteResponse> deleteRoute(@Valid @RequestBody DeleteRouteRequest request) {
+        sLog.info("[DELETE-ROUTE] Delete Route Request: {}", request);
         DeleteRouteResult result = routeManagementService.deleteRoute(DeleteRouteCommand.builder()
                 .creator(request.getData().getCreator())
                 .routeId(request.getData().getRouteId())
@@ -236,6 +245,7 @@ public class RouteManagementController {
                         .build())
                 .build();
 
+        sLog.info("[DELETE-ROUTE] Delete Route Response: {}", response);
         return HttpUtils.buildResponse(request, response);
     }
 
