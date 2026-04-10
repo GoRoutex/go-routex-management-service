@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 import vn.com.go.routex.identity.security.log.SystemLog;
+
 import vn.com.routex.hub.management.service.application.command.operationpoint.CreateOperationPointCommand;
 import vn.com.routex.hub.management.service.application.command.operationpoint.CreateOperationPointResult;
 import vn.com.routex.hub.management.service.application.command.operationpoint.DeleteOperationPointCommand;
@@ -55,10 +57,15 @@ public class OperationPointManagementController {
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @PostMapping(POINT_PATH + CREATE_PATH)
-    public ResponseEntity<CreateOperationPointResponse> createOperationPoint(@Valid @RequestBody CreateOperationPointRequest request) {
+    @PreAuthorize("hasAuthority('points:management') or hasRole('ADMIN')")
+    public ResponseEntity<CreateOperationPointResponse> createOperationPoint(@Valid @RequestBody CreateOperationPointRequest request,
+                                                                             HttpServletRequest servletRequest) {
+
         sLog.info("[OPERATION-POINT] Create Operation Point Request: {}", request);
+        String merchantId = ApiRequestUtils.requireMerchantId(servletRequest, request);
         CreateOperationPointResult result = operationPointManagementService.createOperationPoint(CreateOperationPointCommand.builder()
-                .context(HttpUtils.toContext(request))
+                .context(HttpUtils.toContext(request, merchantId))
+                .merchantId(merchantId)
                 .code(request.getData().getCode())
                 .name(request.getData().getName())
                 .type(request.getData().getType())
@@ -93,11 +100,16 @@ public class OperationPointManagementController {
     }
 
     @PostMapping(POINT_PATH + UPDATE_PATH)
-    public ResponseEntity<UpdateOperationPointResponse> updateOperationPoint(@Valid @RequestBody UpdateOperationPointRequest request) {
+    @PreAuthorize("hasAuthority('points:management') or hasRole('ADMIN')")
+    public ResponseEntity<UpdateOperationPointResponse> updateOperationPoint(@Valid @RequestBody UpdateOperationPointRequest request,
+                                                                             HttpServletRequest servletRequest) {
+
         sLog.info("[OPERATION-POINT] Update Operation Point Request: {}", request);
+        String merchantId = ApiRequestUtils.requireMerchantId(servletRequest, request);
 
         UpdateOperationPointResult result = operationPointManagementService.updateOperationPoint(UpdateOperationPointCommand.builder()
-                .context(HttpUtils.toContext(request))
+                .context(HttpUtils.toContext(request, merchantId))
+                .merchantId(merchantId)
                 .id(request.getData().getId())
                 .code(request.getData().getCode())
                 .name(request.getData().getName())
@@ -132,11 +144,16 @@ public class OperationPointManagementController {
     }
 
     @PostMapping(POINT_PATH + DELETE_PATH)
-    public ResponseEntity<DeleteOperationPointResponse> deleteOperationPoint(@Valid @RequestBody DeleteOperationPointRequest request) {
+    @PreAuthorize("hasAuthority('points:management') or hasRole('ADMIN')")
+    public ResponseEntity<DeleteOperationPointResponse> deleteOperationPoint(@Valid @RequestBody DeleteOperationPointRequest request,
+                                                                             HttpServletRequest servletRequest) {
+
         sLog.info("[OPERATION-POINT] Delete Operation Point Request: {}", request);
+        String merchantId = ApiRequestUtils.requireMerchantId(servletRequest, request);
 
         DeleteOperationPointResult result = operationPointManagementService.deleteOperationPoint(DeleteOperationPointCommand.builder()
-                .context(HttpUtils.toContext(request))
+                .context(HttpUtils.toContext(request, merchantId))
+                .merchantId(merchantId)
                 .id(request.getData().getId())
                 .build());
 
@@ -157,15 +174,19 @@ public class OperationPointManagementController {
     }
 
     @GetMapping(POINT_PATH + FETCH_PATH)
+    @PreAuthorize("hasAuthority('points:management') or hasRole('ADMIN')")
     public ResponseEntity<FetchOperationPointResponse> fetchOperationPoint(@RequestParam int pageNumber,
                                                                            @RequestParam int pageSize,
                                                                            HttpServletRequest servletRequest) {
+
         BaseRequest baseRequest = ApiRequestUtils.getBaseRequestOrDefault(servletRequest);
+        String merchantId = ApiRequestUtils.requireMerchantId(servletRequest, baseRequest);
 
         FetchOperationPointResult result = operationPointManagementService.fetchOperationPoint(FetchOperationPointQuery.builder()
-                .context(HttpUtils.toContext(baseRequest))
+                .context(HttpUtils.toContext(baseRequest, merchantId))
                 .pageNumber(String.valueOf(pageNumber))
                 .pageSize(String.valueOf(pageSize))
+                .merchantId(merchantId)
                 .build());
 
         List<FetchOperationPointResponse.FetchOperationPointResponseData> items = result.items().stream()

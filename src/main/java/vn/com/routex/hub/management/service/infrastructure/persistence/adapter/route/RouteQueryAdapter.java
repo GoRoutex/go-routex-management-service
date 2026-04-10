@@ -27,6 +27,7 @@ public class RouteQueryAdapter implements RouteQueryPort {
 
     @Override
     public List<RouteSearchView> searchAssignedRoutes(
+            String merchantId,
             String origin,
             String destination,
             OffsetDateTime startTime,
@@ -34,7 +35,8 @@ public class RouteQueryAdapter implements RouteQueryPort {
             int pageNumber,
             int pageSize
     ) {
-        Specification<RouteEntity> specification = Specification.where(RouteSpecification.originContainsIgnoreCase(origin))
+        Specification<RouteEntity> specification = Specification.where(RouteSpecification.hasMerchantId(merchantId))
+                .and(RouteSpecification.originContainsIgnoreCase(origin))
                 .and(RouteSpecification.destinationContainsIgnoreCase(destination))
                 .and(RouteSpecification.plannedStartBetween(startTime, endTime))
                 .and(RouteSpecification.assignedStatus(RouteStatus.ASSIGNED));
@@ -59,9 +61,12 @@ public class RouteQueryAdapter implements RouteQueryPort {
     }
 
     @Override
-    public PagedResult<RouteFetchView> fetchRoutes(int pageNumber, int pageSize) {
+    public PagedResult<RouteFetchView> fetchRoutes(String merchantId, String merchantName, int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "plannedStartTime"));
-        Page<RouteEntity> page = routeEntityRepository.findAll(pageable);
+        Specification<RouteEntity> specification = Specification.where(RouteSpecification.hasMerchantId(merchantId))
+                .and(RouteSpecification.hasMerchantName(merchantName));
+        Page<RouteEntity> page = routeEntityRepository.findAll(specification, pageable);
+
 
         List<RouteFetchView> items = page.getContent().stream()
                 .map(route -> {

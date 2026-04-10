@@ -17,6 +17,7 @@ import java.time.OffsetDateTime;
 @SuperBuilder(toBuilder = true)
 public class VehicleProfile {
     private String id;
+    private String merchantId;
     private String creator;
     private VehicleStatus status;
     private VehicleType type;
@@ -29,6 +30,7 @@ public class VehicleProfile {
 
     public static VehicleProfile register(
             String id,
+            String merchantId,
             String creator,
             VehicleType type,
             String vehiclePlate,
@@ -38,6 +40,7 @@ public class VehicleProfile {
     ) {
         return VehicleProfile.builder()
                 .id(id)
+                .merchantId(merchantId)
                 .creator(creator)
                 .status(VehicleStatus.AVAILABLE)
                 .type(type)

@@ -1,22 +1,18 @@
 package vn.com.routex.hub.management.service.application.services.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.management.service.application.services.OutBoxRelayService;
-import vn.com.routex.hub.management.service.domain.outbox.OutBoxEventStatus;
-import vn.com.routex.hub.management.service.domain.outbox.model.OutboxEvent;
+import vn.com.routex.hub.management.service.domain.outbox.model.OutBoxEvent;
 import vn.com.routex.hub.management.service.domain.outbox.port.OutBoxEventRepositoryPort;
 import vn.com.routex.hub.management.service.infrastructure.kafka.config.KafkaEventPublisher;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @Component
@@ -32,19 +28,19 @@ public class OutBoxRelayServiceImpl implements OutBoxRelayService {
     @Override
     @Transactional
     public void pollingEvent() {
-        List<OutboxEvent> outboxEventList = outboxEventRepositoryPort.lockPendingBatch(lockingBatch);
+        List<OutBoxEvent> outBoxEventList = outboxEventRepositoryPort.lockPendingBatch(lockingBatch);
 
-        if (outboxEventList.isEmpty()) {
+        if (outBoxEventList.isEmpty()) {
             return;
         }
 
-        sLog.info("[OUTBOX-EVENT] Relaying {} outbox events to Kafka", outboxEventList.size());
+        sLog.info("[OUTBOX-EVENT] Relaying {} outbox events to Kafka", outBoxEventList.size());
 
         List<String> processedIds = new ArrayList<>();
         List<String> failedIds = new ArrayList<>();
         List<CompletableFuture<Void>> futures = new ArrayList<>();
 
-        for (OutboxEvent event : outboxEventList) {
+        for (OutBoxEvent event : outBoxEventList) {
             CompletableFuture<Void> future = kafkaEventPublisher.publishAsync(event)
                     .thenRun(() -> {
                         synchronized (processedIds) {

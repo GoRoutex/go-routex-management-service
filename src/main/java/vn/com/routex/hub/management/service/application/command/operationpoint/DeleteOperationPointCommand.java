@@ -6,6 +6,7 @@ import vn.com.routex.hub.management.service.application.command.common.RequestCo
 @Builder
 public record DeleteOperationPointCommand(
         RequestContext context,
+        String merchantId,
         String id
 ) {
 }

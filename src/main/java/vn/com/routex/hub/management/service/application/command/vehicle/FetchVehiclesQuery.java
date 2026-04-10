@@ -7,7 +7,7 @@ import vn.com.routex.hub.management.service.application.command.common.RequestCo
 public record FetchVehiclesQuery(
         String pageSize,
         String pageNumber,
+        String merchantId,
         RequestContext context
 ) {
 }
-

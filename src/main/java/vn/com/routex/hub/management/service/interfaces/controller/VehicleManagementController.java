@@ -69,18 +69,20 @@ public class VehicleManagementController {
 
 
     @PostMapping(VEHICLE_SERVICE + ADD_PATH)
-    public ResponseEntity<AddVehicleResponse> addVehicle(@Valid @RequestBody AddVehicleRequest request) {
+    public ResponseEntity<AddVehicleResponse> addVehicle(@Valid @RequestBody AddVehicleRequest request,
+                                                         HttpServletRequest servletRequest) {
         sLog.info("[VEHICLE-MANAGEMENT] Add Vehicle Request: {}", request);
+        String merchantId = ApiRequestUtils.requireMerchantId(servletRequest, request);
         AddVehicleResult result = vehicleManagementService.addVehicle(AddVehicleCommand.builder()
+                .context(HttpUtils.toContext(request, merchantId))
+                .merchantId(merchantId)
                 .creator(request.getData().getCreator())
                 .type(request.getData().getType())
                 .vehiclePlate(request.getData().getVehiclePlate())
                 .seatCapacity(request.getData().getSeatCapacity())
                 .manufacturer(request.getData().getManufacturer())
-                .requestId(request.getRequestId())
-                .requestDateTime(request.getRequestDateTime())
-                .channel(request.getChannel())
                 .build());
+
 
         AddVehicleResponse response = AddVehicleResponse.builder()
                 .result(ApiResult.builder()
@@ -103,9 +105,13 @@ public class VehicleManagementController {
     }
 
     @PostMapping(VEHICLE_SERVICE + UPDATE_PATH)
-    public ResponseEntity<UpdateVehicleResponse> updateVehicle(@Valid @RequestBody UpdateVehicleRequest request) {
+    public ResponseEntity<UpdateVehicleResponse> updateVehicle(@Valid @RequestBody UpdateVehicleRequest request,
+                                                               HttpServletRequest servletRequest) {
         sLog.info("[VEHICLE-MANAGEMENT] Update Vehicle Request: {}", request);
+        String merchantId = ApiRequestUtils.requireMerchantId(servletRequest, request);
         UpdateVehicleResult result = vehicleManagementService.updateVehicle(UpdateVehicleCommand.builder()
+                .context(HttpUtils.toContext(request, merchantId))
+                .merchantId(merchantId)
                 .creator(request.getData().getCreator())
                 .vehicleId(request.getData().getVehicleId())
                 .type(request.getData().getType())
@@ -114,10 +120,8 @@ public class VehicleManagementController {
                 .manufacturer(request.getData().getManufacturer())
                 .hasFloor(request.getData().getHasFloor())
                 .status(request.getData().getStatus())
-                .requestId(request.getRequestId())
-                .requestDateTime(request.getRequestDateTime())
-                .channel(request.getChannel())
                 .build());
+
 
         UpdateVehicleResponse response = UpdateVehicleResponse.builder()
                 .result(apiResultFactory.buildSuccess())
@@ -138,15 +142,17 @@ public class VehicleManagementController {
     }
 
     @PostMapping(VEHICLE_SERVICE + DELETE_PATH)
-    public ResponseEntity<DeleteVehicleResponse> deleteVehicle(@Valid @RequestBody DeleteVehicleRequest request) {
+    public ResponseEntity<DeleteVehicleResponse> deleteVehicle(@Valid @RequestBody DeleteVehicleRequest request,
+                                                               HttpServletRequest servletRequest) {
         sLog.info("[VEHICLE-MANAGEMENT] Delete Vehicle Request: {}", request);
+        String merchantId = ApiRequestUtils.requireMerchantId(servletRequest, request);
         DeleteVehicleResult result = vehicleManagementService.deleteVehicle(DeleteVehicleCommand.builder()
+                .context(HttpUtils.toContext(request, merchantId))
+                .merchantId(merchantId)
                 .creator(request.getData().getCreator())
                 .vehicleId(request.getData().getVehicleId())
-                .requestId(request.getRequestId())
-                .requestDateTime(request.getRequestDateTime())
-                .channel(request.getChannel())
                 .build());
+
 
         DeleteVehicleResponse response = DeleteVehicleResponse.builder()
                 .result(apiResultFactory.buildSuccess())
@@ -167,11 +173,13 @@ public class VehicleManagementController {
             @RequestParam(defaultValue = "10") int pageSize
     ) {
         BaseRequest baseRequest = ApiRequestUtils.getBaseRequestOrDefault(servletRequest);
+        String merchantId = ApiRequestUtils.requireMerchantId(servletRequest, baseRequest);
 
         FetchVehiclesResult result = vehicleManagementService.fetchVehicles(FetchVehiclesQuery.builder()
-                .context(HttpUtils.toContext(baseRequest))
+                .context(HttpUtils.toContext(baseRequest, merchantId))
                 .pageNumber(String.valueOf(pageNumber))
                 .pageSize(String.valueOf(pageSize))
+                .merchantId(merchantId)
                 .build());
 
         List<FetchVehicleResponse.FetchVehicleResponseData> items = result.items().stream()

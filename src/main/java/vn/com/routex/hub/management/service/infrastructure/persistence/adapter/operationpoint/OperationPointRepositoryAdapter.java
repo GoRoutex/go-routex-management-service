@@ -27,13 +27,37 @@ public class OperationPointRepositoryAdapter implements OperationPointRepository
     }
 
     @Override
+    public Optional<OperationPoint> findByCode(String code, String merchantId) {
+        return operationPointEntityRepository.findByCodeAndMerchantId(code, merchantId)
+                .map(operationPointPersistenceMapper::toDomain);
+    }
+
+    @Override
     public Optional<OperationPoint> findById(String id) {
         return operationPointEntityRepository.findById(id).map(operationPointPersistenceMapper::toDomain);
     }
 
     @Override
+    public Optional<OperationPoint> findById(String id, String merchantId) {
+        return operationPointEntityRepository.findByIdAndMerchantId(id, merchantId)
+                .map(operationPointPersistenceMapper::toDomain);
+    }
+
+    @Override
     public boolean existsByCode(String code) {
         return operationPointEntityRepository.existsByCode(code);
+    }
+
+    @Override
+    public boolean existsByCode(String code, String merchantId) {
+        return operationPointEntityRepository.existsByCodeAndMerchantId(code, merchantId);
+    }
+
+    @Override
+    public List<OperationPoint> findByMerchantId(String merchantId) {
+        return operationPointEntityRepository.findByMerchantId(merchantId).stream()
+                .map(operationPointPersistenceMapper::toDomain)
+                .toList();
     }
 
     @Override
@@ -44,6 +68,19 @@ public class OperationPointRepositoryAdapter implements OperationPointRepository
     @Override
     public PagedResult<OperationPoint> fetch(int pageNumber, int pageSize) {
         Page<OperationPointEntity> page = operationPointEntityRepository.findAll(PageRequest.of(pageNumber, pageSize));
+        return toPagedResult(page);
+    }
+
+    @Override
+    public PagedResult<OperationPoint> fetch(String merchantId, int pageNumber, int pageSize) {
+        Page<OperationPointEntity> page = operationPointEntityRepository.findByMerchantId(
+                merchantId,
+                PageRequest.of(pageNumber, pageSize)
+        );
+        return toPagedResult(page);
+    }
+
+    private PagedResult<OperationPoint> toPagedResult(Page<OperationPointEntity> page) {
         List<OperationPoint> items = page.getContent().stream()
                 .map(operationPointPersistenceMapper::toDomain)
                 .toList();

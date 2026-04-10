@@ -19,6 +19,7 @@ import java.util.List;
 @SuperBuilder(toBuilder = true)
 public class RouteAggregate extends AbstractAuditingEntity {
     private String id;
+    private String merchantId;
     private String routeCode;
     private String creator;
     private String pickupBranch;
@@ -33,6 +34,7 @@ public class RouteAggregate extends AbstractAuditingEntity {
 
     public static RouteAggregate plan(
             String id,
+            String merchantId,
             String routeCode,
             String creator,
             String pickupBranch,
@@ -45,6 +47,7 @@ public class RouteAggregate extends AbstractAuditingEntity {
     ) {
         return RouteAggregate.builder()
                 .id(id)
+                .merchantId(merchantId)
                 .routeCode(routeCode)
                 .creator(creator)
                 .pickupBranch(pickupBranch)

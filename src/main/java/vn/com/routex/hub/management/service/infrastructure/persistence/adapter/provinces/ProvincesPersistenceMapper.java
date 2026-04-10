@@ -13,6 +13,7 @@ public class ProvincesPersistenceMapper {
                 .name(entity.getName())
                 .code(entity.getCode())
                 .build();
+
     }
 
     public ProvincesEntity toEntity(Province province) {
@@ -22,6 +23,7 @@ public class ProvincesPersistenceMapper {
         entity.setName(province.getName());
         entity.setCode(province.getCode());
         return entity;
+
     }
 }
 

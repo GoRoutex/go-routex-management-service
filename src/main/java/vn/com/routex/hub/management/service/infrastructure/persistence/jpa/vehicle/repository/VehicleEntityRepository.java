@@ -7,12 +7,23 @@ import org.springframework.stereotype.Repository;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.vehicle.entity.VehicleEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface VehicleEntityRepository extends JpaRepository<VehicleEntity, String> {
     boolean existsByVehiclePlate(String vehiclePlate);
 
+    boolean existsByVehiclePlateAndMerchantId(String vehiclePlate, String merchantId);
+
+    Optional<VehicleEntity> findByIdAndMerchantId(String id, String merchantId);
+
     List<VehicleEntity> findByIdIn(List<String> vehicleIds);
+
+    List<VehicleEntity> findByIdInAndMerchantId(List<String> vehicleIds, String merchantId);
+
+    List<VehicleEntity> findByMerchantId(String merchantId);
+
+    Page<VehicleEntity> findByMerchantId(String merchantId, Pageable pageable);
 
     Page<VehicleEntity> findAll(Pageable pageable);
 }

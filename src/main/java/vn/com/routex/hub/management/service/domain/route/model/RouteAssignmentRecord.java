@@ -16,6 +16,7 @@ import java.time.OffsetDateTime;
 @SuperBuilder(toBuilder = true)
 public class RouteAssignmentRecord {
     private String id;
+    private String merchantId;
     private String routeId;
     private String creator;
     private String vehicleId;
@@ -28,6 +29,7 @@ public class RouteAssignmentRecord {
 
     public static RouteAssignmentRecord assign(
             String id,
+            String merchantId,
             String routeId,
             String creator,
             String vehicleId,
@@ -36,6 +38,7 @@ public class RouteAssignmentRecord {
     ) {
         return RouteAssignmentRecord.builder()
                 .id(id)
+                .merchantId(merchantId)
                 .routeId(routeId)
                 .creator(creator)
                 .driverId(driverId)

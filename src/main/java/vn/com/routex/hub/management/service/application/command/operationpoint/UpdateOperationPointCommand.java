@@ -8,6 +8,7 @@ import vn.com.routex.hub.management.service.domain.operationpoint.OperationPoint
 @Builder
 public record UpdateOperationPointCommand(
         RequestContext context,
+        String merchantId,
         String id,
         String code,
         String name,

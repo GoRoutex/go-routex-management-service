@@ -68,15 +68,20 @@ public class ProvincesManagementController {
     }
 
     @GetMapping(PROVINCES_SERVICE + SEARCH_PATH)
+    @PreAuthorize("hasAuthority('provinces:management') or hasRole('ADMIN')")
     public ResponseEntity<SearchProvincesResponse> searchProvinces(
+            HttpServletRequest servletRequest,
             @RequestParam String keyword,
             @RequestParam int page,
             @RequestParam int size) {
+        String merchantId = ApiRequestUtils.requireMerchantId(servletRequest, ApiRequestUtils.getBaseRequestOrDefault(servletRequest));
         SearchProvincesResult result = provincesManagementService.searchProvinces(SearchProvincesQuery.builder()
+                .merchantId(merchantId)
                 .keyword(keyword)
                 .page(page)
                 .size(size)
                 .build());
+
 
         SearchProvincesResponse response = SearchProvincesResponse.builder()
                 .data(result.data().stream()
@@ -93,13 +98,16 @@ public class ProvincesManagementController {
 
     @PostMapping(PROVINCES_SERVICE + CREATE_PATH)
     @PreAuthorize("hasAuthority('provinces:management') or hasRole('ADMIN')")
-    public ResponseEntity<CreateProvinceResponse> createProvince(@Valid @RequestBody CreateProvinceRequest request) {
+    public ResponseEntity<CreateProvinceResponse> createProvince(@Valid @RequestBody CreateProvinceRequest request,
+                                                                 HttpServletRequest servletRequest) {
         sLog.info("[PROVINCE-MANAGEMENT] Create Province Request: {}", request);
+        String merchantId = ApiRequestUtils.requireMerchantId(servletRequest, request);
         CreateProvinceResult result = provincesManagementService.createProvince(CreateProvinceCommand.builder()
-                .context(HttpUtils.toContext(request))
+                .context(HttpUtils.toContext(request, merchantId))
                 .name(request.getData().getName())
                 .code(request.getData().getCode())
                 .build());
+
 
         CreateProvinceResponse response = CreateProvinceResponse.builder()
                 .result(apiResultFactory.buildSuccess())
@@ -115,14 +123,17 @@ public class ProvincesManagementController {
 
     @PostMapping(PROVINCES_SERVICE + UPDATE_PATH)
     @PreAuthorize("hasAuthority('provinces:management') or hasRole('ADMIN')")
-    public ResponseEntity<UpdateProvinceResponse> updateProvince(@Valid @RequestBody UpdateProvinceRequest request) {
+    public ResponseEntity<UpdateProvinceResponse> updateProvince(@Valid @RequestBody UpdateProvinceRequest request,
+                                                                 HttpServletRequest servletRequest) {
         sLog.info("[PROVINCE-MANAGEMENT] Update Province Request: {}", request);
+        String merchantId = ApiRequestUtils.requireMerchantId(servletRequest, request);
         UpdateProvinceResult result = provincesManagementService.updateProvince(UpdateProvinceCommand.builder()
-                .context(HttpUtils.toContext(request))
+                .context(HttpUtils.toContext(request, merchantId))
                 .id(request.getData().getId())
                 .name(request.getData().getName())
                 .code(request.getData().getCode())
                 .build());
+
 
         UpdateProvinceResponse response = UpdateProvinceResponse.builder()
                 .result(apiResultFactory.buildSuccess())
@@ -139,12 +150,15 @@ public class ProvincesManagementController {
 
     @PostMapping(PROVINCES_SERVICE + DELETE_PATH)
     @PreAuthorize("hasAuthority('provinces:management') or hasRole('ADMIN')")
-    public ResponseEntity<DeleteProvinceResponse> deleteProvince(@Valid @RequestBody DeleteProvinceRequest request) {
+    public ResponseEntity<DeleteProvinceResponse> deleteProvince(@Valid @RequestBody DeleteProvinceRequest request,
+                                                                 HttpServletRequest servletRequest) {
         sLog.info("[PROVINCE-MANAGEMENT] Delete Province: {}", request);
+        String merchantId = ApiRequestUtils.requireMerchantId(servletRequest, request);
         DeleteProvinceResult result = provincesManagementService.deleteProvince(DeleteProvinceCommand.builder()
-                .context(HttpUtils.toContext(request))
+                .context(HttpUtils.toContext(request, merchantId))
                 .id(request.getData().getId())
                 .build());
+
 
         DeleteProvinceResponse response = DeleteProvinceResponse.builder()
                 .result(apiResultFactory.buildSuccess())
@@ -166,14 +180,16 @@ public class ProvincesManagementController {
             @RequestParam(defaultValue = "10") int pageSize
     ) {
         BaseRequest baseRequest = ApiRequestUtils.getBaseRequestOrDefault(servletRequest);
+        String merchantId = ApiRequestUtils.requireMerchantId(servletRequest, baseRequest);
 
         FetchProvincesResult result = provincesManagementService.fetchProvinces(
                 FetchProvincesQuery.builder()
-                        .context(HttpUtils.toContext(baseRequest))
+                        .context(HttpUtils.toContext(baseRequest, merchantId))
                         .pageSize(String.valueOf(pageSize))
                         .pageNumber(String.valueOf(pageNumber))
                         .build()
         );
+
 
         List<FetchProvincesResponse.FetchProvincesResponseData> dataList = result.items().stream()
                 .map(p -> FetchProvincesResponse.FetchProvincesResponseData.builder()

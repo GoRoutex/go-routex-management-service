@@ -50,10 +50,15 @@ public class SecurityConfig {
                                 "/actuator/**",
                                 "/error",
                                 "/swagger-ui/**",
+                                "/api/v1/media/**",
                                 "/v3/api-docs/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/api/v1/route-service/search",
+                                "/api/v1/route-service/fetch"
                         ).permitAll()
                         .anyRequest().authenticated()
+
+
                 )
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler(accessDeniedHandler)

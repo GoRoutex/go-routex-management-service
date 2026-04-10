@@ -60,7 +60,7 @@ public class CreateRouteRequest extends BaseRequest {
         @Pattern(regexp = OFFSET_DATE_TIME_REGEX, message= "must be in format of yyyy-MM-ddTHH:mm:ss+timezone e.g. 2026-03-03T14:30:00+07:00")
         private String plannedEndTime;
 
-        private List<RoutePoints> routePoints;
+        private List<RoutePoints> operationPoints;
     }
 
     @Getter

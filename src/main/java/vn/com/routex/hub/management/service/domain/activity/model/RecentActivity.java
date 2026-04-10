@@ -1,4 +1,4 @@
-package vn.com.routex.hub.management.service.domain.outbox.model;
+package vn.com.routex.hub.management.service.domain.activity.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
-import vn.com.routex.hub.management.service.domain.outbox.OutBoxEventStatus;
 
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -17,16 +16,19 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class OutboxEvent extends AbstractAuditingEntity {
+public class RecentActivity extends AbstractAuditingEntity {
     private String id;
-    private String topic;
-    private String aggregateId;
     private String eventType;
+    private String aggregateId;
     private String eventKey;
-    private Map<String, Object> payload;
+    private OffsetDateTime occurredAt;
+    private String title;
+    private String message;
+    private String actorUserId;
+    private String actorName;
+    private String entityType;
+    private String entityId;
+    private String merchantId;
     private Map<String, Object> header;
-    private OutBoxEventStatus status;
-    private Integer retryCount;
-    private OffsetDateTime availableAt;
-    private OffsetDateTime processedAt;
+    private Map<String, Object> payload;
 }

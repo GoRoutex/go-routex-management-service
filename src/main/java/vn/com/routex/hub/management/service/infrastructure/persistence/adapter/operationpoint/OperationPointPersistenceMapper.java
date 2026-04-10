@@ -13,6 +13,7 @@ public class OperationPointPersistenceMapper {
 
         return OperationPoint.builder()
                 .id(operationPointEntity.getId())
+                .merchantId(operationPointEntity.getMerchantId())
                 .code(operationPointEntity.getCode())
                 .name(operationPointEntity.getName())
                 .type(operationPointEntity.getType())
@@ -35,6 +36,7 @@ public class OperationPointPersistenceMapper {
 
         return OperationPointEntity.builder()
                 .id(operationPoint.getId())
+                .merchantId(operationPoint.getMerchantId())
                 .code(operationPoint.getCode())
                 .name(operationPoint.getName())
                 .type(operationPoint.getType())

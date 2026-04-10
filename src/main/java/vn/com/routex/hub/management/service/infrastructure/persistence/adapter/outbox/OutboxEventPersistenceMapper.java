@@ -2,22 +2,23 @@ package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.
 
 
 import org.springframework.stereotype.Component;
-import vn.com.routex.hub.management.service.domain.outbox.model.OutboxEvent;
+import vn.com.routex.hub.management.service.domain.outbox.model.OutBoxEvent;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.outbox.entity.OutBoxEventEntity;
 
 @Component
 public class OutboxEventPersistenceMapper {
 
-    public OutboxEvent toDomain(OutBoxEventEntity outboxEventEntity) {
+    public OutBoxEvent toDomain(OutBoxEventEntity outboxEventEntity) {
         if(outboxEventEntity == null) {
             return null;
         }
 
-        return OutboxEvent.builder()
+        return OutBoxEvent.builder()
                 .id(outboxEventEntity.getId())
                 .aggregateId(outboxEventEntity.getAggregateId())
                 .eventType(outboxEventEntity.getEventType())
                 .eventKey(outboxEventEntity.getEventKey())
+                .topic(outboxEventEntity.getTopic())
                 .payload(outboxEventEntity.getPayload())
                 .status(outboxEventEntity.getStatus())
                 .retryCount(outboxEventEntity.getRetryCount())
@@ -30,7 +31,7 @@ public class OutboxEventPersistenceMapper {
                 .build();
     }
 
-    public OutBoxEventEntity toEntity(OutboxEvent outboxEvent) {
+    public OutBoxEventEntity toEntity(OutBoxEvent outboxEvent) {
         if(outboxEvent == null) {
             return null;
         }
@@ -40,6 +41,7 @@ public class OutboxEventPersistenceMapper {
                 .aggregateId(outboxEvent.getAggregateId())
                 .eventType(outboxEvent.getEventType())
                 .eventKey(outboxEvent.getEventKey())
+                .topic(outboxEvent.getTopic())
                 .payload(outboxEvent.getPayload())
                 .status(outboxEvent.getStatus())
                 .retryCount(outboxEvent.getRetryCount())

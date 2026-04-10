@@ -22,24 +22,29 @@ public class ProvincesQueryAdapter implements ProvincesQueryPort {
     private final ProvincesEntityRepository provincesEntityRepository;
 
     @Override
-    public List<ProvincesSearchItem> search(String keyword, int page, int size) {
+    public List<ProvincesSearchItem> search(String merchantId, String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(
                 Math.max(0, page),
                 Math.min(Math.max(size, 1), 50),
                 Sort.by(Sort.Order.asc("name"))
         );
 
-        return provincesEntityRepository.search(keyword == null ? "" : keyword.trim(), pageable)
-                .map(p -> new ProvincesSearchItem(p.getId(), p.getName(), p.getCode()))
+        return provincesEntityRepository.searchByMerchantId(merchantId, keyword == null ? "" : keyword.trim(), pageable)
+                .map(p -> {
+                    ProvincesSearchItem item = new ProvincesSearchItem();
+                    item.setId(p.getId());
+                    item.setName(p.getName());
+                    item.setCode(p.getCode());
+                    return item;
+                })
                 .getContent();
     }
 
     @Override
-    public PagedResult<ProvincesFetchView> fetchRoutes(int pageNumber, int pageSize) {
+    public PagedResult<ProvincesFetchView> fetchRoutes(String merchantId, int pageNumber, int pageSize) {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<ProvincesEntity> page = provincesEntityRepository.findAll(pageable);
-
+        Page<ProvincesEntity> page = provincesEntityRepository.fetchByMerchantId(merchantId, pageable);
 
         List<ProvincesFetchView> items = page.getContent().stream()
                 .map(p -> {

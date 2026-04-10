@@ -12,6 +12,7 @@ final class VehiclePersistenceMapper {
         if (entity == null) return null;
         return VehicleProfile.builder()
                 .id(entity.getId())
+                .merchantId(entity.getMerchantId())
                 .creator(entity.getCreator())
                 .status(entity.getStatus())
                 .type(entity.getType())
@@ -27,6 +28,7 @@ final class VehiclePersistenceMapper {
     static VehicleEntity toEntity(VehicleProfile vehicleProfile) {
         return VehicleEntity.builder()
                 .id(vehicleProfile.getId())
+                .merchantId(vehicleProfile.getMerchantId())
                 .creator(vehicleProfile.getCreator())
                 .status(vehicleProfile.getStatus())
                 .type(vehicleProfile.getType())

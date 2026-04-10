@@ -15,7 +15,7 @@ public record FetchProvincesResult(
 
     @Builder
     public record FetchProvinceResult(
-            Integer id,
+            int id,
             String code,
             String name
     ) {

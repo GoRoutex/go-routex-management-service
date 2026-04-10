@@ -27,6 +27,9 @@ public class VehicleEntity extends AbstractAuditingEntity {
     @Id
     private String id;
 
+    @Column(name = "MERCHANT_ID")
+    private String merchantId;
+
     @Column(name = "CREATOR")
     private String creator;
 

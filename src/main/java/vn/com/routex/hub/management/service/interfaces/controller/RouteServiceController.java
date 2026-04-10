@@ -43,9 +43,13 @@ public class RouteServiceController {
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @PostMapping(SEARCH_PATH)
-    public ResponseEntity<SearchRouteResponse> searchRoute(@Valid @RequestBody SearchRouteRequest request) {
+    public ResponseEntity<SearchRouteResponse> searchRoute(@Valid @RequestBody SearchRouteRequest request,
+                                                           HttpServletRequest servletRequest) {
         sLog.info("[ROUTE-SERVICE] Search Route Request: {}", request);
+        String merchantId = ApiRequestUtils.getMerchantId(servletRequest);
         SearchRouteResult result = routeManagementService.searchRoute(SearchRouteQuery.builder()
+
+                .merchantId(merchantId)
                 .origin(request.getData().getOrigin())
                 .destination(request.getData().getDestination())
                 .departureDate(request.getData().getDepartureDate())
@@ -54,9 +58,7 @@ public class RouteServiceController {
                 .toTime(request.getData().getToTime())
                 .pageSize(request.getData().getPageSize())
                 .pageNumber(request.getData().getPageNumber())
-                .requestId(request.getRequestId())
-                .requestDateTime(request.getRequestDateTime())
-                .channel(request.getChannel())
+                .context(HttpUtils.toContext(request))
                 .build());
 
         SearchRouteResponse response = SearchRouteResponse.builder()
@@ -72,24 +74,28 @@ public class RouteServiceController {
     @GetMapping(FETCH_PATH)
     public ResponseEntity<FetchRouteResponse> fetchRoutes(
             HttpServletRequest servletRequest,
+            @RequestParam(required = false) String merchantName,
             @RequestParam(defaultValue = "1") int pageNumber,
             @RequestParam(defaultValue = "10") int pageSize
     ) {
         BaseRequest baseRequest = ApiRequestUtils.getBaseRequestOrDefault(servletRequest);
+        String merchantId = ApiRequestUtils.getMerchantId(servletRequest);
         FetchRoutesResult result = routeManagementService.fetchRoutes(FetchRoutesQuery.builder()
                 .pageSize(String.valueOf(pageSize))
                 .pageNumber(String.valueOf(pageNumber))
-                .requestId(baseRequest.getRequestId())
-                .requestDateTime(baseRequest.getRequestDateTime())
-                .channel(baseRequest.getChannel())
+                .merchantId(merchantId)
+                .merchantName(merchantName)
+                .context(HttpUtils.toContext(baseRequest))
                 .build());
+
 
         FetchRouteResponse response = FetchRouteResponse.builder()
                 .result(apiResultFactory.buildSuccess())
                 .data(FetchRouteResponse.FetchRouteResponsePage.builder()
                         .items(result.items().stream()
-                                .map(routeResponseMapper::toFetchRouteResponseData)
+                                .map(routeResponseMapper::toPublicFetchRouteResponseData)
                                 .toList())
+
                         .pagination(FetchRouteResponse.Pagination.builder()
                                 .pageNumber(result.pageNumber())
                                 .pageSize(result.pageSize())

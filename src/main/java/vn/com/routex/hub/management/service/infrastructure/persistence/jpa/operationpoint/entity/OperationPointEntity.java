@@ -27,6 +27,9 @@ public class OperationPointEntity extends AbstractAuditingEntity {
     @Id
     private String id;
 
+    @Column(name = "MERCHANT_ID")
+    private String merchantId;
+
     @Column(name = "CODE")
     private String code;
 

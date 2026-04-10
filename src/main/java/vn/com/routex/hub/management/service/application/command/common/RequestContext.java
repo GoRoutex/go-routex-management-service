@@ -6,7 +6,7 @@ import lombok.Builder;
 public record RequestContext(
         String requestId,
         String requestDateTime,
-        String channel
+        String channel,
+        String merchantId
 ) {
 }
-

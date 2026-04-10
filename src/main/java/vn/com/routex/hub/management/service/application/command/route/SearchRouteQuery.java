@@ -1,9 +1,12 @@
 package vn.com.routex.hub.management.service.application.command.route;
 
 import lombok.Builder;
+import vn.com.routex.hub.management.service.application.command.common.RequestContext;
 
 @Builder
 public record SearchRouteQuery(
+        RequestContext context,
+        String merchantId,
         String origin,
         String destination,
         String departureDate,
@@ -11,9 +14,6 @@ public record SearchRouteQuery(
         String fromTime,
         String toTime,
         String pageSize,
-        String pageNumber,
-        String requestId,
-        String requestDateTime,
-        String channel
+        String pageNumber
 ) {
 }

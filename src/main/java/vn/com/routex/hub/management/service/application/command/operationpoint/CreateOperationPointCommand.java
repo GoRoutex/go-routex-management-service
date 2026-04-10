@@ -9,6 +9,7 @@ import vn.com.routex.hub.management.service.domain.operationpoint.OperationPoint
 @Builder
 public record CreateOperationPointCommand(
         RequestContext context,
+        String merchantId,
         String code,
         String name,
         OperationPointType type,

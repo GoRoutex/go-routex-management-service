@@ -14,7 +14,17 @@ import java.util.Optional;
 public interface RouteAssignmentEntityRepository extends JpaRepository<RouteAssignmentEntity, String> {
     boolean existsByRouteId(String routeId);
 
+    boolean existsByRouteIdAndMerchantId(String routeId, String merchantId);
+
     Optional<RouteAssignmentEntity> findFirstByRouteIdAndStatusAndUnAssignedAtIsNullOrderByAssignedAtDesc(String routeId, RouteAssignmentStatus status);
+
+    Optional<RouteAssignmentEntity> findFirstByRouteIdAndMerchantIdAndStatusAndUnAssignedAtIsNullOrderByAssignedAtDesc(
+            String routeId,
+            String merchantId,
+            RouteAssignmentStatus status
+    );
+
+    List<RouteAssignmentEntity> findByMerchantId(String merchantId);
 
     @Query(value = """
             SELECT ra.*
@@ -25,6 +35,20 @@ public interface RouteAssignmentEntityRepository extends JpaRepository<RouteAssi
         """, nativeQuery = true)
     List<RouteAssignmentEntity> findActiveByRouteIdsNative(
             @Param("routeIds") List<String> routeIds,
+            @Param("status") String status
+    );
+
+    @Query(value = """
+            SELECT ra.*
+            FROM route_assignment ra
+            WHERE ra.route_id IN (:routeIds)
+              AND ra.merchant_id = :merchantId
+              AND ra.status = :status
+              AND ra.unassigned_at IS NULL
+        """, nativeQuery = true)
+    List<RouteAssignmentEntity> findActiveByRouteIdsAndMerchantIdNative(
+            @Param("routeIds") List<String> routeIds,
+            @Param("merchantId") String merchantId,
             @Param("status") String status
     );
 }

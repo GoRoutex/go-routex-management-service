@@ -6,7 +6,6 @@ create table driver_profile
     created_by              varchar(255),
     updated_at              timestamp(6),
     updated_by              varchar(255),
-    current_route_id        varchar(255),
     emergency_contact_name  varchar(255),
     emergency_contact_phone varchar(255),
     employee_code           varchar(255),
@@ -16,6 +15,9 @@ create table driver_profile
     license_issue_date      date,
     license_number          varchar(255),
     note                    varchar(255),
+    approval_status varchar(30) not null, -- PENDING, APPROVED, REJECTED
+    approved_by varchar(36),
+    approved_at timestamptz,
     operation_status        varchar(255) not null
         constraint driver_profile_operation_status_check
             check ((operation_status)::text = ANY
@@ -31,3 +33,11 @@ create table driver_profile
     training_completed      boolean,
     user_id                 varchar(255)
 );
+
+alter table driver_profile
+drop column current_route_id;
+
+alter table driver_profile
+add column approval_status varchar(30),
+    add column approved_by varchar(36),
+    add column approved_at timestamptz
