@@ -15,6 +15,8 @@ import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.domain.merchant.MerchantStatus;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -46,6 +48,10 @@ public class MerchantEntity extends AbstractAuditingEntity {
 
     @Column(name = "REPRESENTATIVE_NAME")
     private String representativeName;
+
+    @Column(name = "COMMISSION_RATE", precision = 5, scale = 2)
+    private BigDecimal commissionRate;
+
 
     @Column(name = "STATUS")
     @Enumerated(EnumType.STRING)

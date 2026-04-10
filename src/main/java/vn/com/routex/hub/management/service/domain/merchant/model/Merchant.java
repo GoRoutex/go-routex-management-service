@@ -8,6 +8,7 @@ import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
 import vn.com.routex.hub.management.service.domain.merchant.MerchantStatus;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @Getter
@@ -25,6 +26,7 @@ public class Merchant extends AbstractAuditingEntity {
     private String email;
     private String address;
     private String representativeName;
+    private BigDecimal commissionRate;
     private MerchantStatus status;
 
     public static Merchant create(
@@ -36,6 +38,7 @@ public class Merchant extends AbstractAuditingEntity {
             String email,
             String address,
             String representativeName,
+            BigDecimal commissionRate,
             String createdBy
     ) {
         OffsetDateTime now = OffsetDateTime.now();
@@ -48,6 +51,7 @@ public class Merchant extends AbstractAuditingEntity {
                 .email(email)
                 .address(address)
                 .representativeName(representativeName)
+                .commissionRate(commissionRate)
                 .status(MerchantStatus.ACTIVE)
                 .createdAt(now)
                 .createdBy(createdBy)

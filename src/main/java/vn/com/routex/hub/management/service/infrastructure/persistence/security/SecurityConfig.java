@@ -48,6 +48,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/actuator/**",
+                                "/api/v1/management/merchant-service/**",
+                                "/api/v1/management/merchant-application-form-service/**",
                                 "/error",
                                 "/swagger-ui/**",
                                 "/api/v1/media/**",
