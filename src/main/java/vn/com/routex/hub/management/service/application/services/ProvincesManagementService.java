@@ -11,8 +11,6 @@ import vn.com.routex.hub.management.service.application.command.provinces.Search
 import vn.com.routex.hub.management.service.application.command.provinces.UpdateProvinceCommand;
 import vn.com.routex.hub.management.service.application.command.provinces.UpdateProvinceResult;
 
-import java.util.List;
-
 public interface ProvincesManagementService {
     SearchProvincesResult searchProvinces(SearchProvincesQuery query);
 

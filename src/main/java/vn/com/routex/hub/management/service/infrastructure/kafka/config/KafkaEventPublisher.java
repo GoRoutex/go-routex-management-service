@@ -1,6 +1,5 @@
 package vn.com.routex.hub.management.service.infrastructure.kafka.config;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.producer.RecordMetadata;
@@ -8,7 +7,8 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
 import vn.com.go.routex.identity.security.log.SystemLog;
-import vn.com.routex.hub.management.service.domain.outbox.model.OutboxEvent;
+import vn.com.routex.hub.management.service.domain.outbox.model.OutBoxEvent;
+import vn.com.routex.hub.management.service.infrastructure.kafka.event.DomainEvent;
 import vn.com.routex.hub.management.service.infrastructure.kafka.model.KafkaEventMessage;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.JsonUtils;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
@@ -25,11 +25,12 @@ public class KafkaEventPublisher {
     private final ObjectMapper objectMapper;
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
-    public CompletableFuture<Void> publishAsync(OutboxEvent outboxEvent) {
+    public CompletableFuture<Void> publishAsync(OutBoxEvent outboxEvent) {
 
         String jsonPayload;
         try {
-            jsonPayload = objectMapper.writeValueAsString(outboxEvent.getPayload());
+            DomainEvent domainEvent = toDomainEvent(outboxEvent);
+            jsonPayload = objectMapper.writeValueAsString(domainEvent);
         } catch (Exception e) {
             sLog.error("[OUTBOX-SERIALIZE-ERROR] eventId={}", outboxEvent.getId(), e);
             return CompletableFuture.failedFuture(e);
@@ -53,7 +54,7 @@ public class KafkaEventPublisher {
         });
     }
 
-    public void publish(OutboxEvent outboxEvent) {
+    public void publish(OutBoxEvent outboxEvent) {
         try {
 
             BaseRequest baseRequest = objectMapper.convertValue(outboxEvent.getHeader().get("context"), BaseRequest.class);
@@ -78,5 +79,20 @@ public class KafkaEventPublisher {
         } catch (Exception ex) {
             throw new IllegalArgumentException("Kafka publish failed: ", ex);
         }
+    }
+
+    private DomainEvent toDomainEvent(OutBoxEvent outBoxEvent) {
+
+        if(outBoxEvent == null) {
+            return null;
+        }
+        return DomainEvent.builder()
+                .eventId(outBoxEvent.getId())
+                .eventType(outBoxEvent.getEventType())
+                .eventKey(outBoxEvent.getEventKey())
+                .aggregateId(outBoxEvent.getAggregateId())
+                .header(outBoxEvent.getHeader())
+                .payload(outBoxEvent.getPayload())
+                .build();
     }
 }

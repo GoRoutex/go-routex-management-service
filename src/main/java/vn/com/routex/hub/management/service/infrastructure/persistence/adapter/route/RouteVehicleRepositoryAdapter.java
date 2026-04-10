@@ -25,8 +25,21 @@ public class RouteVehicleRepositoryAdapter implements RouteVehicleRepositoryPort
     }
 
     @Override
+    public Optional<VehicleSnapshot> findById(String vehicleId, String merchantId) {
+        return VehicleEntityRepository.findByIdAndMerchantId(vehicleId, merchantId)
+                .map(routePersistenceMapper::toVehicleSnapshot);
+    }
+
+    @Override
     public Map<String, VehicleSnapshot> findByIds(List<String> vehicleIds) {
         return VehicleEntityRepository.findByIdIn(vehicleIds).stream()
+                .map(routePersistenceMapper::toVehicleSnapshot)
+                .collect(Collectors.toMap(VehicleSnapshot::getId, vehicle -> vehicle));
+    }
+
+    @Override
+    public Map<String, VehicleSnapshot> findByIds(List<String> vehicleIds, String merchantId) {
+        return VehicleEntityRepository.findByIdInAndMerchantId(vehicleIds, merchantId).stream()
                 .map(routePersistenceMapper::toVehicleSnapshot)
                 .collect(Collectors.toMap(VehicleSnapshot::getId, vehicle -> vehicle));
     }

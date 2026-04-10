@@ -15,10 +15,15 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 public class HttpUtils {
 
     public RequestContext toContext(BaseRequest request) {
+        return toContext(request, null);
+    }
+
+    public RequestContext toContext(BaseRequest request, String merchantId) {
         return RequestContext.builder()
                 .requestId(request.getRequestId())
                 .requestDateTime(request.getRequestDateTime())
                 .channel(request.getChannel())
+                .merchantId(merchantId)
                 .build();
     }
 

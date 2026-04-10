@@ -4,7 +4,6 @@ package vn.com.routex.hub.management.service.infrastructure.kafka.properties;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 
 import java.util.HashMap;
 import java.util.Map;

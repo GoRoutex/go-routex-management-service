@@ -4,7 +4,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.experimental.UtilityClass;
 import vn.com.routex.hub.management.service.application.command.common.RequestContext;
 import vn.com.routex.hub.management.service.infrastructure.persistence.config.RequestAttributes;
+import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
+
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
 
 @UtilityClass
 public class ApiRequestUtils {
@@ -24,6 +27,27 @@ public class ApiRequestUtils {
                 .requestDateTime(requestDateTime)
                 .channel(requestChannel)
                 .build();
+    }
+
+    public String getMerchantId(HttpServletRequest request) {
+        String merchantId = (String) request.getAttribute(RequestAttributes.MERCHANT_ID);
+        if (merchantId != null && !merchantId.isBlank()) {
+            return merchantId.trim();
+        }
+        return null;
+    }
+
+    public String requireMerchantId(HttpServletRequest request, BaseRequest baseRequest) {
+        String merchantId = getMerchantId(request);
+        if (merchantId == null || merchantId.isBlank()) {
+            throw new BusinessException(
+                    baseRequest.getRequestId(),
+                    baseRequest.getRequestDateTime(),
+                    baseRequest.getChannel(),
+                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, "merchantId is required")
+            );
+        }
+        return merchantId;
     }
 
     public BaseRequest getHeader(RequestContext context) {

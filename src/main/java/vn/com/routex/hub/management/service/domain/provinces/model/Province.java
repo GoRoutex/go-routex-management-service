@@ -16,4 +16,3 @@ public class Province {
     private String name;
     private String code;
 }
-

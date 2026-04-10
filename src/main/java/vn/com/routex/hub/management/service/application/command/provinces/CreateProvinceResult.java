@@ -4,7 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record CreateProvinceResult(
-        Integer id,
+        int id,
         String name,
         String code
 ) {

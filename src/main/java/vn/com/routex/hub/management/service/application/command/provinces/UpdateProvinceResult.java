@@ -4,7 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record UpdateProvinceResult(
-        Integer id,
+        int id,
         String name,
         String code
 ) {

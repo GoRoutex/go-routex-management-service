@@ -3,11 +3,11 @@ package vn.com.routex.hub.management.service.infrastructure.persistence.security
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -48,12 +48,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/actuator/**",
+                                "/api/v1/management/merchant-service/**",
+                                "/api/v1/management/merchant-application-form-service/**",
                                 "/error",
                                 "/swagger-ui/**",
+                                "/api/v1/media/**",
                                 "/v3/api-docs/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/api/v1/route-service/search",
+                                "/api/v1/route-service/fetch"
                         ).permitAll()
                         .anyRequest().authenticated()
+
+
                 )
                 .exceptionHandling(ex -> ex
                         .accessDeniedHandler(accessDeniedHandler)

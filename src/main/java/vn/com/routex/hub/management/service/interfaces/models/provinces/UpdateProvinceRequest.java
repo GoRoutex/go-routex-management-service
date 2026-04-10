@@ -27,7 +27,8 @@ public class UpdateProvinceRequest extends BaseRequest {
     @SuperBuilder
     public static class UpdateProvinceRequestData {
         @NotNull
-        private Integer id;
+        private String id;
+
 
         private String name;
         private String code;

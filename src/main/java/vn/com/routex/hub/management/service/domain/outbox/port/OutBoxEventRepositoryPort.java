@@ -1,14 +1,14 @@
 package vn.com.routex.hub.management.service.domain.outbox.port;
 
-import vn.com.routex.hub.management.service.domain.outbox.model.OutboxEvent;
+import vn.com.routex.hub.management.service.domain.outbox.model.OutBoxEvent;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface OutBoxEventRepositoryPort {
-    void save(OutboxEvent outboxEvent);
+    void save(OutBoxEvent outboxEvent);
 
     void markAsProcessed(List<String> processedIds, OffsetDateTime now);
     void markAsFailed(List<String> failedIds, OffsetDateTime now);
-    List<OutboxEvent> lockPendingBatch(int i);
+    List<OutBoxEvent> lockPendingBatch(int i);
 }

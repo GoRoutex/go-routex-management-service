@@ -34,6 +34,25 @@ public class RouteResponseMapper {
                 .build();
     }
 
+    public FetchRouteResponse.FetchRouteResponseData toPublicFetchRouteResponseData(FetchRouteResult item) {
+        return FetchRouteResponse.FetchRouteResponseData.builder()
+                .id(item.id())
+                .routeCode(item.routeCode())
+                .origin(item.origin())
+                .destination(item.destination())
+                .plannedStartTime(item.plannedStartTime())
+                .plannedEndTime(item.plannedEndTime())
+                .status(item.status())
+                .availableSeats(item.availableSeats())
+                .vehiclePlate(item.vehiclePlate())
+                .hasFloor(item.hasFloor())
+                .routePoints(item.routePoints() == null ? null : item.routePoints().stream()
+                        .map(this::toSearchRoutePoint)
+                        .toList())
+                .build();
+    }
+
+
     public SearchRouteResponse.SearchRouteResponseData toSearchRouteResponseData(SearchRouteItemResult item) {
         return SearchRouteResponse.SearchRouteResponseData.builder()
                 .id(item.id())

@@ -17,6 +17,7 @@ final class RoutePersistenceMapper {
     public RouteAggregate toAggregate(RouteEntity route) {
         return RouteAggregate.builder()
                 .id(route.getId())
+                .merchantId(route.getMerchantId())
                 .routeCode(route.getRouteCode())
                 .creator(route.getCreator())
                 .pickupBranch(route.getPickupBranch())
@@ -37,6 +38,7 @@ final class RoutePersistenceMapper {
     public RouteEntity toEntity(RouteAggregate aggregate) {
         return RouteEntity.builder()
                 .id(aggregate.getId())
+                .merchantId(aggregate.getMerchantId())
                 .routeCode(aggregate.getRouteCode())
                 .creator(aggregate.getCreator())
                 .pickupBranch(aggregate.getPickupBranch())
@@ -97,6 +99,7 @@ final class RoutePersistenceMapper {
     public RouteAssignmentRecord toAssignmentRecord(RouteAssignmentEntity assignment) {
         return RouteAssignmentRecord.builder()
                 .id(assignment.getId())
+                .merchantId(assignment.getMerchantId())
                 .routeId(assignment.getRouteId())
                 .creator(assignment.getCreator())
                 .driverId(assignment.getDriverId())
@@ -112,6 +115,7 @@ final class RoutePersistenceMapper {
     public RouteAssignmentEntity toEntity(RouteAssignmentRecord record) {
         return RouteAssignmentEntity.builder()
                 .id(record.getId())
+                .merchantId(record.getMerchantId())
                 .routeId(record.getRouteId())
                 .creator(record.getCreator())
                 .driverId(record.getDriverId())

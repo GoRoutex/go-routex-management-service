@@ -24,8 +24,6 @@ import vn.com.routex.hub.management.service.infrastructure.persistence.utils.Exc
 
 import java.util.List;
 
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ERROR;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_PROVINCE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_NUMBER;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_SIZE;
@@ -42,10 +40,10 @@ public class ProvincesManagementServiceImpl implements ProvincesManagementServic
     private static final int DEFAULT_PAGE_SIZE = 10;
     private static final int DEFAULT_PAGE_NUMBER = 1;
 
-
     @Override
     public SearchProvincesResult searchProvinces(SearchProvincesQuery query) {
         List<SearchProvincesResult.SearchProvincesItemResult> items = provincesQueryPort.search(
+                        query.merchantId(),
                         query.keyword(),
                         query.page(),
                         query.size()
@@ -69,7 +67,6 @@ public class ProvincesManagementServiceImpl implements ProvincesManagementServic
         int pageNumber = ApiRequestUtils.parseIntOrDefault(query.pageNumber(), DEFAULT_PAGE_NUMBER, "pageNumber",
                 query.context().requestId(), query.context().requestDateTime(), query.context().channel());
 
-
         if (pageSize < 1 || pageSize > 100) {
             throw new BusinessException(query.context().requestId(), query.context().requestDateTime(), query.context().channel(),
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_SIZE));
@@ -79,18 +76,15 @@ public class ProvincesManagementServiceImpl implements ProvincesManagementServic
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_NUMBER));
         }
 
-        PagedResult<ProvincesFetchView> page = provincesQueryPort.fetchRoutes(pageNumber - 1, pageSize);
+        PagedResult<ProvincesFetchView> page = provincesQueryPort.fetchRoutes(query.context().merchantId(), pageNumber - 1, pageSize);
         List<ProvincesFetchView> provinces = page.getItems();
 
         List<FetchProvincesResult.FetchProvinceResult> resultList = provinces.stream()
-                .map(p -> {
-                    return FetchProvincesResult.FetchProvinceResult
-                            .builder()
-                            .id(p.getId())
-                            .name(p.getName())
-                            .code(p.getCode())
-                            .build();
-                })
+                .map(p -> FetchProvincesResult.FetchProvinceResult.builder()
+                        .id(p.getId())
+                        .name(p.getName())
+                        .code(p.getCode())
+                        .build())
                 .toList();
 
         return FetchProvincesResult.builder()
@@ -104,69 +98,53 @@ public class ProvincesManagementServiceImpl implements ProvincesManagementServic
 
     @Override
     public CreateProvinceResult createProvince(CreateProvinceCommand command) {
-        String name = command.name() == null ? null : command.name().trim();
         String code = command.code() == null ? null : command.code().trim();
 
-        if (name == null || name.isBlank() || code == null || code.isBlank()) {
+        if (code == null || code.isBlank()) {
             throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, "name and code are required"));
+                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, "province code is required to assign"));
         }
 
-        if (provincesRepositoryPort.existsByName(name) || provincesRepositoryPort.existsByCode(code)) {
-            throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(DUPLICATE_PROVINCE, code)));
-        }
+        Province master = provincesRepositoryPort.findByCode(code)
+                .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
+                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(PROVINCE_NOT_FOUND, code))));
 
-        Province saved = provincesRepositoryPort.save(Province.builder()
-                .name(name)
-                .code(code)
-                .build());
+        provincesRepositoryPort.assign(master.getId(), command.context().merchantId());
 
         return CreateProvinceResult.builder()
-                .id(saved.getId())
-                .name(saved.getName())
-                .code(saved.getCode())
+                .id(master.getId())
+                .name(master.getName())
+                .code(master.getCode())
                 .build();
     }
 
     @Override
     public UpdateProvinceResult updateProvince(UpdateProvinceCommand command) {
-        Province existing = provincesRepositoryPort.findById(command.id())
+        // For a Many-to-Many mapping, "Update" doesn't usually make sense unless we update mapping status.
+        // We'll treat it as potentially re-assigning or just verifying if assigned.
+        // Actually, we'll just throw not supported for merchants for now, or just return existing.
+        Integer provinceId = Integer.parseInt(command.id());
+        Province master = provincesRepositoryPort.findById(provinceId)
                 .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(PROVINCE_NOT_FOUND, command.id()))));
 
-        String name = command.name() == null ? null : command.name().trim();
-        String code = command.code() == null ? null : command.code().trim();
-
-        if (name != null && !name.isBlank() && !name.equals(existing.getName()) && provincesRepositoryPort.existsByName(name)) {
-            throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(DUPLICATE_PROVINCE, name)));
+        if (!provincesRepositoryPort.isAssigned(provinceId, command.context().merchantId())) {
+             throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
+                    ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, "Province not assigned to this merchant"));
         }
-        if (code != null && !code.isBlank() && !code.equals(existing.getCode()) && provincesRepositoryPort.existsByCode(code)) {
-            throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(DUPLICATE_PROVINCE, code)));
-        }
-
-        Province saved = provincesRepositoryPort.save(existing.toBuilder()
-                .name(name == null || name.isBlank() ? existing.getName() : name)
-                .code(code == null || code.isBlank() ? existing.getCode() : code)
-                .build());
 
         return UpdateProvinceResult.builder()
-                .id(saved.getId())
-                .name(saved.getName())
-                .code(saved.getCode())
+                .id(master.getId())
+                .name(master.getName())
+                .code(master.getCode())
                 .build();
     }
 
     @Override
     public DeleteProvinceResult deleteProvince(DeleteProvinceCommand command) {
-        Province existing = provincesRepositoryPort.findById(command.id())
-                .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(PROVINCE_NOT_FOUND, command.id()))));
-        provincesRepositoryPort.deleteById(existing.getId());
+        provincesRepositoryPort.unassign(command.id(), command.context().merchantId());
         return DeleteProvinceResult.builder()
-                .id(existing.getId())
+                .id(command.id())
                 .build();
     }
 }

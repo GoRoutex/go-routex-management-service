@@ -27,7 +27,8 @@ public class DeleteProvinceRequest extends BaseRequest {
     @SuperBuilder
     public static class DeleteProvinceRequestData {
         @NotNull
-        private Integer id;
+        private int id;
+
     }
 }
 

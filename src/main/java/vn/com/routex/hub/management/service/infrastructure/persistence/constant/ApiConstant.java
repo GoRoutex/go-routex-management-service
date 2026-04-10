@@ -9,6 +9,8 @@ public class ApiConstant {
     public static final String ADD_ROLES = "/add-roles";
     public static final String SET_PERMISSIONS = "/set-permissions";
     public static final String SET_ROLE = "/set-role";
+    public static final String MEDIA_PATH = "/media";
+    public static final String UPLOAD = "/upload";
     public static final String ADD_PERMISSIONS = "/add-permissions";
     public static final String POINT_PATH = "/point-service";
     public static final String CREATE_PATH = "/create";
@@ -20,4 +22,7 @@ public class ApiConstant {
     public static final String ADD_PATH = "/add";
     public static final String SEARCH_PATH = "/search";
     public static final String PROVINCES_SERVICE = "/provinces-service";
+    public static final String MERCHANT_SERVICE = "/merchant-service";
+    public static final String MERCHANT_APPLICATION_FORM_SERVICE = "/merchant-application-form-service";
+    public static final String DETAIL_PATH = "/detail";
 }

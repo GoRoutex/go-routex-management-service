@@ -8,20 +8,25 @@ import org.springframework.data.repository.query.Param;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.provinces.entity.ProvincesEntity;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.provinces.projection.ProvincesCodeProjection;
 
-public interface ProvincesEntityRepository extends JpaRepository<ProvincesEntity, Integer> {
-    boolean existsByCode(String code);
+import java.util.Optional;
 
-    boolean existsByName(String name);
+public interface ProvincesEntityRepository extends JpaRepository<ProvincesEntity, Integer> {
+    Optional<ProvincesEntity> findByCode(String code);
 
     @Query(value = """
-            
-            SELECT * FROM PROVINCES
-                        WHERE (:keyword IS NULL OR :keyword = '' OR 
-                                           LOWER(NAME) LIKE LOWER(CONCAT('%', :keyword, '%')) OR 
-                                           LOWER(CODE) LIKE LOWER(CONCAT('%', :keyword, '%')))
+            SELECT p.* FROM PROVINCES p 
+            JOIN MERCHANT_PROVINCE mp ON p.ID = mp.PROVINCE_ID 
+            WHERE mp.MERCHANT_ID = :merchantId
             """, nativeQuery = true)
-    Page<ProvincesEntity> search(@Param("keyword") String kw, Pageable pageable);
+    Page<ProvincesEntity> fetchByMerchantId(@Param("merchantId") String merchantId, Pageable pageable);
 
+    @Query(value = """
+            SELECT p.* FROM PROVINCES p 
+            JOIN MERCHANT_PROVINCE mp ON p.ID = mp.PROVINCE_ID 
+            WHERE mp.MERCHANT_ID = :merchantId 
+            AND (:keyword IS NULL OR :keyword = '' OR LOWER(p.NAME) LIKE LOWER(CONCAT('%', :keyword, '%')))
+            """, nativeQuery = true)
+    Page<ProvincesEntity> searchByMerchantId(@Param("merchantId") String merchantId, @Param("keyword") String keyword, Pageable pageable);
 
     @Query(value = """
             SELECT  o.code AS originCode,
@@ -33,5 +38,6 @@ public interface ProvincesEntityRepository extends JpaRepository<ProvincesEntity
             """, nativeQuery = true)
     ProvincesCodeProjection selectProvincesCode(@Param("origin") String origin,
                                                 @Param("destination") String destination);
+
 
 }

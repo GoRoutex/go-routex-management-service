@@ -1,14 +1,18 @@
 package vn.com.routex.hub.management.service.application.specification;
 
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import vn.com.routex.hub.management.service.domain.route.RouteStatus;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.merchant.entity.MerchantEntity;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.route.entity.RouteEntity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+
 
 @RequiredArgsConstructor
 public class RouteSpecification {
@@ -31,6 +35,30 @@ public class RouteSpecification {
             return cb.equal(root.get("status"), status);
         };
     }
+
+    public static Specification<RouteEntity> hasMerchantId(String merchantId) {
+        return (root, query, cb) -> {
+            if (merchantId == null || merchantId.isBlank()) {
+                return cb.conjunction();
+            }
+            return cb.equal(root.get("merchantId"), merchantId);
+        };
+    }
+
+
+    public static Specification<RouteEntity> hasMerchantName(String merchantName) {
+        return (root, query, cb) -> {
+            if (merchantName == null || merchantName.isBlank()) {
+                return cb.conjunction();
+            }
+            Subquery<String> subquery = query.subquery(String.class);
+            Root<MerchantEntity> merchant = subquery.from(MerchantEntity.class);
+            subquery.select(merchant.get("id"))
+                    .where(cb.like(cb.lower(merchant.get("name")), "%" + merchantName.toLowerCase() + "%"));
+            return root.get("merchantId").in(subquery);
+        };
+    }
+
 
     public static Specification<RouteEntity> plannedStartBetween(OffsetDateTime startInitialize, OffsetDateTime endInitialize) {
         return (root, query, cb) -> cb.and(

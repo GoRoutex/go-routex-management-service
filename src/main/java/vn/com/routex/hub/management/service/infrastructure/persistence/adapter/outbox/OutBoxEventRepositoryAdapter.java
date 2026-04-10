@@ -3,7 +3,7 @@ package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.management.service.domain.outbox.OutBoxEventStatus;
-import vn.com.routex.hub.management.service.domain.outbox.model.OutboxEvent;
+import vn.com.routex.hub.management.service.domain.outbox.model.OutBoxEvent;
 import vn.com.routex.hub.management.service.domain.outbox.port.OutBoxEventRepositoryPort;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.outbox.repository.OutBoxEventRepository;
 
@@ -18,7 +18,7 @@ public class OutBoxEventRepositoryAdapter implements OutBoxEventRepositoryPort {
     private final OutBoxEventRepository outBoxEventRepository;
 
     @Override
-    public void save(OutboxEvent outboxEvent) {
+    public void save(OutBoxEvent outboxEvent) {
         outBoxEventRepository.save(outboxEventPersistenceMapper.toEntity(outboxEvent));
     }
 
@@ -48,7 +48,7 @@ public class OutBoxEventRepositoryAdapter implements OutBoxEventRepositoryPort {
     }
 
     @Override
-    public List<OutboxEvent> lockPendingBatch(int i) {
+    public List<OutBoxEvent> lockPendingBatch(int i) {
         return outBoxEventRepository.lockPendingBatch(i)
                 .stream()
                 .map(outboxEventPersistenceMapper::toDomain)

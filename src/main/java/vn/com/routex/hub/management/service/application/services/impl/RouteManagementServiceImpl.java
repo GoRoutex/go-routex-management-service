@@ -120,9 +120,10 @@ public class RouteManagementServiceImpl implements RouteManagementService {
         String routeCode = routeAggregateRepositoryPort.generateRouteCode(originCode, destinationCode);
 
         if(!plannedStartTime.isBefore(plannedEndTime)) {
-            throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+            throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_START_TIME));
         }
+
 
         List<RoutePointCommand> routePoints =
                 Optional.ofNullable(command.routePoints())
@@ -160,6 +161,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
 
         RouteAggregate newRoute = RouteAggregate.plan(
                 routeId,
+                command.merchantId(),
                 routeCode,
                 command.creator(),
                 command.pickupBranch(),
@@ -193,22 +195,23 @@ public class RouteManagementServiceImpl implements RouteManagementService {
     @Override
     @Transactional
     public AssignRouteResult assignRoute(AssignRouteCommand command) {
-        if(routeAssignmentRepositoryPort.existsActiveByRouteId(command.routeId())) {
+        if(routeAssignmentRepositoryPort.existsActiveByRouteId(command.routeId(), command.merchantId())) {
             throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                     ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(DUPLICATE_ROUTE_ASSIGNMENT, command.routeId())));
         }
 
-        VehicleSnapshot vehicle = routeVehicleRepositoryPort.findById(command.vehicleId())
+        VehicleSnapshot vehicle = routeVehicleRepositoryPort.findById(command.vehicleId(), command.merchantId())
                 .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, VEHICLE_NOT_FOUND)));
 
-        RouteAggregate route = routeAggregateRepositoryPort.findById(command.routeId())
+        RouteAggregate route = routeAggregateRepositoryPort.findById(command.routeId(), command.merchantId())
                         .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                                 ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, command.routeId()))));
 
         OffsetDateTime assignedAt = OffsetDateTime.now();
         RouteAssignmentRecord routeAssignment = RouteAssignmentRecord.assign(
                 UUID.randomUUID().toString(),
+                route.getMerchantId(),
                 command.routeId(),
                 command.creator(),
                 vehicle.getId(),
@@ -266,7 +269,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
     @Override
     @Transactional
     public UpdateRouteResult updateRoute(UpdateRouteCommand command) {
-        RouteAggregate route = routeAggregateRepositoryPort.findById(command.routeId())
+        RouteAggregate route = routeAggregateRepositoryPort.findById(command.routeId(), command.context().merchantId())
                 .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, command.routeId()))));
 
@@ -340,30 +343,32 @@ public class RouteManagementServiceImpl implements RouteManagementService {
     @Override
     public SearchRouteResult searchRoute(SearchRouteQuery query) {
         int pageSize = ApiRequestUtils.parseIntOrDefault(query.pageSize(), DEFAULT_PAGE_SIZE, "pageSize",
-                query.requestId(), query.requestDateTime(), query.channel());
+                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
         int pageNumber = ApiRequestUtils.parseIntOrDefault(query.pageNumber(), DEFAULT_PAGE_NUMBER, "pageNumber",
-                query.requestId(), query.requestDateTime(), query.channel());
+                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
 
         if (pageSize < 1 || pageSize > 100) {
-            throw new BusinessException(query.requestId(), query.requestDateTime(), query.channel(),
+            throw new BusinessException(query.context().requestId(), query.context().requestDateTime(), query.context().channel(),
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_SIZE));
         }
         if (pageNumber < 1) {
-            throw new BusinessException(query.requestId(), query.requestDateTime(), query.channel(),
+            throw new BusinessException(query.context().requestId(), query.context().requestDateTime(), query.context().channel(),
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_NUMBER));
         }
 
+
         LocalDate departureDate = DateTimeUtils.parseDateOrThrow(query.departureDate(), "departureDate",
-                query.requestId(), query.requestDateTime(), query.channel());
+                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
         LocalTime fromTime = DateTimeUtils.parseTimeNullable(query.fromTime(), "fromTime",
-                query.requestId(), query.requestDateTime(), query.channel());
+                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
         LocalTime toTime = DateTimeUtils.parseTimeNullable(query.toTime(), "toTime",
-                query.requestId(), query.requestDateTime(), query.channel());
+                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
 
         if(fromTime != null && toTime != null && fromTime.isAfter(toTime)) {
-            throw new BusinessException(query.requestId(), query.requestDateTime(), query.channel(),
+            throw new BusinessException(query.context().requestId(), query.context().requestDateTime(), query.context().channel(),
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_SEARCH_TIME));
         }
+
 
         OffsetDateTime startEx = RouteSpecification.dayStart(departureDate, DEFAULT_ZONE);
         OffsetDateTime endEx = RouteSpecification.dayEndExclusive(departureDate, DEFAULT_ZONE);
@@ -372,6 +377,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
         if(toTime != null) endEx = RouteSpecification.atTime(departureDate, toTime, DEFAULT_ZONE);
 
         List<RouteSearchView> searchedRoutes = routeQueryPort.searchAssignedRoutes(
+                query.merchantId(),
                 query.origin(),
                 query.destination(),
                 startEx,
@@ -389,7 +395,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
         Map<String, VehicleSnapshot> vehicleById;
         if(!routeIds.isEmpty()) {
             seatAvailable = routeSeatAvailabilityPort.countAvailableSeats(routeIds);
-            assignments = routeAssignmentRepositoryPort.findLatestActiveByRouteIds(routeIds);
+            assignments = routeAssignmentRepositoryPort.findLatestActiveByRouteIds(routeIds, query.merchantId());
 
             List<String> vehicleIds = assignments.values().stream()
                     .map(RouteAssignmentRecord::getVehicleId)
@@ -397,7 +403,7 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                     .toList();
 
             if (!vehicleIds.isEmpty()) {
-                vehicleById = routeVehicleRepositoryPort.findByIds(vehicleIds);
+                vehicleById = routeVehicleRepositoryPort.findByIds(vehicleIds, query.merchantId());
             } else {
                 vehicleById = Map.of();
             }
@@ -442,21 +448,23 @@ public class RouteManagementServiceImpl implements RouteManagementService {
     @Override
     public FetchRoutesResult fetchRoutes(FetchRoutesQuery query) {
         int pageSize = ApiRequestUtils.parseIntOrDefault(query.pageSize(), DEFAULT_PAGE_SIZE, "pageSize",
-                query.requestId(), query.requestDateTime(), query.channel());
+                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
         int pageNumber = ApiRequestUtils.parseIntOrDefault(query.pageNumber(), DEFAULT_PAGE_NUMBER, "pageNumber",
-                query.requestId(), query.requestDateTime(), query.channel());
+                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
 
         if (pageSize < 1 || pageSize > 100) {
-            throw new BusinessException(query.requestId(), query.requestDateTime(), query.channel(),
+            throw new BusinessException(query.context().requestId(), query.context().requestDateTime(), query.context().channel(),
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_SIZE));
         }
         if (pageNumber < 1) {
-            throw new BusinessException(query.requestId(), query.requestDateTime(), query.channel(),
+            throw new BusinessException(query.context().requestId(), query.context().requestDateTime(), query.context().channel(),
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_NUMBER));
         }
 
+
         // external is 1-based; Spring Data is 0-based
-        PagedResult<RouteFetchView> page = routeQueryPort.fetchRoutes(pageNumber - 1, pageSize);
+        PagedResult<RouteFetchView> page = routeQueryPort.fetchRoutes(query.merchantId(), query.merchantName(), pageNumber - 1, pageSize);
+
         List<RouteFetchView> routes = page.getItems();
 
         List<String> routeIds = routes.stream()
@@ -468,14 +476,14 @@ public class RouteManagementServiceImpl implements RouteManagementService {
         Map<String, VehicleSnapshot> vehicleById;
         if (!routeIds.isEmpty()) {
             seatAvailable = routeSeatAvailabilityPort.countAvailableSeats(routeIds);
-            assignments = routeAssignmentRepositoryPort.findLatestActiveByRouteIds(routeIds);
+            assignments = routeAssignmentRepositoryPort.findLatestActiveByRouteIds(routeIds, query.merchantId());
 
             List<String> vehicleIds = assignments.values().stream()
                     .map(RouteAssignmentRecord::getVehicleId)
                     .distinct()
                     .toList();
 
-            vehicleById = vehicleIds.isEmpty() ? Map.of() : routeVehicleRepositoryPort.findByIds(vehicleIds);
+            vehicleById = vehicleIds.isEmpty() ? Map.of() : routeVehicleRepositoryPort.findByIds(vehicleIds, query.merchantId());
         } else {
             vehicleById = Map.of();
             assignments = Map.of();
@@ -525,16 +533,17 @@ public class RouteManagementServiceImpl implements RouteManagementService {
     @Override
     @Transactional
     public DeleteRouteResult deleteRoute(DeleteRouteCommand command) {
-        RouteAggregate route = routeAggregateRepositoryPort.findById(command.routeId())
-                .orElseThrow(() -> new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+        RouteAggregate route = routeAggregateRepositoryPort.findById(command.routeId(), command.merchantId())
+                .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, command.routeId()))));
+
 
         OffsetDateTime now = OffsetDateTime.now();
         route.cancel(command.creator(), now);
         routeAggregateRepositoryPort.save(route);
 
         routeAssignmentRepositoryPort
-                .findActiveByRouteId(route.getId())
+                .findActiveByRouteId(route.getId(), command.merchantId())
                 .ifPresent(routeAssignment -> {
                     routeAssignment.cancel(command.creator(), now);
                     routeAssignmentRepositoryPort.save(routeAssignment);
@@ -574,17 +583,17 @@ public class RouteManagementServiceImpl implements RouteManagementService {
 
         for(RoutePointCommand point : routePoints) {
             if(point.operationOrder() == null || Integer.parseInt(point.operationOrder()) <= 0) {
-                throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+                throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                         ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_STOP_ORDER));
             }
 
             if(!setOfOrders.add(Integer.valueOf(point.operationOrder()))) {
-                throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+                throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                         ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_STOP_ORDER));
             }
 
             if(point.plannedArrivalTime() == null || point.plannedDepartureTime() == null) {
-                throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+                throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                         ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PLANNED_TIME));
             }
 
@@ -592,29 +601,30 @@ public class RouteManagementServiceImpl implements RouteManagementService {
             OffsetDateTime plannedDepartureTime = OffsetDateTime.parse(point.plannedDepartureTime());
 
             if(!plannedArrivalTime.isBefore(plannedDepartureTime)) {
-                throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+                throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                         ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PLANNED_TIME));
             }
 
             boolean hasOpId = point.operationPointId() != null && !point.operationPointId().isBlank();
             boolean hasCustomName = point.stopName() != null && !point.stopName().isBlank();
             if (hasOpId == hasCustomName) {
-                throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+                throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                         ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, "Either operationPointId or stopName is required (but not both)"));
             }
 
             if (hasOpId) {
-                operationPointRepositoryPort.findById(point.operationPointId().trim())
-                        .orElseThrow(() -> new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+                operationPointRepositoryPort.findById(point.operationPointId().trim(), command.merchantId())
+                        .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                                 ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND,
                                         String.format(OPERATION_POINT_NOT_FOUND, point.operationPointId().trim()))));
             } else {
                 // custom stop: basic coordinate sanity
                 if (point.stopLatitude() != null ^ point.stopLongitude() != null) {
-                    throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+                    throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                             ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, "stopLatitude and stopLongitude must be provided together"));
                 }
             }
+
         }
 
     }

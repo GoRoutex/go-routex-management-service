@@ -17,6 +17,8 @@ public class ErrorConstant {
     public static final String ROUTE_POINT_NOT_FOUND = "Route Point not found";
     public static final String VEHICLE_NOT_FOUND = "Vehicle not found";
     public static final String VEHICLE_NOT_FOUND_BY_ID = "Vehicle with Id %s not found";
+    public static final String MERCHANT_NOT_FOUND_BY_ID = "Merchant with Id %s not found";
+    public static final String MERCHANT_APPLICATION_FORM_NOT_FOUND = "Merchant application form with Id %s not found";
     public static final String ROUTE_SEAT_NOT_FOUND = "Rout Seat with Route Id %s is not exists";
     public static final String RECORD_NOT_FOUND_MESSAGE = "Record not found";
     public static final String SUCCESS_CODE = "0000";
@@ -26,6 +28,10 @@ public class ErrorConstant {
     public static final String INVALID_HTTP_REQUEST_RESOURCE_ERROR = "4000";
     public static final String INVALID_HTTP_REQUEST_RESOURCE_ERROR_MESSAGE = "Resource %s path is not exists";
     public static final String INVALID_INPUT_ERROR = "0310";
+    public static final String FILE_UPLOAD_ERROR_MESSAGE = "File upload failed";
+    public static final String FILE_UPLOAD_ERROR = "9310";
+    public static final String CLOUDINARY_CONFIG_MESSAGE = "Cloudinary is not configured";
+    public static final String INVALID_FILE_MESSAGE = "Invalid file";
     public static final String SEAT_NOT_AVAILABLE = "Seat %s is not available";
     public static final String INVALID_INPUT_MESSAGE = "Invalid Input";
     public static final String INVALID_REQUEST_TIMESTAMP = "5186";
@@ -46,4 +52,5 @@ public class ErrorConstant {
     public static final String INVALID_STOP_ORDER = "operationOrder must be positive & unique";
     public static final String INVALID_PLANNED_TIME = "Invalid planned arrival or departure time";
     public static final String INVALID_SEARCH_TIME = "From Time must be before To Time";
+    public static final String INVALID_COMMISSION_RATE = "commissionRate must be between 0 and 100";
 }

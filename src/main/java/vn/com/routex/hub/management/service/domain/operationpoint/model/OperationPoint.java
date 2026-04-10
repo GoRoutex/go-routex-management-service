@@ -16,6 +16,7 @@ import vn.com.routex.hub.management.service.domain.operationpoint.OperationPoint
 @SuperBuilder
 public class OperationPoint extends AbstractAuditingEntity {
     private String id;
+    private String merchantId;
     private String code;
     private String name;
     private OperationPointType type;

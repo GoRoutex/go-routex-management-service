@@ -12,8 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
 import vn.com.routex.hub.management.service.domain.assignment.RouteAssignmentStatus;
+import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
 
 import java.time.OffsetDateTime;
 
@@ -28,6 +28,9 @@ import java.time.OffsetDateTime;
 public class RouteAssignmentEntity extends AbstractAuditingEntity {
     @Id
     private String id;
+
+    @Column(name = "MERCHANT_ID")
+    private String merchantId;
 
     @Column(name = "ROUTE_ID")
     private String routeId;

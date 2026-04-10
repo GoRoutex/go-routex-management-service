@@ -4,12 +4,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import vn.com.go.routex.identity.security.log.SystemLog;
-import vn.com.routex.hub.management.service.application.command.common.RequestContext;
 import vn.com.routex.hub.management.service.application.services.OutBoxService;
 import vn.com.routex.hub.management.service.domain.outbox.OutBoxEventStatus;
-import vn.com.routex.hub.management.service.domain.outbox.model.OutboxEvent;
+import vn.com.routex.hub.management.service.domain.outbox.model.OutBoxEvent;
 import vn.com.routex.hub.management.service.domain.outbox.port.OutBoxEventRepositoryPort;
-import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
 
 import java.time.OffsetDateTime;
@@ -25,7 +23,7 @@ public class OutBoxServiceImpl implements OutBoxService {
     @Override
     @Transactional
     public void generateEvent(String aggregateId, String topic, String eventName, String eventKey, Object payload, BaseRequest context) {
-        OutboxEvent outboxEvent = OutboxEvent.builder()
+        OutBoxEvent outboxEvent = OutBoxEvent.builder()
                 .id(UUID.randomUUID().toString())
                 .aggregateId(aggregateId)
                 .topic(topic)

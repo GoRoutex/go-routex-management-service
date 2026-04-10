@@ -25,8 +25,26 @@ public class VehicleProfileRepositoryAdapter implements VehicleProfileRepository
     }
 
     @Override
+    public boolean existsByVehiclePlate(String vehiclePlate, String merchantId) {
+        return VehicleEntityRepository.existsByVehiclePlateAndMerchantId(vehiclePlate, merchantId);
+    }
+
+    @Override
     public Optional<VehicleProfile> findById(String id) {
         return VehicleEntityRepository.findById(id).map(VehiclePersistenceMapper::toDomain);
+    }
+
+    @Override
+    public Optional<VehicleProfile> findById(String id, String merchantId) {
+        return VehicleEntityRepository.findByIdAndMerchantId(id, merchantId)
+                .map(VehiclePersistenceMapper::toDomain);
+    }
+
+    @Override
+    public List<VehicleProfile> findByMerchantId(String merchantId) {
+        return VehicleEntityRepository.findByMerchantId(merchantId).stream()
+                .map(VehiclePersistenceMapper::toDomain)
+                .toList();
     }
 
     @Override
@@ -37,6 +55,16 @@ public class VehicleProfileRepositoryAdapter implements VehicleProfileRepository
     @Override
     public PagedResult<VehicleProfile> fetch(int pageNumber, int pageSize) {
         Page<VehicleEntity> page = VehicleEntityRepository.findAll(PageRequest.of(pageNumber, pageSize));
+        return toPagedResult(page);
+    }
+
+    @Override
+    public PagedResult<VehicleProfile> fetch(String merchantId, int pageNumber, int pageSize) {
+        Page<VehicleEntity> page = VehicleEntityRepository.findByMerchantId(merchantId, PageRequest.of(pageNumber, pageSize));
+        return toPagedResult(page);
+    }
+
+    private PagedResult<VehicleProfile> toPagedResult(Page<VehicleEntity> page) {
         List<VehicleProfile> items = page.getContent().stream()
                 .map(VehiclePersistenceMapper::toDomain)
                 .toList();

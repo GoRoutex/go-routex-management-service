@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ProvincesFetchView {
-    private Integer id;
+    private int id;
     private String name;
     private String code;
 }

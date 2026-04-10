@@ -43,13 +43,14 @@ public class OperationPointManagementServiceImpl implements OperationPointManage
 
     @Override
     public CreateOperationPointResult createOperationPoint(CreateOperationPointCommand command) {
-        boolean existPoint = operationPointRepositoryPort.existsByCode(command.code());
+        boolean existPoint = operationPointRepositoryPort.existsByCode(command.code(), command.merchantId());
         if(existPoint) {
             throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                     ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, DUPLICATE_OPERATION_POINT_MESSAGE));
         }
         OperationPoint operationPoint = OperationPoint.builder()
                 .id(UUID.randomUUID().toString())
+                .merchantId(command.merchantId())
                 .code(command.code())
                 .name(command.name())
                 .type(command.type())
@@ -77,7 +78,7 @@ public class OperationPointManagementServiceImpl implements OperationPointManage
 
     @Override
     public UpdateOperationPointResult updateOperationPoint(UpdateOperationPointCommand command) {
-        OperationPoint existing = operationPointRepositoryPort.findById(command.id())
+        OperationPoint existing = operationPointRepositoryPort.findById(command.id(), command.merchantId())
                 .orElseThrow(() -> new BusinessException(
                         command.context().requestId(),
                         command.context().requestDateTime(),
@@ -86,7 +87,7 @@ public class OperationPointManagementServiceImpl implements OperationPointManage
                 ));
 
         if (command.code() != null && !command.code().isBlank() && !command.code().equals(existing.getCode())) {
-            if (operationPointRepositoryPort.existsByCode(command.code())) {
+            if (operationPointRepositoryPort.existsByCode(command.code(), command.merchantId())) {
                 throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                         ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, DUPLICATE_OPERATION_POINT_MESSAGE));
             }
@@ -94,6 +95,7 @@ public class OperationPointManagementServiceImpl implements OperationPointManage
 
         OperationPoint updated = OperationPoint.builder()
                 .id(existing.getId())
+                .merchantId(existing.getMerchantId())
                 .code(firstNonBlank(command.code(), existing.getCode()))
                 .name(firstNonBlank(command.name(), existing.getName()))
                 .type(command.type() == null ? existing.getType() : command.type())
@@ -125,7 +127,7 @@ public class OperationPointManagementServiceImpl implements OperationPointManage
 
     @Override
     public DeleteOperationPointResult deleteOperationPoint(DeleteOperationPointCommand command) {
-        OperationPoint existing = operationPointRepositoryPort.findById(command.id())
+        OperationPoint existing = operationPointRepositoryPort.findById(command.id(), command.merchantId())
                 .orElseThrow(() -> new BusinessException(
                         command.context().requestId(),
                         command.context().requestDateTime(),
@@ -135,6 +137,7 @@ public class OperationPointManagementServiceImpl implements OperationPointManage
 
         OperationPoint closed = OperationPoint.builder()
                 .id(existing.getId())
+                .merchantId(existing.getMerchantId())
                 .code(existing.getCode())
                 .name(existing.getName())
                 .type(existing.getType())
@@ -174,7 +177,7 @@ public class OperationPointManagementServiceImpl implements OperationPointManage
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_NUMBER));
         }
 
-        PagedResult<OperationPoint> page = operationPointRepositoryPort.fetch(pageNumber - 1, pageSize);
+        PagedResult<OperationPoint> page = operationPointRepositoryPort.fetch(query.merchantId(), pageNumber - 1, pageSize);
         List<FetchOperationPointResult.FetchOperationPointItemResult> items = page.getItems().stream()
                 .map(p -> FetchOperationPointResult.FetchOperationPointItemResult.builder()
                         .id(p.getId())

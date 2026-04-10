@@ -4,7 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record DeleteProvinceResult(
-        Integer id
+        int id
 ) {
 }
 

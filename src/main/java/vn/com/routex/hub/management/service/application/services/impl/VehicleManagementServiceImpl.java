@@ -45,13 +45,15 @@ public class VehicleManagementServiceImpl implements VehicleManagementService {
     @Override
     @Transactional
     public AddVehicleResult addVehicle(AddVehicleCommand command) {
-        if(vehicleProfileRepositoryPort.existsByVehiclePlate(command.vehiclePlate())) {
-            throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+        if(vehicleProfileRepositoryPort.existsByVehiclePlate(command.vehiclePlate(), command.merchantId())) {
+            throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                     ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(DUPLICATE_VEHICLE, command.vehiclePlate())));
         }
 
+
         VehicleProfile newVehicle = VehicleProfile.register(
                 UUID.randomUUID().toString(),
+                command.merchantId(),
                 command.creator(),
                 VehicleType.valueOf(command.type()),
                 command.vehiclePlate(),
@@ -76,18 +78,21 @@ public class VehicleManagementServiceImpl implements VehicleManagementService {
     @Override
     @Transactional
     public UpdateVehicleResult updateVehicle(UpdateVehicleCommand command) {
-        VehicleProfile existing = vehicleProfileRepositoryPort.findById(command.vehicleId())
-                .orElseThrow(() -> new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+        VehicleProfile existing = vehicleProfileRepositoryPort.findById(command.vehicleId(), command.merchantId())
+                .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(VEHICLE_NOT_FOUND_BY_ID, command.vehicleId()))));
+
 
         if (command.vehiclePlate() != null && !command.vehiclePlate().isBlank()
                 && !command.vehiclePlate().trim().equals(existing.getVehiclePlate())
-                && vehicleProfileRepositoryPort.existsByVehiclePlate(command.vehiclePlate().trim())) {
-            throw new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+                && vehicleProfileRepositoryPort.existsByVehiclePlate(command.vehiclePlate().trim(), command.merchantId())) {
+            throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                     ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(DUPLICATE_VEHICLE, command.vehiclePlate().trim())));
         }
 
+
         VehicleProfile updated = existing.toBuilder()
+                .merchantId(existing.getMerchantId())
                 .creator(ApiRequestUtils.firstNonBlank(command.creator(), existing.getCreator()))
                 .type(command.type() == null || command.type().isBlank() ? existing.getType() : VehicleType.valueOf(command.type().trim()))
                 .vehiclePlate(ApiRequestUtils.firstNonBlank(command.vehiclePlate(), existing.getVehiclePlate()))
@@ -116,9 +121,10 @@ public class VehicleManagementServiceImpl implements VehicleManagementService {
     @Override
     @Transactional
     public DeleteVehicleResult deleteVehicle(DeleteVehicleCommand command) {
-        VehicleProfile existing = vehicleProfileRepositoryPort.findById(command.vehicleId())
-                .orElseThrow(() -> new BusinessException(command.requestId(), command.requestDateTime(), command.channel(),
+        VehicleProfile existing = vehicleProfileRepositoryPort.findById(command.vehicleId(), command.merchantId())
+                .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(VEHICLE_NOT_FOUND_BY_ID, command.vehicleId()))));
+
 
         VehicleProfile inactive = existing.toBuilder()
                 .status(VehicleStatus.INACTIVE)
@@ -147,7 +153,7 @@ public class VehicleManagementServiceImpl implements VehicleManagementService {
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_NUMBER));
         }
 
-        PagedResult<VehicleProfile> page = vehicleProfileRepositoryPort.fetch(pageNumber - 1, pageSize);
+        PagedResult<VehicleProfile> page = vehicleProfileRepositoryPort.fetch(query.merchantId(), pageNumber - 1, pageSize);
         List<FetchVehiclesResult.FetchVehicleItemResult> items = page.getItems().stream()
                 .map(v -> FetchVehiclesResult.FetchVehicleItemResult.builder()
                         .id(v.getId())

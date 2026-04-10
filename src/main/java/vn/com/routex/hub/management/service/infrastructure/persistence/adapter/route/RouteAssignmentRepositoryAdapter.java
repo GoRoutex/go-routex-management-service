@@ -29,6 +29,11 @@ public class RouteAssignmentRepositoryAdapter implements RouteAssignmentReposito
     }
 
     @Override
+    public boolean existsActiveByRouteId(String routeId, String merchantId) {
+        return routeAssignmentJpaRepository.existsByRouteIdAndMerchantId(routeId, merchantId);
+    }
+
+    @Override
     public Optional<RouteAssignmentRecord> findActiveByRouteId(String routeId) {
         return routeAssignmentJpaRepository
                 .findFirstByRouteIdAndStatusAndUnAssignedAtIsNullOrderByAssignedAtDesc(routeId, RouteAssignmentStatus.ASSIGNED)
@@ -36,8 +41,40 @@ public class RouteAssignmentRepositoryAdapter implements RouteAssignmentReposito
     }
 
     @Override
+    public Optional<RouteAssignmentRecord> findActiveByRouteId(String routeId, String merchantId) {
+        return routeAssignmentJpaRepository
+                .findFirstByRouteIdAndMerchantIdAndStatusAndUnAssignedAtIsNullOrderByAssignedAtDesc(
+                        routeId,
+                        merchantId,
+                        RouteAssignmentStatus.ASSIGNED
+                )
+                .map(routePersistenceMapper::toAssignmentRecord);
+    }
+
+    @Override
     public Map<String, RouteAssignmentRecord> findLatestActiveByRouteIds(List<String> routeIds) {
         List<RouteAssignmentEntity> assignments = routeAssignmentJpaRepository.findActiveByRouteIdsNative(routeIds, RouteAssignmentStatus.ASSIGNED.name());
+        return toAssignmentMap(assignments);
+    }
+
+    @Override
+    public Map<String, RouteAssignmentRecord> findLatestActiveByRouteIds(List<String> routeIds, String merchantId) {
+        List<RouteAssignmentEntity> assignments = routeAssignmentJpaRepository.findActiveByRouteIdsAndMerchantIdNative(
+                routeIds,
+                merchantId,
+                RouteAssignmentStatus.ASSIGNED.name()
+        );
+        return toAssignmentMap(assignments);
+    }
+
+    @Override
+    public List<RouteAssignmentRecord> findByMerchantId(String merchantId) {
+        return routeAssignmentJpaRepository.findByMerchantId(merchantId).stream()
+                .map(routePersistenceMapper::toAssignmentRecord)
+                .toList();
+    }
+
+    private Map<String, RouteAssignmentRecord> toAssignmentMap(List<RouteAssignmentEntity> assignments) {
         return assignments.stream()
                 .map(routePersistenceMapper::toAssignmentRecord)
                 .collect(Collectors.toMap(
