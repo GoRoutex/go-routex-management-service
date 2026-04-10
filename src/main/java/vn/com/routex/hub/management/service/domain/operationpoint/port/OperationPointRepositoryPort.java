@@ -1,7 +1,7 @@
 package vn.com.routex.hub.management.service.domain.operationpoint.port;
 
-import vn.com.routex.hub.management.service.domain.operationpoint.model.OperationPoint;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
+import vn.com.routex.hub.management.service.domain.operationpoint.model.OperationPoint;
 
 import java.util.List;
 import java.util.Optional;

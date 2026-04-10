@@ -12,8 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
 import vn.com.routex.hub.management.service.domain.assignment.RouteAssignmentStatus;
+import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
 
 import java.time.OffsetDateTime;
 

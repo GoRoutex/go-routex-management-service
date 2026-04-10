@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.provinces.entity.ProvincesEntity;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.provinces.projection.ProvincesCodeProjection;
 
-
 import java.util.Optional;
 
 public interface ProvincesEntityRepository extends JpaRepository<ProvincesEntity, Integer> {

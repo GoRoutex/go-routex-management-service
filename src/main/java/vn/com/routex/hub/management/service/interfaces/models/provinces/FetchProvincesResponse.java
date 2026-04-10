@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseResponse;
-import vn.com.routex.hub.management.service.interfaces.models.route.FetchRouteResponse;
 
 import java.util.List;
 

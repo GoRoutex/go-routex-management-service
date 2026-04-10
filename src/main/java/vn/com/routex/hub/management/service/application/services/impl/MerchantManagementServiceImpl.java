@@ -19,8 +19,8 @@ import vn.com.routex.hub.management.service.infrastructure.persistence.utils.Exc
 import java.math.BigDecimal;
 import java.util.List;
 
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_COMMISSION_RATE;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_NUMBER;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_SIZE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.MERCHANT_NOT_FOUND_BY_ID;

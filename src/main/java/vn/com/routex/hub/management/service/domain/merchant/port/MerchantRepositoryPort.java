@@ -1,8 +1,8 @@
 package vn.com.routex.hub.management.service.domain.merchant.port;
 
 
-import vn.com.routex.hub.management.service.domain.merchant.model.Merchant;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
+import vn.com.routex.hub.management.service.domain.merchant.model.Merchant;
 
 import java.util.Optional;
 

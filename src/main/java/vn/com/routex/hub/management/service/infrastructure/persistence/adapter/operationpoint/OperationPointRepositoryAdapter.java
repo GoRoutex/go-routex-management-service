@@ -1,14 +1,14 @@
 package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.operationpoint;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Component;
+import vn.com.routex.hub.management.service.domain.common.PagedResult;
 import vn.com.routex.hub.management.service.domain.operationpoint.model.OperationPoint;
 import vn.com.routex.hub.management.service.domain.operationpoint.port.OperationPointRepositoryPort;
-import vn.com.routex.hub.management.service.domain.common.PagedResult;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.operationpoint.repository.OperationPointEntityRepository;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.operationpoint.entity.OperationPointEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.operationpoint.repository.OperationPointEntityRepository;
 
 import java.util.List;
 import java.util.Optional;

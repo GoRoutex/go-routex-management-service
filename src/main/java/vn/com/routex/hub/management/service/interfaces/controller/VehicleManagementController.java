@@ -1,8 +1,8 @@
 package vn.com.routex.hub.management.service.interfaces.controller;
 
 
-import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,8 +28,8 @@ import vn.com.routex.hub.management.service.application.services.VehicleManageme
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.HttpUtils;
 import vn.com.routex.hub.management.service.interfaces.factory.ApiResultFactory;
-import vn.com.routex.hub.management.service.interfaces.models.result.ApiResult;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
+import vn.com.routex.hub.management.service.interfaces.models.result.ApiResult;
 import vn.com.routex.hub.management.service.interfaces.models.vehicle.AddVehicleRequest;
 import vn.com.routex.hub.management.service.interfaces.models.vehicle.AddVehicleResponse;
 import vn.com.routex.hub.management.service.interfaces.models.vehicle.DeleteVehicleRequest;

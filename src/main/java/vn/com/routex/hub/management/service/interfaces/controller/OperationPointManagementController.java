@@ -5,15 +5,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.security.access.prepost.PreAuthorize;
 import vn.com.go.routex.identity.security.log.SystemLog;
-
 import vn.com.routex.hub.management.service.application.command.operationpoint.CreateOperationPointCommand;
 import vn.com.routex.hub.management.service.application.command.operationpoint.CreateOperationPointResult;
 import vn.com.routex.hub.management.service.application.command.operationpoint.DeleteOperationPointCommand;
@@ -26,6 +25,7 @@ import vn.com.routex.hub.management.service.application.services.OperationPointM
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.HttpUtils;
 import vn.com.routex.hub.management.service.interfaces.factory.ApiResultFactory;
+import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
 import vn.com.routex.hub.management.service.interfaces.models.operationpoint.CreateOperationPointRequest;
 import vn.com.routex.hub.management.service.interfaces.models.operationpoint.CreateOperationPointResponse;
 import vn.com.routex.hub.management.service.interfaces.models.operationpoint.DeleteOperationPointRequest;
@@ -33,7 +33,6 @@ import vn.com.routex.hub.management.service.interfaces.models.operationpoint.Del
 import vn.com.routex.hub.management.service.interfaces.models.operationpoint.FetchOperationPointResponse;
 import vn.com.routex.hub.management.service.interfaces.models.operationpoint.UpdateOperationPointRequest;
 import vn.com.routex.hub.management.service.interfaces.models.operationpoint.UpdateOperationPointResponse;
-import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
 
 import java.util.List;
 import java.util.stream.Collectors;
