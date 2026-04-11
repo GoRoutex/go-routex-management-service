@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import vn.com.go.routex.identity.security.log.SystemLog;
+import vn.com.routex.hub.management.service.application.command.common.PageContext;
 import vn.com.routex.hub.management.service.application.command.route.FetchRoutesQuery;
 import vn.com.routex.hub.management.service.application.command.route.FetchRoutesResult;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteQuery;
@@ -56,8 +57,10 @@ public class RouteServiceController {
                 .seat(request.getData().getSeat())
                 .fromTime(request.getData().getFromTime())
                 .toTime(request.getData().getToTime())
-                .pageSize(request.getData().getPageSize())
-                .pageNumber(request.getData().getPageNumber())
+                .pageContext(PageContext.builder()
+                        .pageSize(request.getData().getPageSize())
+                        .pageNumber(request.getData().getPageNumber())
+                        .build())
                 .context(HttpUtils.toContext(request))
                 .build());
 
@@ -81,8 +84,10 @@ public class RouteServiceController {
         BaseRequest baseRequest = ApiRequestUtils.getBaseRequestOrDefault(servletRequest);
         String merchantId = ApiRequestUtils.getMerchantId(servletRequest);
         FetchRoutesResult result = routeManagementService.fetchRoutes(FetchRoutesQuery.builder()
-                .pageSize(String.valueOf(pageSize))
-                .pageNumber(String.valueOf(pageNumber))
+                .pageContext(PageContext.builder()
+                        .pageNumber(String.valueOf(pageNumber))
+                        .pageSize(String.valueOf(pageSize))
+                        .build())
                 .merchantId(merchantId)
                 .merchantName(merchantName)
                 .context(HttpUtils.toContext(baseRequest))
