@@ -1,48 +1,31 @@
 package vn.com.routex.hub.management.service.application.services.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import vn.com.go.routex.identity.security.log.SystemLog;
-import vn.com.routex.hub.management.service.application.command.route.AssignRouteCommand;
-import vn.com.routex.hub.management.service.application.command.route.AssignRouteResult;
-import vn.com.routex.hub.management.service.application.command.route.CreateRouteCommand;
-import vn.com.routex.hub.management.service.application.command.route.CreateRouteResult;
-import vn.com.routex.hub.management.service.application.command.route.DeleteRouteCommand;
-import vn.com.routex.hub.management.service.application.command.route.DeleteRouteResult;
+import vn.com.routex.hub.management.service.application.command.common.PageContext;
+import vn.com.routex.hub.management.service.application.command.common.PageInfo;
+import vn.com.routex.hub.management.service.application.command.common.RequestContext;
 import vn.com.routex.hub.management.service.application.command.route.FetchRouteResult;
 import vn.com.routex.hub.management.service.application.command.route.FetchRoutesQuery;
 import vn.com.routex.hub.management.service.application.command.route.FetchRoutesResult;
-import vn.com.routex.hub.management.service.application.command.route.RoutePointCommand;
 import vn.com.routex.hub.management.service.application.command.route.RoutePointResult;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteItemResult;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteQuery;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteResult;
-import vn.com.routex.hub.management.service.application.command.route.UpdateRouteCommand;
-import vn.com.routex.hub.management.service.application.command.route.UpdateRouteResult;
-import vn.com.routex.hub.management.service.application.services.OutBoxService;
+import vn.com.routex.hub.management.service.application.command.route.SearchWindow;
 import vn.com.routex.hub.management.service.application.services.RouteManagementService;
 import vn.com.routex.hub.management.service.application.specification.RouteSpecification;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
-import vn.com.routex.hub.management.service.domain.operationpoint.port.OperationPointRepositoryPort;
-import vn.com.routex.hub.management.service.domain.route.RouteStatus;
-import vn.com.routex.hub.management.service.domain.route.model.ProvincesCodePair;
-import vn.com.routex.hub.management.service.domain.route.model.RouteAggregate;
 import vn.com.routex.hub.management.service.domain.route.model.RouteAssignmentRecord;
 import vn.com.routex.hub.management.service.domain.route.model.RouteStopPlan;
 import vn.com.routex.hub.management.service.domain.route.model.VehicleSnapshot;
-import vn.com.routex.hub.management.service.domain.route.port.RouteAggregateRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteAssignmentRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RoutePointRepositoryPort;
-import vn.com.routex.hub.management.service.domain.route.port.RouteProvincesLookupPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteQueryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteSeatAvailabilityPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteVehicleRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.readmodel.RouteFetchView;
 import vn.com.routex.hub.management.service.domain.route.readmodel.RouteSearchView;
-import vn.com.routex.hub.management.service.infrastructure.kafka.event.RouteAssignedEvent;
-import vn.com.routex.hub.management.service.infrastructure.kafka.event.RouteSellableEvent;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.DateTimeUtils;
@@ -51,510 +34,54 @@ import vn.com.routex.hub.management.service.infrastructure.persistence.utils.Exc
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.DEFAULT_PAGE_NUMBER;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.DEFAULT_PAGE_SIZE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.DEFAULT_ZONE;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ERROR;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ROUTE_ASSIGNMENT;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_NUMBER;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_SIZE;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PLANNED_TIME;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_SEARCH_TIME;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_START_TIME;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_STOP_ORDER;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.OPERATION_POINT_NOT_FOUND;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_NOT_FOUND;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_POINT_NOT_FOUND;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.VEHICLE_NOT_FOUND;
-
 
 @Service
 @RequiredArgsConstructor
 public class RouteManagementServiceImpl implements RouteManagementService {
 
-    private final RouteAggregateRepositoryPort routeAggregateRepositoryPort;
     private final RoutePointRepositoryPort routePointRepositoryPort;
     private final RouteAssignmentRepositoryPort routeAssignmentRepositoryPort;
     private final RouteVehicleRepositoryPort routeVehicleRepositoryPort;
-    private final RouteProvincesLookupPort routeProvincesLookupPort;
     private final RouteSeatAvailabilityPort routeSeatAvailabilityPort;
     private final RouteQueryPort routeQueryPort;
-    private final OperationPointRepositoryPort operationPointRepositoryPort;
-    private final OutBoxService outBoxService;
-
-    @Value("${spring.kafka.topics.routes}")
-    private String routeTopic;
-
-    @Value("${spring.kafka.events.route-assigned}")
-    private String routeAssignedEvent;
-
-    @Value("${spring.kafka.events.route-ready-for-sale}")
-    private String routeReadyForSaleEvent;
-
-    private final SystemLog sLog = SystemLog.getLogger(this.getClass());
-
-    @Override
-    @Transactional
-    public CreateRouteResult createRoute(CreateRouteCommand command) {
-        String origin = command.origin().trim();
-        String destination = command.destination().trim();
-
-        OffsetDateTime plannedStartTime = OffsetDateTime.parse(command.plannedStartTime());
-        OffsetDateTime plannedEndTime = OffsetDateTime.parse(command.plannedEndTime());
-
-        ProvincesCodePair codeResult = routeProvincesLookupPort.getCodes(command.origin(), command.destination());
-
-        String originCode = codeResult.originCode();
-        String destinationCode = codeResult.destinationCode();
-
-        String routeCode = routeAggregateRepositoryPort.generateRouteCode(originCode, destinationCode);
-
-        if(!plannedStartTime.isBefore(plannedEndTime)) {
-            throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_START_TIME));
-        }
-
-
-        List<RoutePointCommand> routePoints =
-                Optional.ofNullable(command.routePoints())
-                        .orElseGet(List::of);
-
-        // Validate stop points
-        validateRoutePoints(command);
-
-        OffsetDateTime now = OffsetDateTime.now();
-        String routeId = UUID.randomUUID().toString();
-        List<RouteStopPlan> routeStopPlans = routePoints.stream()
-                .map(point -> {
-                    OffsetDateTime arrival = OffsetDateTime.parse(point.plannedArrivalTime());
-                    OffsetDateTime departure = OffsetDateTime.parse(point.plannedDepartureTime());
-
-                    return RouteStopPlan.builder()
-                            .id(UUID.randomUUID().toString())
-                            .routeId(routeId)
-                            .stopOrder(Integer.parseInt(point.operationOrder()))
-                            .creator(command.creator())
-                            .createdAt(now)
-                            .createdBy(command.creator())
-                            .plannedArrivalTime(arrival)
-                            .plannedDepartureTime(departure)
-                            .note(point.note())
-                            .operationPointId(point.operationPointId())
-                            .stopName(point.stopName())
-                            .stopAddress(point.stopAddress())
-                            .stopCity(point.stopCity())
-                            .stopLatitude(point.stopLatitude())
-                            .stopLongitude(point.stopLongitude())
-                            .build();
-                })
-                .collect(Collectors.toList());
-
-        RouteAggregate newRoute = RouteAggregate.plan(
-                routeId,
-                command.merchantId(),
-                routeCode,
-                command.creator(),
-                command.pickupBranch(),
-                origin,
-                destination,
-                plannedStartTime,
-                plannedEndTime,
-                now,
-                routeStopPlans
-        );
-
-        routeAggregateRepositoryPort.save(newRoute);
-        routePointRepositoryPort.saveAll(routeStopPlans);
-
-
-        return CreateRouteResult.builder()
-                .id(newRoute.getId())
-                .routeCode(routeCode)
-                .creator(command.creator())
-                .pickupBranch(command.pickupBranch())
-                .origin(command.origin())
-                .destination(command.destination())
-                .plannedStartTime(command.plannedStartTime())
-                .plannedEndTime(command.plannedEndTime())
-                .status(RouteStatus.PLANNED.name())
-                .routePoints(command.routePoints() != null ?
-                        command.routePoints() : null)
-                .build();
-    }
-
-    @Override
-    @Transactional
-    public AssignRouteResult assignRoute(AssignRouteCommand command) {
-        if(routeAssignmentRepositoryPort.existsActiveByRouteId(command.routeId(), command.merchantId())) {
-            throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                    ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, String.format(DUPLICATE_ROUTE_ASSIGNMENT, command.routeId())));
-        }
-
-        VehicleSnapshot vehicle = routeVehicleRepositoryPort.findById(command.vehicleId(), command.merchantId())
-                .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, VEHICLE_NOT_FOUND)));
-
-        RouteAggregate route = routeAggregateRepositoryPort.findById(command.routeId(), command.merchantId())
-                        .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                                ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, command.routeId()))));
-
-        OffsetDateTime assignedAt = OffsetDateTime.now();
-        RouteAssignmentRecord routeAssignment = RouteAssignmentRecord.assign(
-                UUID.randomUUID().toString(),
-                route.getMerchantId(),
-                command.routeId(),
-                command.creator(),
-                vehicle.getId(),
-                command.driverId(),
-                assignedAt
-        );
-
-        route.setStatus(RouteStatus.ASSIGNED);
-        routeAggregateRepositoryPort.save(route);
-        routeAssignmentRepositoryPort.save(routeAssignment);
-
-        sLog.info("[ASSIGN-ROUTE] Route Assigned successfully with VehicleId: {} DriverId: {}", vehicle.getId(), command.driverId());
-
-        RouteSellableEvent sellableEvent = RouteSellableEvent
-                .builder()
-                .routeId(routeAssignment.getRouteId())
-                .vehicleId(routeAssignment.getVehicleId())
-                .assignedBy(command.creator())
-                .assignedAt(routeAssignment.getAssignedAt())
-                .routeStatus(RouteStatus.ASSIGNED.name())
-                .seatCount(vehicle.getSeatCapacity())
-                .hasFloor(vehicle.isHasFloor())
-                .creator(command.creator())
-                .build();
-
-        outBoxService.generateEvent(routeAssignment.getRouteId(), routeTopic, routeReadyForSaleEvent, routeAssignment.getId(), sellableEvent, ApiRequestUtils.getHeader(command.context()));
-
-        RouteAssignedEvent assignedEvent = RouteAssignedEvent
-                .builder()
-                .routeId(routeAssignment.getRouteId())
-                .driverUserId(routeAssignment.getDriverId()) // TODO: Get User Id from driverId
-                .driverId(routeAssignment.getDriverId())
-                .vehicleId(routeAssignment.getVehicleId())
-                .originName(route.getOrigin())
-                .destinationName(route.getDestination())
-                .departureTime(route.getPlannedStartTime())
-                .status(route.getStatus())
-                .assignedBy(command.creator())
-                .assignedAt(routeAssignment.getAssignedAt())
-                .build();
-
-
-        outBoxService.generateEvent(routeAssignment.getRouteId(), routeTopic, routeAssignedEvent, routeAssignment.getId(), assignedEvent, ApiRequestUtils.getHeader(command.context()));
-
-        return AssignRouteResult.builder()
-                .creator(command.creator())
-                .assignedAt(routeAssignment.getAssignedAt().toString())
-                .routeId(routeAssignment.getRouteId())
-                .vehicleId(routeAssignment.getVehicleId())
-                .driverId(routeAssignment.getDriverId())
-                .status(routeAssignment.getStatus().name())
-                .build();
-    }
-
-    @Override
-    @Transactional
-    public UpdateRouteResult updateRoute(UpdateRouteCommand command) {
-        RouteAggregate route = routeAggregateRepositoryPort.findById(command.routeId(), command.context().merchantId())
-                .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, command.routeId()))));
-
-        if(command.routePoints() != null) {
-            command.routePoints().forEach(point -> {
-                RouteStopPlan routeStopPlan = routePointRepositoryPort.findByRouteIdAndStopOrder(command.routeId(), point.operationOrder())
-                        .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                                ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, ROUTE_POINT_NOT_FOUND)));
-
-                Optional.ofNullable(point.plannedArrivalTime())
-                        .ifPresent(routeStopPlan::setPlannedArrivalTime);
-
-                Optional.ofNullable(point.plannedDepartureTime())
-                        .ifPresent(routeStopPlan::setPlannedDepartureTime);
-
-                Optional.ofNullable(point.note())
-                        .ifPresent(routeStopPlan::setNote);
-
-                routePointRepositoryPort.save(routeStopPlan);
-            });
-        }
-        Optional.ofNullable(command.pickupBranch())
-                .ifPresent(route::setPickupBranch);
-
-        Optional.ofNullable(command.origin())
-                .ifPresent(route::setOrigin);
-
-        Optional.ofNullable(command.destination())
-                .ifPresent(route::setDestination);
-
-        Optional.ofNullable(command.plannedStartTime())
-                .ifPresent(route::setPlannedStartTime);
-
-        Optional.ofNullable(command.plannedEndTime())
-                .ifPresent(route::setPlannedEndTime);
-
-        Optional.ofNullable(command.actualStartTime())
-                .ifPresent(route::setActualStartTime);
-
-        Optional.ofNullable(command.actualEndTime())
-                .ifPresent(route::setActualEndTime);
-
-        routeAggregateRepositoryPort.save(route);
-
-        List<UpdateRouteResult.UpdateRoutePointResult> routePointResults = command.routePoints() != null ?
-                command.routePoints().stream()
-                .map(point -> UpdateRouteResult.UpdateRoutePointResult.builder()
-                        .id(point.id())
-                        .operationOrder(point.id())
-                        .plannedArrivalTime(point.plannedArrivalTime())
-                        .plannedDepartureTime(point.plannedDepartureTime())
-                        .note(point.note())
-                        .build())
-                .toList() : null;
-
-        return UpdateRouteResult.builder()
-                .routeId(command.routeId())
-                .creator(command.creator())
-                .pickupBranch(command.pickupBranch())
-                .origin(command.origin())
-                .destination(command.destination())
-                .plannedStartTime(command.plannedStartTime())
-                .plannedEndTime(command.plannedEndTime())
-                .actualStartTime(command.actualStartTime())
-                .actualEndTime(command.actualEndTime())
-                .status(command.status())
-                .routePoints(routePointResults)
-                .build();
-    }
 
     @Override
     public SearchRouteResult searchRoute(SearchRouteQuery query) {
-        int pageSize = ApiRequestUtils.parseIntOrDefault(query.pageSize(), DEFAULT_PAGE_SIZE, "pageSize",
-                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
-        int pageNumber = ApiRequestUtils.parseIntOrDefault(query.pageNumber(), DEFAULT_PAGE_NUMBER, "pageNumber",
-                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
-
-        if (pageSize < 1 || pageSize > 100) {
-            throw new BusinessException(query.context().requestId(), query.context().requestDateTime(), query.context().channel(),
-                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_SIZE));
-        }
-        if (pageNumber < 1) {
-            throw new BusinessException(query.context().requestId(), query.context().requestDateTime(), query.context().channel(),
-                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_NUMBER));
-        }
-
-
-        LocalDate departureDate = DateTimeUtils.parseDateOrThrow(query.departureDate(), "departureDate",
-                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
-        LocalTime fromTime = DateTimeUtils.parseTimeNullable(query.fromTime(), "fromTime",
-                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
-        LocalTime toTime = DateTimeUtils.parseTimeNullable(query.toTime(), "toTime",
-                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
-
-        if(fromTime != null && toTime != null && fromTime.isAfter(toTime)) {
-            throw new BusinessException(query.context().requestId(), query.context().requestDateTime(), query.context().channel(),
-                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_SEARCH_TIME));
-        }
-
-
-        OffsetDateTime startEx = RouteSpecification.dayStart(departureDate, DEFAULT_ZONE);
-        OffsetDateTime endEx = RouteSpecification.dayEndExclusive(departureDate, DEFAULT_ZONE);
-
-        if(fromTime != null) startEx = RouteSpecification.atTime(departureDate, fromTime, DEFAULT_ZONE);
-        if(toTime != null) endEx = RouteSpecification.atTime(departureDate, toTime, DEFAULT_ZONE);
+        PageInfo pageInfo = validatePageContext(query.context(), query.pageContext());
+        SearchWindow searchWindow = resolveSearchWindow(query);
 
         List<RouteSearchView> searchedRoutes = routeQueryPort.searchAssignedRoutes(
                 query.merchantId(),
                 query.origin(),
                 query.destination(),
-                startEx,
-                endEx,
-                pageNumber - 1, // external is 1-based; Spring Data is 0-based
-                pageSize
+                searchWindow.start(),
+                searchWindow.endExclusive(),
+                pageInfo.pageNumber() - 1, // external is 1-based; Spring Data is 0-based
+                pageInfo.pageSize()
         );
 
-        List<String> routeIds = searchedRoutes.stream()
-                .map(RouteSearchView::getId)
-                .toList();
-
-        Map<String, RouteAssignmentRecord> assignments;
-        Map<String, Long> seatAvailable;
-        Map<String, VehicleSnapshot> vehicleById;
-        if(!routeIds.isEmpty()) {
-            seatAvailable = routeSeatAvailabilityPort.countAvailableSeats(routeIds);
-            assignments = routeAssignmentRepositoryPort.findLatestActiveByRouteIds(routeIds, query.merchantId());
-
-            List<String> vehicleIds = assignments.values().stream()
-                    .map(RouteAssignmentRecord::getVehicleId)
-                    .distinct()
-                    .toList();
-
-            if (!vehicleIds.isEmpty()) {
-                vehicleById = routeVehicleRepositoryPort.findByIds(vehicleIds, query.merchantId());
-            } else {
-                vehicleById = Map.of();
-            }
-
-        } else {
-            vehicleById = Map.of();
-            assignments = Map.of();
-            seatAvailable = Map.of();
-        }
-
-        Map<String, List<RouteStopPlan>> stopsByRouteId;
-        stopsByRouteId = routeIds.isEmpty() ? Map.of() : routePointRepositoryPort.findByRouteIds(routeIds);
+        RouteEnrichment enrichment = enrichRoutes(
+                searchedRoutes.stream().map(RouteSearchView::getId).toList(),
+                query.merchantId()
+        );
 
         List<SearchRouteItemResult> items = searchedRoutes.stream()
-                .map(r ->
-                {
-                    RouteAssignmentRecord ra = assignments.get(r.getId());
-                    VehicleSnapshot v = ra == null ? null : vehicleById.get(ra.getVehicleId());
-                    return SearchRouteItemResult.builder()
-                            .id(r.getId())
-                            .routeCode(r.getRouteCode())
-                            .pickupBranch(r.getPickupBranch())
-                            .origin(r.getOrigin())
-                            .destination(r.getDestination())
-                            .availableSeats(seatAvailable.getOrDefault(r.getId(), 0L))
-                            .plannedStartTime(r.getPlannedStartTime())
-                            .plannedEndTime(r.getPlannedEndTime())
-                            .vehiclePlate(v == null ? null : v.getVehiclePlate())
-                            .hasFloor(v != null && v.isHasFloor())
-                            .routePoints(stopsByRouteId.getOrDefault(r.getId(), List.of()).stream()
-                                    .map(this::toRoutePoint)
-                                    .toList())
-                            .build();
-                })
+                .map(route -> toSearchRouteItem(route, enrichment))
                 .collect(Collectors.toList());
 
         return SearchRouteResult.builder()
                 .data(items)
-                .build();
-    }
-
-    @Override
-    public FetchRoutesResult fetchRoutes(FetchRoutesQuery query) {
-        int pageSize = ApiRequestUtils.parseIntOrDefault(query.pageSize(), DEFAULT_PAGE_SIZE, "pageSize",
-                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
-        int pageNumber = ApiRequestUtils.parseIntOrDefault(query.pageNumber(), DEFAULT_PAGE_NUMBER, "pageNumber",
-                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
-
-        if (pageSize < 1 || pageSize > 100) {
-            throw new BusinessException(query.context().requestId(), query.context().requestDateTime(), query.context().channel(),
-                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_SIZE));
-        }
-        if (pageNumber < 1) {
-            throw new BusinessException(query.context().requestId(), query.context().requestDateTime(), query.context().channel(),
-                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_NUMBER));
-        }
-
-
-        // external is 1-based; Spring Data is 0-based
-        PagedResult<RouteFetchView> page = routeQueryPort.fetchRoutes(query.merchantId(), query.merchantName(), pageNumber - 1, pageSize);
-
-        List<RouteFetchView> routes = page.getItems();
-
-        List<String> routeIds = routes.stream()
-                .map(RouteFetchView::getId)
-                .toList();
-
-        Map<String, RouteAssignmentRecord> assignments;
-        Map<String, Long> seatAvailable;
-        Map<String, VehicleSnapshot> vehicleById;
-        if (!routeIds.isEmpty()) {
-            seatAvailable = routeSeatAvailabilityPort.countAvailableSeats(routeIds);
-            assignments = routeAssignmentRepositoryPort.findLatestActiveByRouteIds(routeIds, query.merchantId());
-
-            List<String> vehicleIds = assignments.values().stream()
-                    .map(RouteAssignmentRecord::getVehicleId)
-                    .distinct()
-                    .toList();
-
-            vehicleById = vehicleIds.isEmpty() ? Map.of() : routeVehicleRepositoryPort.findByIds(vehicleIds, query.merchantId());
-        } else {
-            vehicleById = Map.of();
-            assignments = Map.of();
-            seatAvailable = Map.of();
-        }
-
-        Map<String, List<RouteStopPlan>> stopsByRouteId =
-                routeIds.isEmpty() ? Map.of() : routePointRepositoryPort.findByRouteIds(routeIds);
-
-        List<FetchRouteResult> items = routes.stream()
-                .map(r -> {
-                    RouteAssignmentRecord ra = assignments.get(r.getId());
-                    VehicleSnapshot v = ra == null ? null : vehicleById.get(ra.getVehicleId());
-                    return FetchRouteResult.builder()
-                            .id(r.getId())
-                            .creator(r.getCreator())
-                            .pickupBranch(r.getPickupBranch())
-                            .routeCode(r.getRouteCode())
-                            .origin(r.getOrigin())
-                            .destination(r.getDestination())
-                            .plannedStartTime(r.getPlannedStartTime())
-                            .plannedEndTime(r.getPlannedEndTime())
-                            .actualStartTime(r.getActualStartTime())
-                            .actualEndTime(r.getActualEndTime())
-                            .status(r.getStatus())
-                            .availableSeats(seatAvailable.getOrDefault(r.getId(), 0L))
-                            .vehicleId(ra == null ? null : ra.getVehicleId())
-                            .vehiclePlate(v == null ? null : v.getVehiclePlate())
-                            .hasFloor(v != null && v.isHasFloor())
-                            .assignedAt(ra == null ? null : ra.getAssignedAt())
-                            .routePoints(stopsByRouteId.getOrDefault(r.getId(), List.of()).stream()
-                                    .map(this::toRoutePoint)
-                                    .toList())
-                            .build();
-                })
-                .collect(Collectors.toList());
-
-        return FetchRoutesResult.builder()
-                .items(items)
-                .pageNumber(page.getPageNumber() + 1)
-                .pageSize(page.getPageSize())
-                .totalElements(page.getTotalElements())
-                .totalPages(page.getTotalPages())
-                .build();
-    }
-
-    @Override
-    @Transactional
-    public DeleteRouteResult deleteRoute(DeleteRouteCommand command) {
-        RouteAggregate route = routeAggregateRepositoryPort.findById(command.routeId(), command.merchantId())
-                .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, command.routeId()))));
-
-
-        OffsetDateTime now = OffsetDateTime.now();
-        route.cancel(command.creator(), now);
-        routeAggregateRepositoryPort.save(route);
-
-        routeAssignmentRepositoryPort
-                .findActiveByRouteId(route.getId(), command.merchantId())
-                .ifPresent(routeAssignment -> {
-                    routeAssignment.cancel(command.creator(), now);
-                    routeAssignmentRepositoryPort.save(routeAssignment);
-                });
-
-        return DeleteRouteResult.builder()
-                .creator(command.creator())
-                .routeId(route.getId())
-                .routeCode(route.getRouteCode())
-                .status(route.getStatus().name())
-                .updatedAt(route.getUpdatedAt())
                 .build();
     }
 
@@ -575,57 +102,158 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .build();
     }
 
-    private void validateRoutePoints(CreateRouteCommand command) {
-        List<RoutePointCommand> routePoints = command.routePoints();
-        if (routePoints == null || routePoints.isEmpty()) return;
 
-        Set<Integer> setOfOrders = new HashSet<>();
+    @Override
+    public FetchRoutesResult fetchRoutes(FetchRoutesQuery query) {
+        PageInfo pageInfo = validatePageContext(query.context(), query.pageContext());
+        // external is 1-based; Spring Data is 0-based
+        PagedResult<RouteFetchView> page = routeQueryPort.fetchRoutes(
+                query.merchantId(),
+                query.merchantName(),
+                pageInfo.pageNumber() - 1,
+                pageInfo.pageSize()
+        );
 
-        for(RoutePointCommand point : routePoints) {
-            if(point.operationOrder() == null || Integer.parseInt(point.operationOrder()) <= 0) {
-                throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                        ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_STOP_ORDER));
-            }
+        List<RouteFetchView> routes = page.getItems();
+        RouteEnrichment enrichment = enrichRoutes(
+                routes.stream().map(RouteFetchView::getId).toList(),
+                query.merchantId()
+        );
 
-            if(!setOfOrders.add(Integer.valueOf(point.operationOrder()))) {
-                throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                        ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_STOP_ORDER));
-            }
+        List<FetchRouteResult> items = routes.stream()
+                .map(route -> toFetchRouteItem(route, enrichment))
+                .collect(Collectors.toList());
 
-            if(point.plannedArrivalTime() == null || point.plannedDepartureTime() == null) {
-                throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                        ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PLANNED_TIME));
-            }
+        return FetchRoutesResult.builder()
+                .items(items)
+                .pageNumber(page.getPageNumber() + 1)
+                .pageSize(page.getPageSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .build();
+    }
 
-            OffsetDateTime plannedArrivalTime = OffsetDateTime.parse(point.plannedArrivalTime());
-            OffsetDateTime plannedDepartureTime = OffsetDateTime.parse(point.plannedDepartureTime());
+    private SearchWindow resolveSearchWindow(SearchRouteQuery query) {
+        LocalDate departureDate = DateTimeUtils.parseDateOrThrow(query.departureDate(), "departureDate",
+                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
+        LocalTime fromTime = DateTimeUtils.parseTimeNullable(query.fromTime(), "fromTime",
+                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
+        LocalTime toTime = DateTimeUtils.parseTimeNullable(query.toTime(), "toTime",
+                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
 
-            if(!plannedArrivalTime.isBefore(plannedDepartureTime)) {
-                throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                        ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PLANNED_TIME));
-            }
-
-            boolean hasOpId = point.operationPointId() != null && !point.operationPointId().isBlank();
-            boolean hasCustomName = point.stopName() != null && !point.stopName().isBlank();
-            if (hasOpId == hasCustomName) {
-                throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                        ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, "Either operationPointId or stopName is required (but not both)"));
-            }
-
-            if (hasOpId) {
-                operationPointRepositoryPort.findById(point.operationPointId().trim(), command.merchantId())
-                        .orElseThrow(() -> new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                                ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND,
-                                        String.format(OPERATION_POINT_NOT_FOUND, point.operationPointId().trim()))));
-            } else {
-                // custom stop: basic coordinate sanity
-                if (point.stopLatitude() != null ^ point.stopLongitude() != null) {
-                    throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                            ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, "stopLatitude and stopLongitude must be provided together"));
-                }
-            }
-
+        if (fromTime != null && toTime != null && fromTime.isAfter(toTime)) {
+            throw new BusinessException(query.context().requestId(), query.context().requestDateTime(), query.context().channel(),
+                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_SEARCH_TIME));
         }
 
+        OffsetDateTime start = fromTime == null
+                ? RouteSpecification.dayStart(departureDate, DEFAULT_ZONE)
+                : RouteSpecification.atTime(departureDate, fromTime, DEFAULT_ZONE);
+        OffsetDateTime endExclusive = toTime == null
+                ? RouteSpecification.dayEndExclusive(departureDate, DEFAULT_ZONE)
+                : RouteSpecification.atTime(departureDate, toTime, DEFAULT_ZONE);
+
+        return new SearchWindow(start, endExclusive);
+    }
+
+    private RouteEnrichment enrichRoutes(List<String> routeIds, String merchantId) {
+        if (routeIds.isEmpty()) {
+            return new RouteEnrichment(Map.of(), Map.of(), Map.of(), Map.of());
+        }
+
+        Map<String, Long> seatAvailable = routeSeatAvailabilityPort.countAvailableSeats(routeIds);
+        Map<String, RouteAssignmentRecord> assignments =
+                routeAssignmentRepositoryPort.findLatestActiveByRouteIds(routeIds, merchantId);
+        List<String> vehicleIds = assignments.values().stream()
+                .map(RouteAssignmentRecord::getVehicleId)
+                .distinct()
+                .toList();
+        Map<String, VehicleSnapshot> vehicles = vehicleIds.isEmpty()
+                ? Map.of()
+                : routeVehicleRepositoryPort.findByIds(vehicleIds, merchantId);
+        Map<String, List<RouteStopPlan>> stopsByRouteId = routePointRepositoryPort.findByRouteIds(routeIds);
+
+        return new RouteEnrichment(assignments, seatAvailable, vehicles, stopsByRouteId);
+    }
+
+    private SearchRouteItemResult toSearchRouteItem(RouteSearchView route, RouteEnrichment enrichment) {
+        RouteAssignmentRecord assignment = enrichment.assignments().get(route.getId());
+        VehicleSnapshot vehicle = findVehicle(assignment, enrichment);
+
+        return SearchRouteItemResult.builder()
+                .id(route.getId())
+                .routeCode(route.getRouteCode())
+                .pickupBranch(route.getPickupBranch())
+                .origin(route.getOrigin())
+                .destination(route.getDestination())
+                .availableSeats(enrichment.seatAvailable().getOrDefault(route.getId(), 0L))
+                .plannedStartTime(route.getPlannedStartTime())
+                .plannedEndTime(route.getPlannedEndTime())
+                .vehiclePlate(vehicle == null ? null : vehicle.getVehiclePlate())
+                .hasFloor(vehicle != null && vehicle.isHasFloor())
+                .routePoints(toRoutePoints(enrichment.stopsByRouteId().get(route.getId())))
+                .build();
+    }
+
+    private PageInfo validatePageContext(RequestContext context, PageContext query) {
+        int pageSize = ApiRequestUtils.parseIntOrDefault(query.pageSize(), DEFAULT_PAGE_SIZE, "pageSize",
+                context.requestId(), context.requestDateTime(), context.channel());
+        int pageNumber = ApiRequestUtils.parseIntOrDefault(query.pageNumber(), DEFAULT_PAGE_NUMBER, "pageNumber",
+                context.requestId(), context.requestDateTime(), context.channel());
+
+        if (pageSize < 1 || pageSize > 100) {
+            throw new BusinessException(context.requestId(), context.requestDateTime(), context.channel(),
+                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_SIZE));
+        }
+        if (pageNumber < 1) {
+            throw new BusinessException(context.requestId(), context.requestDateTime(), context.channel(),
+                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_NUMBER));
+        }
+
+        return new PageInfo(pageSize, pageNumber);
+    }
+
+    private FetchRouteResult toFetchRouteItem(RouteFetchView route, RouteEnrichment enrichment) {
+        RouteAssignmentRecord assignment = enrichment.assignments().get(route.getId());
+        VehicleSnapshot vehicle = findVehicle(assignment, enrichment);
+
+        return FetchRouteResult.builder()
+                .id(route.getId())
+                .creator(route.getCreator())
+                .pickupBranch(route.getPickupBranch())
+                .routeCode(route.getRouteCode())
+                .origin(route.getOrigin())
+                .destination(route.getDestination())
+                .plannedStartTime(route.getPlannedStartTime())
+                .plannedEndTime(route.getPlannedEndTime())
+                .actualStartTime(route.getActualStartTime())
+                .actualEndTime(route.getActualEndTime())
+                .status(route.getStatus())
+                .availableSeats(enrichment.seatAvailable().getOrDefault(route.getId(), 0L))
+                .vehicleId(assignment == null ? null : assignment.getVehicleId())
+                .vehiclePlate(vehicle == null ? null : vehicle.getVehiclePlate())
+                .hasFloor(vehicle != null && vehicle.isHasFloor())
+                .assignedAt(assignment == null ? null : assignment.getAssignedAt())
+                .routePoints(toRoutePoints(enrichment.stopsByRouteId().get(route.getId())))
+                .build();
+    }
+
+    private VehicleSnapshot findVehicle(RouteAssignmentRecord assignment, RouteEnrichment enrichment) {
+        return assignment == null ? null : enrichment.vehicles().get(assignment.getVehicleId());
+    }
+
+    private List<RoutePointResult> toRoutePoints(List<RouteStopPlan> stops) {
+        return (stops == null ? List.<RouteStopPlan>of() : stops).stream()
+                .map(this::toRoutePoint)
+                .toList();
+    }
+
+
+    private record RouteEnrichment(
+            Map<String, RouteAssignmentRecord> assignments,
+            Map<String, Long> seatAvailable,
+            Map<String, VehicleSnapshot> vehicles,
+            Map<String, List<RouteStopPlan>> stopsByRouteId
+    ) {
     }
 }

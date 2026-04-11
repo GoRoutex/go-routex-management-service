@@ -2,15 +2,43 @@ package vn.com.routex.hub.management.service.infrastructure.persistence.utils;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.experimental.UtilityClass;
+import vn.com.routex.hub.management.service.application.command.common.PageContext;
 import vn.com.routex.hub.management.service.application.command.common.RequestContext;
 import vn.com.routex.hub.management.service.infrastructure.persistence.config.RequestAttributes;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
 
+import java.util.List;
+
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.DEFAULT_PAGE_NUMBER;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.DEFAULT_PAGE_SIZE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_NUMBER;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_SIZE;
 
 @UtilityClass
 public class ApiRequestUtils {
+
+
+    public List<Integer> validatePageContext(RequestContext context, PageContext query) {
+        int pageSize = parseIntOrDefault(query.pageSize(), DEFAULT_PAGE_SIZE, "pageSize",
+                context.requestId(), context.requestDateTime(), context.channel());
+        int pageNumber = parseIntOrDefault(query.pageNumber(), DEFAULT_PAGE_NUMBER, "pageNumber",
+                context.requestId(), context.requestDateTime(), context.channel());
+
+        if (pageSize < 1 || pageSize > 100) {
+            throw new BusinessException( context.requestId(),  context.requestDateTime(),  context.channel(),
+                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_SIZE));
+        }
+        if (pageNumber < 1) {
+            throw new BusinessException( context.requestId(),  context.requestDateTime(),  context.channel(),
+                    ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_NUMBER));
+        }
+
+        return List.of(pageSize, pageNumber);
+
+    }
+
     public BaseRequest getBaseRequestOrDefault(HttpServletRequest request) {
 
         String requestId =
