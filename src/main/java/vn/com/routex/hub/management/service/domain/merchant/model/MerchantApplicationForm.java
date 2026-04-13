@@ -27,18 +27,16 @@ public class MerchantApplicationForm extends AbstractAuditingEntity {
     private ApplicationFormBankInfo bankInfo;
     private ApplicationFormOwner ownerInfo;
     private String approvedBy;
+    private String address;
     private OffsetDateTime approvedAt;
     private String businessLicenseUrl;
     private String businessLicense;
-    private String city;
     private String country;
-    private String description;
-    private String district;
     private String formCode;
-    private String merchantId;
-    private String merchantName;
     private String postalCode;
     private String province;
+    private String ward;
+    private String description;
     private String rejectedBy;
     private String rejectionReason;
     private ApplicationFormStatus status;
@@ -46,27 +44,6 @@ public class MerchantApplicationForm extends AbstractAuditingEntity {
     private String submittedBy;
     private String taxCode;
     private String slug;
-
-    public void approve(String merchantId, String approvedBy, OffsetDateTime approvedAt) {
-        this.merchantId = merchantId;
-        this.approvedBy = approvedBy;
-        this.approvedAt = approvedAt;
-        this.rejectedBy = null;
-        this.rejectionReason = null;
-        this.status = ApplicationFormStatus.APPROVED;
-        this.setUpdatedAt(approvedAt);
-        this.setUpdatedBy(approvedBy);
-    }
-
-    public void reject(String rejectedBy, String rejectionReason, OffsetDateTime rejectedAt) {
-        this.rejectedBy = rejectedBy;
-        this.rejectionReason = rejectionReason;
-        this.approvedBy = null;
-        this.approvedAt = null;
-        this.status = ApplicationFormStatus.REJECTED;
-        this.setUpdatedAt(rejectedAt);
-        this.setUpdatedBy(rejectedBy);
-    }
 
     public static MerchantApplicationForm submit(
             String id,
@@ -78,8 +55,8 @@ public class MerchantApplicationForm extends AbstractAuditingEntity {
             String businessLicenseUrl,
             String country,
             String province,
-            String district,
-            String city,
+            String address,
+            String ward,
             String postalCode,
             String description,
             String slug,
@@ -106,12 +83,11 @@ public class MerchantApplicationForm extends AbstractAuditingEntity {
                 .businessLicenseUrl(businessLicenseUrl)
                 .country(country)
                 .province(province)
-                .district(district)
-                .city(city)
+                .address(address)
+                .ward(ward)
                 .postalCode(postalCode)
                 .description(description)
                 .slug(slug)
-                .merchantName(displayName)
                 .contact(new ApplicationFormContact(contactEmail, contactName, contactPhone))
                 .bankInfo(new ApplicationFormBankInfo(bankAccountName, bankAccountNumber, bankBranch, bankName))
                 .ownerInfo(new ApplicationFormOwner(ownerEmail, ownerFullName, ownerName, ownerPhone))

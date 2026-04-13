@@ -19,13 +19,11 @@ public class MerchantApplicationFormPersistenceMapper {
                 .approvedAt(entity.getApprovedAt())
                 .businessLicenseUrl(entity.getBusinessLicenseUrl())
                 .businessLicense(entity.getBusinessLicense())
-                .city(entity.getCity())
+                .address(entity.getAddress())
+                .ward(entity.getWard())
                 .country(entity.getCountry())
                 .description(entity.getDescription())
-                .district(entity.getDistrict())
                 .formCode(entity.getFormCode())
-                .merchantId(entity.getMerchantId())
-                .merchantName(entity.getMerchantName())
                 .postalCode(entity.getPostalCode())
                 .province(entity.getProvince())
                 .rejectedBy(entity.getRejectedBy())
@@ -54,13 +52,11 @@ public class MerchantApplicationFormPersistenceMapper {
         entity.setApprovedAt(domain.getApprovedAt());
         entity.setBusinessLicenseUrl(domain.getBusinessLicenseUrl());
         entity.setBusinessLicense(domain.getBusinessLicense());
-        entity.setCity(domain.getCity());
+        entity.setWard(domain.getWard());
+        entity.setAddress(domain.getAddress());
         entity.setCountry(domain.getCountry());
         entity.setDescription(domain.getDescription());
-        entity.setDistrict(domain.getDistrict());
         entity.setFormCode(domain.getFormCode());
-        entity.setMerchantId(domain.getMerchantId());
-        entity.setMerchantName(domain.getMerchantName());
         entity.setPostalCode(domain.getPostalCode());
         entity.setProvince(domain.getProvince());
         entity.setRejectedBy(domain.getRejectedBy());

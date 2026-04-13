@@ -23,10 +23,10 @@ import java.util.stream.Collectors;
 
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.API_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.API_VERSION;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.APPLICATION_FORM;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.DETAIL_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.FETCH_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.MANAGEMENT_PATH;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.MERCHANT_APPLICATION_FORM_SERVICE;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,7 +37,7 @@ public class MerchantApplicationFormManagementController {
     private final MerchantApplicationFormManagementService merchantApplicationFormManagementService;
     private final ApiResultFactory apiResultFactory;
 
-    @GetMapping(MERCHANT_APPLICATION_FORM_SERVICE + FETCH_PATH)
+    @GetMapping(APPLICATION_FORM + FETCH_PATH)
     public ResponseEntity<FetchPendingMerchantApplicationFormsResponse> fetchPendingApplicationForms(
             HttpServletRequest servletRequest,
             @RequestParam(required = false) String status,
@@ -70,12 +70,11 @@ public class MerchantApplicationFormManagementController {
                                         .businessLicenseUrl(item.businessLicenseUrl())
                                         .country(item.country())
                                         .province(item.province())
-                                        .district(item.district())
-                                        .city(item.city())
+                                        .address(item.address())
+                                        .ward(item.ward())
                                         .postalCode(item.postalCode())
                                         .description(item.description())
                                         .slug(item.slug())
-                                        .merchantName(item.merchantName())
                                         .submittedBy(item.submittedBy())
                                         .submittedAt(item.submittedAt())
                                         .status(item.status())
@@ -96,7 +95,7 @@ public class MerchantApplicationFormManagementController {
         return HttpUtils.buildResponse(baseRequest, response);
     }
 
-    @GetMapping(MERCHANT_APPLICATION_FORM_SERVICE + DETAIL_PATH)
+    @GetMapping(APPLICATION_FORM + DETAIL_PATH)
     public ResponseEntity<FetchMerchantApplicationFormDetailResponse> fetchApplicationFormDetail(
             HttpServletRequest servletRequest,
             @RequestParam String applicationFormId
@@ -121,15 +120,15 @@ public class MerchantApplicationFormManagementController {
                         .taxCode(result.taxCode())
                         .businessLicense(result.businessLicense())
                         .businessLicenseUrl(result.businessLicenseUrl())
-                        .country(result.country())
-                        .province(result.province())
-                        .district(result.district())
-                        .city(result.city())
-                        .postalCode(result.postalCode())
+                        .address(FetchMerchantApplicationFormDetailResponse.AddressData.builder()
+                                .province(result.address().province())
+                                .country(result.address().country())
+                                .address(result.address().address())
+                                .ward(result.address().ward())
+                                .postalCode(result.address().postalCode())
+                                .build())
                         .description(result.description())
                         .slug(result.slug())
-                        .merchantId(result.merchantId())
-                        .merchantName(result.merchantName())
                         .approvedBy(result.approvedBy())
                         .approvedAt(result.approvedAt())
                         .rejectedBy(result.rejectedBy())

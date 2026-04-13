@@ -42,12 +42,11 @@ public class FetchPendingMerchantApplicationFormsResponse extends BaseResponse<F
         private String businessLicenseUrl;
         private String country;
         private String province;
-        private String district;
-        private String city;
+        private String ward;
+        private String address;
         private String postalCode;
         private String description;
         private String slug;
-        private String merchantName;
         private String submittedBy;
         private OffsetDateTime submittedAt;
         private ApplicationFormStatus status;

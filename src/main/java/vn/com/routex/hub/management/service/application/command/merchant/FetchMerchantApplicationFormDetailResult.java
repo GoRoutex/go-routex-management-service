@@ -14,15 +14,9 @@ public record FetchMerchantApplicationFormDetailResult(
         String taxCode,
         String businessLicense,
         String businessLicenseUrl,
-        String country,
-        String province,
-        String district,
-        String city,
-        String postalCode,
+        AddressResult address,
         String description,
         String slug,
-        String merchantId,
-        String merchantName,
         String approvedBy,
         OffsetDateTime approvedAt,
         String rejectedBy,
@@ -34,6 +28,17 @@ public record FetchMerchantApplicationFormDetailResult(
         BankInfoResult bankInfo,
         OwnerInfoResult ownerInfo
 ) {
+
+    @Builder
+    public record AddressResult(
+            String province,
+            String ward,
+            String address,
+            String postalCode,
+            String country
+    ) {
+
+    }
     @Builder
     public record ContactResult(
             String contactEmail,
