@@ -52,6 +52,11 @@ spring:
     mapper:
       sort-properties-alphabetically: false
 
+  servlet:
+    multipart:
+      max-file-size: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:10MB}
+      max-request-size: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE:12MB}
+
 management:
   endpoint:
     health:

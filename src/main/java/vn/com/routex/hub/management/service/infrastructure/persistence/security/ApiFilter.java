@@ -60,6 +60,15 @@ public class ApiFilter extends OncePerRequestFilter {
             response.getWriter().write("Invalid Request");
             response.getWriter().flush();
             return;
+        } catch (RuntimeException e) {
+            if (multiPartRequest && isMultipartSizeExceeded(e)) {
+                log.warn("Multipart request rejected because file size exceeded the configured limit: {}", e.getMessage());
+                response.setStatus(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
+                response.getWriter().write("Uploaded file exceeds the maximum permitted size");
+                response.getWriter().flush();
+                return;
+            }
+            throw e;
         }
 
         try {
@@ -182,5 +191,23 @@ public class ApiFilter extends OncePerRequestFilter {
         } catch (Exception ignored) {
             return null;
         }
+    }
+
+    private boolean isMultipartSizeExceeded(Throwable throwable) {
+        Throwable current = throwable;
+        while (current != null) {
+            String className = current.getClass().getName();
+            String message = current.getMessage();
+            if (className.contains("MaxUploadSizeExceededException")
+                    || className.contains("FileSizeLimitExceededException")
+                    || className.contains("SizeLimitExceededException")) {
+                return true;
+            }
+            if (message != null && message.contains("maximum permitted size")) {
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
     }
 }

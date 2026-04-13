@@ -142,8 +142,6 @@ public class AuthoritiesManagementServiceImpl implements AuthoritiesManagementSe
                     ExceptionUtils.buildResultResponse(DUPLICATE_ERROR, DUPLICATE_USER_ROLE_MESSAGE));
         }
 
-        userRoleAssignmentRepositoryPort.deleteByUserId(command.userId());
-
         UserRoleAssignment userRoleAssignment = UserRoleAssignment.assign(
                 command.userId(),
                 roleAggregate.getId(),

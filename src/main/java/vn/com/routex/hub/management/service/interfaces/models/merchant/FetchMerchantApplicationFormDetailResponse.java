@@ -29,16 +29,10 @@ public class FetchMerchantApplicationFormDetailResponse extends BaseResponse<Fet
         private String taxCode;
         private String businessLicense;
         private String businessLicenseUrl;
-        private String country;
-        private String province;
-        private String district;
-        private String city;
-        private String postalCode;
         private String description;
         private String slug;
-        private String merchantId;
-        private String merchantName;
         private String approvedBy;
+        private AddressData address;
         private OffsetDateTime approvedAt;
         private String rejectedBy;
         private String rejectionReason;
@@ -48,6 +42,19 @@ public class FetchMerchantApplicationFormDetailResponse extends BaseResponse<Fet
         private ContactData contact;
         private BankInfoData bankInfo;
         private OwnerInfoData ownerInfo;
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @SuperBuilder
+    public static class AddressData {
+        private String country;
+        private String province;
+        private String address;
+        private String ward;
+        private String postalCode;
     }
 
     @Getter
