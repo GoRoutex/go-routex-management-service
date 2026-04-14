@@ -15,6 +15,7 @@ public record FetchMerchantApplicationFormDetailResult(
         String businessLicense,
         String businessLicenseUrl,
         AddressResult address,
+        String logoUrl,
         String description,
         String slug,
         String approvedBy,

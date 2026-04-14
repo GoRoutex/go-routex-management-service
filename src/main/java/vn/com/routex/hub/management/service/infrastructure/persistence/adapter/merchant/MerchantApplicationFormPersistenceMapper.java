@@ -17,6 +17,7 @@ public class MerchantApplicationFormPersistenceMapper {
                 .ownerInfo(entity.getOwnerInfo())
                 .approvedBy(entity.getApprovedBy())
                 .approvedAt(entity.getApprovedAt())
+                .logoUrl(entity.getLogoUrl())
                 .businessLicenseUrl(entity.getBusinessLicenseUrl())
                 .businessLicense(entity.getBusinessLicense())
                 .address(entity.getAddress())
@@ -47,6 +48,7 @@ public class MerchantApplicationFormPersistenceMapper {
         entity.setLegalName(domain.getLegalName());
         entity.setContact(domain.getContact());
         entity.setBankInfo(domain.getBankInfo());
+        entity.setLogoUrl(domain.getLogoUrl());
         entity.setOwnerInfo(domain.getOwnerInfo());
         entity.setApprovedBy(domain.getApprovedBy());
         entity.setApprovedAt(domain.getApprovedAt());

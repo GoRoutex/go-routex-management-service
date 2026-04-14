@@ -34,6 +34,7 @@ public record FetchPendingMerchantApplicationFormsResult(
             OffsetDateTime submittedAt,
             ApplicationFormStatus status,
             String contactName,
+            String logoUrl,
             String contactPhone,
             String contactEmail
     ) {

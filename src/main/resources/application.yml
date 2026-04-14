@@ -69,7 +69,7 @@ management:
       enabled: true
 
 server:
-  port: ${SERVER_PORT:8000}
+  port: ${SERVER_PORT:8082}
 
 locking:
   batch: 100

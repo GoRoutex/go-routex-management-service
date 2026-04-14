@@ -40,6 +40,7 @@ public class FetchPendingMerchantApplicationFormsResponse extends BaseResponse<F
         private String taxCode;
         private String businessLicense;
         private String businessLicenseUrl;
+        private String logoUrl;
         private String country;
         private String province;
         private String ward;

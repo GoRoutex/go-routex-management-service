@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @Builder
-public record UpdateMerchantResult(
+public record FetchMerchantDetailResult(
         String id,
         String code,
         String slug,
@@ -38,6 +38,7 @@ public record UpdateMerchantResult(
         String bankBranch,
         BigDecimal commissionRate,
         MerchantStatus status,
-        String updatedBy
+        OffsetDateTime approvedAt,
+        String approvedBy
 ) {
 }

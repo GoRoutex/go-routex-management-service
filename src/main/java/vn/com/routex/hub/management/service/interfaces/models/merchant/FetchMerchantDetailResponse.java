@@ -1,38 +1,29 @@
 package vn.com.routex.hub.management.service.interfaces.models.merchant;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.domain.merchant.MerchantStatus;
-import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
+import vn.com.routex.hub.management.service.interfaces.models.base.BaseResponse;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-public class UpdateMerchantRequest extends BaseRequest {
-
-    @Valid
-    @NotNull
-    private UpdateMerchantRequestData data;
+public class FetchMerchantDetailResponse extends BaseResponse<FetchMerchantDetailResponse.FetchMerchantDetailData> {
 
     @Getter
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
     @SuperBuilder
-    public static class UpdateMerchantRequestData {
-        private String merchantId;
-        private String updatedBy;
+    public static class FetchMerchantDetailData {
+        private String id;
         private String code;
         private String slug;
         private String displayName;
@@ -62,5 +53,7 @@ public class UpdateMerchantRequest extends BaseRequest {
         private String bankBranch;
         private BigDecimal commissionRate;
         private MerchantStatus status;
+        private OffsetDateTime approvedAt;
+        private String approvedBy;
     }
 }
