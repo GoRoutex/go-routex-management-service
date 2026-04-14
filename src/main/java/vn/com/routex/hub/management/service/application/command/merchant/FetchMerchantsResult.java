@@ -4,6 +4,7 @@ import lombok.Builder;
 import vn.com.routex.hub.management.service.domain.merchant.MerchantStatus;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Builder
@@ -23,14 +24,36 @@ public record FetchMerchantsResult(
     public record FetchMerchantItemResult(
             String id,
             String code,
-            String name,
+            String slug,
+            String displayName,
+            String legalName,
             String taxCode,
+            String businessLicenseNumber,
+            String businessLicenseUrl,
             String phone,
             String email,
+            String logoUrl,
+            String description,
             String address,
+            String ward,
+            String province,
+            String country,
+            String postalCode,
             String representativeName,
+            String contactName,
+            String contactPhone,
+            String contactEmail,
+            String ownerFullName,
+            String ownerPhone,
+            String ownerEmail,
+            String bankAccountName,
+            String bankAccountNumber,
+            String bankName,
+            String bankBranch,
             BigDecimal commissionRate,
-            MerchantStatus status
+            MerchantStatus status,
+            OffsetDateTime approvedAt,
+            String approvedBy
     ) {
     }
 }

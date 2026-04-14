@@ -26,13 +26,14 @@ import vn.com.routex.hub.management.service.interfaces.models.media.UploadMediaR
 
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.API_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.API_VERSION;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.MANAGEMENT_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.MEDIA_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.UPLOAD;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_MESSAGE;
 
 @RestController
-@RequestMapping(API_PATH + API_VERSION + MEDIA_PATH)
+@RequestMapping(API_PATH + API_VERSION + MANAGEMENT_PATH + MEDIA_PATH)
 @RequiredArgsConstructor
 public class MediaController {
 

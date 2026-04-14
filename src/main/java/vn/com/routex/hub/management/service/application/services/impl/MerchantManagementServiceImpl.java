@@ -2,6 +2,8 @@ package vn.com.routex.hub.management.service.application.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import vn.com.routex.hub.management.service.application.command.merchant.FetchMerchantDetailQuery;
+import vn.com.routex.hub.management.service.application.command.merchant.FetchMerchantDetailResult;
 import vn.com.routex.hub.management.service.application.command.merchant.FetchMerchantsQuery;
 import vn.com.routex.hub.management.service.application.command.merchant.FetchMerchantsResult;
 import vn.com.routex.hub.management.service.application.command.merchant.UpdateMerchantCommand;
@@ -37,6 +39,55 @@ public class MerchantManagementServiceImpl implements MerchantManagementService 
     private final MerchantApplicationFormEntityRepository merchantApplicationFormEntityRepository;
 
     @Override
+    public FetchMerchantDetailResult fetchMerchantDetail(FetchMerchantDetailQuery query) {
+        Merchant merchant = merchantRepositoryPort.findById(query.merchantId())
+                .orElseThrow(() -> new BusinessException(
+                        query.context().requestId(),
+                        query.context().requestDateTime(),
+                        query.context().channel(),
+                        ExceptionUtils.buildResultResponse(
+                                RECORD_NOT_FOUND,
+                                String.format(MERCHANT_NOT_FOUND_BY_ID, query.merchantId())
+                        )
+                ));
+
+        return FetchMerchantDetailResult.builder()
+                .id(merchant.getId())
+                .code(merchant.getCode())
+                .slug(merchant.getSlug())
+                .displayName(merchant.getDisplayName())
+                .legalName(merchant.getLegalName())
+                .taxCode(merchant.getTaxCode())
+                .businessLicenseNumber(merchant.getBusinessLicenseNumber())
+                .businessLicenseUrl(merchant.getBusinessLicenseUrl())
+                .phone(merchant.getPhone())
+                .email(merchant.getEmail())
+                .logoUrl(merchant.getLogoUrl())
+                .description(merchant.getDescription())
+                .address(merchant.getAddress())
+                .ward(merchant.getWard())
+                .province(merchant.getProvince())
+                .country(merchant.getCountry())
+                .postalCode(merchant.getPostalCode())
+                .representativeName(merchant.getRepresentativeName())
+                .contactName(merchant.getContactName())
+                .contactPhone(merchant.getContactPhone())
+                .contactEmail(merchant.getContactEmail())
+                .ownerFullName(merchant.getOwnerFullName())
+                .ownerPhone(merchant.getOwnerPhone())
+                .ownerEmail(merchant.getOwnerEmail())
+                .bankAccountName(merchant.getBankAccountName())
+                .bankAccountNumber(merchant.getBankAccountNumber())
+                .bankName(merchant.getBankName())
+                .bankBranch(merchant.getBankBranch())
+                .commissionRate(merchant.getCommissionRate())
+                .status(merchant.getStatus())
+                .approvedAt(merchant.getApprovedAt())
+                .approvedBy(merchant.getApprovedBy())
+                .build();
+    }
+
+    @Override
     public FetchMerchantsResult fetchMerchants(FetchMerchantsQuery query) {
         int pageSize = ApiRequestUtils.parseIntOrDefault(query.pageSize(), DEFAULT_PAGE_SIZE, "pageSize",
                 query.context().requestId(), query.context().requestDateTime(), query.context().channel());
@@ -57,14 +108,36 @@ public class MerchantManagementServiceImpl implements MerchantManagementService 
                 .map(merchant -> FetchMerchantsResult.FetchMerchantItemResult.builder()
                         .id(merchant.getId())
                         .code(merchant.getCode())
-                        .name(merchant.getName())
+                        .slug(merchant.getSlug())
+                        .displayName(merchant.getDisplayName())
+                        .legalName(merchant.getLegalName())
                         .taxCode(merchant.getTaxCode())
+                        .businessLicenseNumber(merchant.getBusinessLicenseNumber())
+                        .businessLicenseUrl(merchant.getBusinessLicenseUrl())
                         .phone(merchant.getPhone())
                         .email(merchant.getEmail())
+                        .logoUrl(merchant.getLogoUrl())
+                        .description(merchant.getDescription())
                         .address(merchant.getAddress())
+                        .ward(merchant.getWard())
+                        .province(merchant.getProvince())
+                        .country(merchant.getCountry())
+                        .postalCode(merchant.getPostalCode())
                         .representativeName(merchant.getRepresentativeName())
+                        .contactName(merchant.getContactName())
+                        .contactPhone(merchant.getContactPhone())
+                        .contactEmail(merchant.getContactEmail())
+                        .ownerFullName(merchant.getOwnerFullName())
+                        .ownerPhone(merchant.getOwnerPhone())
+                        .ownerEmail(merchant.getOwnerEmail())
+                        .bankAccountName(merchant.getBankAccountName())
+                        .bankAccountNumber(merchant.getBankAccountNumber())
+                        .bankName(merchant.getBankName())
+                        .bankBranch(merchant.getBankBranch())
                         .commissionRate(merchant.getCommissionRate())
                         .status(merchant.getStatus())
+                        .approvedAt(merchant.getApprovedAt())
+                        .approvedBy(merchant.getApprovedBy())
                         .build())
                 .toList();
 
@@ -97,14 +170,60 @@ public class MerchantManagementServiceImpl implements MerchantManagementService 
         validateCommissionRate(command.commissionRate(), command);
 
         Merchant updated = existing.toBuilder()
-                .name(ApiRequestUtils.firstNonBlank(command.name(), existing.getName()))
+                .code(ApiRequestUtils.firstNonBlank(command.code(), existing.getCode()))
+                .slug(ApiRequestUtils.firstNonBlank(command.slug(), existing.getSlug()))
+
+                .displayName(ApiRequestUtils.firstNonBlank(command.displayName(), existing.getDisplayName()))
+                .legalName(ApiRequestUtils.firstNonBlank(command.legalName(), existing.getLegalName()))
+
                 .taxCode(ApiRequestUtils.firstNonBlank(command.taxCode(), existing.getTaxCode()))
+                .businessLicenseNumber(ApiRequestUtils.firstNonBlank(
+                        command.businessLicenseNumber(), existing.getBusinessLicenseNumber()))
+                .businessLicenseUrl(ApiRequestUtils.firstNonBlank(
+                        command.businessLicenseUrl(), existing.getBusinessLicenseUrl()))
+
                 .phone(ApiRequestUtils.firstNonBlank(command.phone(), existing.getPhone()))
                 .email(ApiRequestUtils.firstNonBlank(command.email(), existing.getEmail()))
+                .logoUrl(ApiRequestUtils.firstNonBlank(command.logoUrl(), existing.getLogoUrl()))
+                .description(ApiRequestUtils.firstNonBlank(command.description(), existing.getDescription()))
+
                 .address(ApiRequestUtils.firstNonBlank(command.address(), existing.getAddress()))
-                .representativeName(ApiRequestUtils.firstNonBlank(command.representativeName(), existing.getRepresentativeName()))
-                .commissionRate(command.commissionRate() == null ? existing.getCommissionRate() : command.commissionRate())
-                .status(command.status() == null ? existing.getStatus() : command.status())
+                .ward(ApiRequestUtils.firstNonBlank(command.ward(), existing.getWard()))
+                .province(ApiRequestUtils.firstNonBlank(command.province(), existing.getProvince()))
+                .country(ApiRequestUtils.firstNonBlank(command.country(), existing.getCountry()))
+                .postalCode(ApiRequestUtils.firstNonBlank(command.postalCode(), existing.getPostalCode()))
+
+                .representativeName(ApiRequestUtils.firstNonBlank(
+                        command.representativeName(), existing.getRepresentativeName()))
+
+                .contactName(ApiRequestUtils.firstNonBlank(command.contactName(), existing.getContactName()))
+                .contactPhone(ApiRequestUtils.firstNonBlank(command.contactPhone(), existing.getContactPhone()))
+                .contactEmail(ApiRequestUtils.firstNonBlank(command.contactEmail(), existing.getContactEmail()))
+
+                .ownerFullName(ApiRequestUtils.firstNonBlank(command.ownerFullName(), existing.getOwnerFullName()))
+                .ownerPhone(ApiRequestUtils.firstNonBlank(command.ownerPhone(), existing.getOwnerPhone()))
+                .ownerEmail(ApiRequestUtils.firstNonBlank(command.ownerEmail(), existing.getOwnerEmail()))
+
+                .bankAccountName(ApiRequestUtils.firstNonBlank(
+                        command.bankAccountName(), existing.getBankAccountName()))
+                .bankAccountNumber(ApiRequestUtils.firstNonBlank(
+                        command.bankAccountNumber(), existing.getBankAccountNumber()))
+                .bankName(ApiRequestUtils.firstNonBlank(command.bankName(), existing.getBankName()))
+                .bankBranch(ApiRequestUtils.firstNonBlank(command.bankBranch(), existing.getBankBranch()))
+
+                .commissionRate(command.commissionRate() == null
+                        ? existing.getCommissionRate()
+                        : command.commissionRate())
+
+                .status(command.status() == null
+                        ? existing.getStatus()
+                        : command.status())
+
+                .approvedAt(command.approvedAt() == null
+                        ? existing.getApprovedAt()
+                        : command.approvedAt())
+
+                .approvedBy(ApiRequestUtils.firstNonBlank(command.approvedBy(), existing.getApprovedBy()))
                 .updatedBy(ApiRequestUtils.firstNonBlank(command.updatedBy(), existing.getUpdatedBy()))
                 .build();
 
@@ -113,14 +232,35 @@ public class MerchantManagementServiceImpl implements MerchantManagementService 
         return UpdateMerchantResult.builder()
                 .id(saved.getId())
                 .code(saved.getCode())
-                .name(saved.getName())
+                .slug(saved.getSlug())
+                .displayName(saved.getDisplayName())
+                .legalName(saved.getLegalName())
                 .taxCode(saved.getTaxCode())
+                .businessLicenseNumber(saved.getBusinessLicenseNumber())
+                .businessLicenseUrl(saved.getBusinessLicenseUrl())
                 .phone(saved.getPhone())
                 .email(saved.getEmail())
+                .logoUrl(saved.getLogoUrl())
+                .description(saved.getDescription())
                 .address(saved.getAddress())
+                .ward(saved.getWard())
+                .province(saved.getProvince())
+                .country(saved.getCountry())
+                .postalCode(saved.getPostalCode())
                 .representativeName(saved.getRepresentativeName())
+                .contactName(saved.getContactName())
+                .contactPhone(saved.getContactPhone())
+                .contactEmail(saved.getContactEmail())
+                .ownerFullName(saved.getOwnerFullName())
+                .ownerPhone(saved.getOwnerPhone())
+                .ownerEmail(saved.getOwnerEmail())
+                .bankAccountName(saved.getBankAccountName())
+                .bankAccountNumber(saved.getBankAccountNumber())
+                .bankName(saved.getBankName())
+                .bankBranch(saved.getBankBranch())
                 .commissionRate(saved.getCommissionRate())
                 .status(saved.getStatus())
+                .updatedBy(command.updatedBy())
                 .build();
     }
 

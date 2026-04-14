@@ -34,6 +34,7 @@ public class MerchantApplicationFormEntity extends AbstractAuditingEntity {
     @Embedded
     private ApplicationFormOwner ownerInfo;
     private String approvedBy;
+    private String logoUrl;
     private OffsetDateTime approvedAt;
     private String businessLicenseUrl;
     private String businessLicense;

@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>vn.com.routex.hub</groupId>
-	<artifactId>management-service</artifactId>
+	<artifactId>go-routex-management-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>go-routex-management-service</name>
 	<description>Demo project for Spring Boot</description>
