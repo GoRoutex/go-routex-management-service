@@ -8,6 +8,8 @@ import java.util.List;
 @Builder
 public record SearchRouteItemResult(
         String id,
+        String merchantId,
+        String merchantName,
         String pickupBranch,
         String origin,
         String destination,

@@ -21,6 +21,8 @@ public class SearchRouteResponse extends BaseResponse<List<SearchRouteResponse.S
     @SuperBuilder
     public static class SearchRouteResponseData {
         private String id;
+        private String merchantId;
+        private String merchantName;
         private String pickupBranch;
         private String origin;
         private String destination;

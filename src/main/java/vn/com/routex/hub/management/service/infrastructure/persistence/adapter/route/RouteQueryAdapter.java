@@ -34,7 +34,7 @@ public class RouteQueryAdapter implements RouteQueryPort {
             OffsetDateTime endTime,
             int pageNumber,
             int pageSize
-    ) {
+        ) {
         Specification<RouteEntity> specification = Specification.where(RouteSpecification.hasMerchantId(merchantId))
                 .and(RouteSpecification.originContainsIgnoreCase(origin))
                 .and(RouteSpecification.destinationContainsIgnoreCase(destination))
@@ -49,6 +49,7 @@ public class RouteQueryAdapter implements RouteQueryPort {
                 .map(route -> {
                     RouteSearchView searchView = new RouteSearchView();
                     searchView.setId(route.getId());
+                    searchView.setMerchantId(route.getMerchantId());
                     searchView.setRouteCode(route.getRouteCode());
                     searchView.setPickupBranch(route.getPickupBranch());
                     searchView.setOrigin(route.getOrigin());

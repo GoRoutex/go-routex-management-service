@@ -15,6 +15,7 @@ import java.time.OffsetDateTime;
 @SuperBuilder
 public class RouteSearchView {
     private String id;
+    private String merchantId;
     private String routeCode;
     private String pickupBranch;
     private String origin;

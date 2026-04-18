@@ -7,13 +7,10 @@ import vn.com.routex.hub.management.service.application.command.common.RequestCo
 @Builder
 public record SearchRouteQuery(
         RequestContext context,
-        String merchantId,
         String origin,
         String destination,
         String departureDate,
         String seat,
-        String fromTime,
-        String toTime,
         PageContext pageContext
 ) {
 }
