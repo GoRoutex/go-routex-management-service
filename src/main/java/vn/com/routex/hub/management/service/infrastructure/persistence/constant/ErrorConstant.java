@@ -9,6 +9,7 @@ public class ErrorConstant {
     public static final String TIMEOUT_ERROR_MESSAGE = "Timeout";
     public static final String RECORD_NOT_FOUND = "1407";
     public static final String ROLE_NOT_FOUND = "Role not found";
+    public static final String ROLE_NOT_FOUND_ERROR = "Role %s not found";
     public static final String AUTHORITIES_NOT_FOUND = "Authorities not found";
     public static final String ROUTE_NOT_FOUND = "Route with Id %s not found";
     public static final String OPERATION_POINT_NOT_FOUND = "Operation point with Id %s not found";
@@ -25,6 +26,7 @@ public class ErrorConstant {
     public static final String SUCCESS_MESSAGE = "Success";
     public static final String DRIVER_NOT_FOUND_MESSAGE = "Driver Profile not found";
     public static final String USER_NOT_FOUND_MESSAGE = "User Profile not found";
+    public static final String USER_NOT_FOUND_BY_ID = "User with Id %s not found";
     public static final String INVALID_HTTP_REQUEST_RESOURCE_ERROR = "4000";
     public static final String INVALID_HTTP_REQUEST_RESOURCE_ERROR_MESSAGE = "Resource %s path is not exists";
     public static final String INVALID_INPUT_ERROR = "0310";
@@ -39,6 +41,8 @@ public class ErrorConstant {
     public static final String DUPLICATE_OPERATION_POINT_MESSAGE = "Operation point with this code already exists";
     public static final String DUPLICATE_PROVINCE = "Province is already exists by %s";
     public static final String DUPLICATE_USER_ROLE_MESSAGE = "User already has this role";
+    public static final String DUPLICATE_USER_EMAIL_MESSAGE = "User with email %s already exists";
+    public static final String DUPLICATE_USER_PHONE_MESSAGE = "User with phone number %s already exists";
     public static final String ROLE_EXISTS_ERROR = "Role with %s already exists";
     public static final String PERMISSION_EXISTS_ERROR = "Authorities with %s already exists";
     public static final String INVALID_PAGE_SIZE = "pageSize must be in [1..100]";

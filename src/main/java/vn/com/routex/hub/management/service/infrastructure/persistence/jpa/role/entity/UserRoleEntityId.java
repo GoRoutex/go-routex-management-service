@@ -1,4 +1,4 @@
-package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity;
+package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.role.entity;
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
@@ -9,14 +9,13 @@ import lombok.Setter;
 
 import java.io.Serializable;
 
-
 @Embeddable
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRoleIdEntity implements Serializable {
+public class UserRoleEntityId implements Serializable {
 
     private String userId;
     private String roleId;

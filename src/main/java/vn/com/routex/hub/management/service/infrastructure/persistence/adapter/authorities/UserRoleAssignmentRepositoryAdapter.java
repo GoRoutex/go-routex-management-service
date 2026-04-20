@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.management.service.domain.authorities.model.UserRoleAssignment;
 import vn.com.routex.hub.management.service.domain.authorities.port.UserRoleAssignmentRepositoryPort;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity.UserRoleIdEntity;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.repository.UserRolesEntityRepository;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.role.entity.UserRoleEntityId;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.role.repository.UserRolesEntityRepository;
 
 @Component
 @RequiredArgsConstructor
@@ -16,7 +16,7 @@ public class UserRoleAssignmentRepositoryAdapter implements UserRoleAssignmentRe
 
     @Override
     public boolean exists(String userId, String roleId) {
-        return userRoleJpaRepository.existsById(UserRoleIdEntity.builder()
+        return userRoleJpaRepository.existsById(UserRoleEntityId.builder()
                 .userId(userId)
                 .roleId(roleId)
                 .build());

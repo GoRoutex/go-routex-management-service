@@ -7,7 +7,9 @@ public class ApiConstant {
     public static final String MANAGEMENT_PATH = "/management";
     public static final String AUTHORITIES_PATH = "/authorities";
     public static final String ADD_ROLES = "/add-roles";
+    public static final String USER_SERVICE = "/user-service";
     public static final String SET_PERMISSIONS = "/set-permissions";
+    public static final String PROFILE_PATH = "/profile";
     public static final String SET_ROLE = "/set-role";
     public static final String MEDIA_PATH = "/media";
     public static final String UPLOAD = "/upload";

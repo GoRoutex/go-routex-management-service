@@ -3,8 +3,8 @@ package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.management.service.domain.authorities.model.UserRoleAssignment;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity.UserRoleIdEntity;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity.UserRolesEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.role.entity.UserRoleEntityId;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.role.entity.UserRolesEntity;
 
 
 @Component
@@ -21,7 +21,7 @@ final class UserRolePersistenceMapper {
 
     public UserRolesEntity toEntity(UserRoleAssignment assignment) {
         return UserRolesEntity.builder()
-                .id(UserRoleIdEntity.builder()
+                .id(UserRoleEntityId.builder()
                         .userId(assignment.getUserId())
                         .roleId(assignment.getRoleId())
                         .build())

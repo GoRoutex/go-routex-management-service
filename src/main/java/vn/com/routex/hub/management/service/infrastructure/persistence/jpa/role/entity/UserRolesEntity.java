@@ -1,5 +1,6 @@
-package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity;
+package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.role.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -21,8 +22,8 @@ import java.time.OffsetDateTime;
 public class UserRolesEntity {
 
     @EmbeddedId
-    private UserRoleIdEntity id;
+    private UserRoleEntityId id;
 
+    @Column(name = "ASSIGNED_AT")
     private OffsetDateTime assignedAt;
-
 }

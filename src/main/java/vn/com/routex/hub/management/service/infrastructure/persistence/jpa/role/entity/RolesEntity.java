@@ -1,5 +1,4 @@
-package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity;
-
+package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.role.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,7 +13,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.authorities.entity.AuthoritiesEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
 import java.util.HashSet;
 import java.util.Set;
