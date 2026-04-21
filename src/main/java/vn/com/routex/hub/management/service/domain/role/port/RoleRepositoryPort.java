@@ -2,7 +2,6 @@ package vn.com.routex.hub.management.service.domain.role.port;
 
 
 import vn.com.routex.hub.management.service.domain.authorities.model.RoleAggregate;
-import vn.com.routex.hub.management.service.domain.role.model.Roles;
 
 import java.util.Optional;
 

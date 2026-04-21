@@ -16,7 +16,6 @@ import vn.com.routex.hub.management.service.domain.authorities.model.PermissionP
 import vn.com.routex.hub.management.service.domain.authorities.model.RoleAggregate;
 import vn.com.routex.hub.management.service.domain.authorities.model.UserRoleAssignment;
 import vn.com.routex.hub.management.service.domain.authorities.port.PermissionRepositoryPort;
-import vn.com.routex.hub.management.service.domain.authorities.port.UserAccountLookupPort;
 import vn.com.routex.hub.management.service.domain.authorities.port.UserRoleAssignmentRepositoryPort;
 import vn.com.routex.hub.management.service.domain.role.port.RoleRepositoryPort;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;

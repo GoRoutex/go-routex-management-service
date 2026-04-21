@@ -3,7 +3,6 @@ package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.management.service.domain.authorities.model.RoleAggregate;
-import vn.com.routex.hub.management.service.domain.role.model.Roles;
 import vn.com.routex.hub.management.service.domain.role.port.RoleRepositoryPort;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.role.entity.RolesEntity;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.role.repository.RolesEntityRepository;

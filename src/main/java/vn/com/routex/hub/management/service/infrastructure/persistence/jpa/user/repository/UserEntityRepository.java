@@ -1,8 +1,8 @@
 package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.user.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import vn.com.routex.hub.management.service.domain.user.model.UserStatus;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.user.entity.UserEntity;
 
