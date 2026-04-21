@@ -12,6 +12,8 @@ import vn.com.routex.hub.management.service.application.command.user.UpdateUserC
 import vn.com.routex.hub.management.service.application.command.user.UpdateUserResult;
 import vn.com.routex.hub.management.service.application.services.UserManagementService;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
+import vn.com.routex.hub.management.service.domain.customer.model.Customer;
+import vn.com.routex.hub.management.service.domain.customer.port.CustomerRepositoryPort;
 import vn.com.routex.hub.management.service.domain.user.model.User;
 import vn.com.routex.hub.management.service.domain.user.model.UserStatus;
 import vn.com.routex.hub.management.service.domain.user.port.UserRepositoryPort;
@@ -21,6 +23,7 @@ import vn.com.routex.hub.management.service.infrastructure.persistence.utils.Exc
 
 import java.util.List;
 
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.CUSTOMER_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ERROR;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_USER_EMAIL_MESSAGE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_USER_PHONE_MESSAGE;
@@ -38,6 +41,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     private static final int DEFAULT_PAGE_NUMBER = 1;
 
     private final UserRepositoryPort userRepositoryPort;
+    private final CustomerRepositoryPort customerRepositoryPort;
 
     @Override
     public FetchUsersResult fetchUsers(FetchUsersQuery query) {
@@ -57,7 +61,13 @@ public class UserManagementServiceImpl implements UserManagementService {
 
         PagedResult<User> page = userRepositoryPort.fetch(pageNumber - 1, pageSize);
         List<FetchUsersResult.FetchUserItemResult> items = page.getItems().stream()
-                .map(this::toFetchUserItem)
+                .map(item -> {
+
+                    Customer customer = customerRepositoryPort.findByUserId(item.getId())
+                            .orElseThrow(() -> new BusinessException(query.context().requestId(), query.context().requestDateTime(), query.context().channel(),
+                                    ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, CUSTOMER_NOT_FOUND)));
+                    return toFetchUserItem(item, customer);
+                })
                 .toList();
 
         return FetchUsersResult.builder()
@@ -95,7 +105,6 @@ public class UserManagementServiceImpl implements UserManagementService {
                 .profileCompleted(command.profileCompleted() == null ? existing.getProfileCompleted() : command.profileCompleted())
                 .emailVerified(command.emailVerified() == null ? existing.getEmailVerified() : command.emailVerified())
                 .status(command.status() == null ? existing.getStatus() : command.status())
-                .tenantId(ApiRequestUtils.firstNonBlank(command.tenantId(), existing.getTenantId()))
                 .language(ApiRequestUtils.firstNonBlank(command.language(), existing.getLanguage()))
                 .timezone(ApiRequestUtils.firstNonBlank(command.timezone(), existing.getTimezone()))
                 .failLoginCount(command.failLoginCount() == null ? existing.getFailLoginCount() : command.failLoginCount())
@@ -160,10 +169,11 @@ public class UserManagementServiceImpl implements UserManagementService {
         return user;
     }
 
-    private FetchUsersResult.FetchUserItemResult toFetchUserItem(User user) {
+    private FetchUsersResult.FetchUserItemResult toFetchUserItem(User user, Customer customer) {
         return FetchUsersResult.FetchUserItemResult.builder()
                 .id(user.getId())
                 .email(user.getEmail())
+                .fullName(customer.getFullName())
                 .phoneNumber(user.getPhoneNumber())
                 .avatarUrl(user.getAvatarUrl())
                 .dob(user.getDob())
@@ -172,7 +182,6 @@ public class UserManagementServiceImpl implements UserManagementService {
                 .profileCompleted(user.getProfileCompleted())
                 .emailVerified(user.getEmailVerified())
                 .status(user.getStatus())
-                .tenantId(user.getTenantId())
                 .language(user.getLanguage())
                 .timezone(user.getTimezone())
                 .createdAt(user.getCreatedAt())
@@ -194,7 +203,6 @@ public class UserManagementServiceImpl implements UserManagementService {
                 .profileCompleted(user.getProfileCompleted())
                 .emailVerified(user.getEmailVerified())
                 .status(user.getStatus())
-                .tenantId(user.getTenantId())
                 .language(user.getLanguage())
                 .timezone(user.getTimezone())
                 .failLoginCount(user.getFailLoginCount())
@@ -221,7 +229,6 @@ public class UserManagementServiceImpl implements UserManagementService {
                 .profileCompleted(user.getProfileCompleted())
                 .emailVerified(user.getEmailVerified())
                 .status(user.getStatus())
-                .tenantId(user.getTenantId())
                 .language(user.getLanguage())
                 .timezone(user.getTimezone())
                 .failLoginCount(user.getFailLoginCount())

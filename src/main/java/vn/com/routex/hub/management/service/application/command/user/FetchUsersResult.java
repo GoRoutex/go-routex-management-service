@@ -20,6 +20,7 @@ public record FetchUsersResult(
     public record FetchUserItemResult(
             String id,
             String email,
+            String fullName,
             String phoneNumber,
             String avatarUrl,
             LocalDate dob,
@@ -28,7 +29,6 @@ public record FetchUsersResult(
             Boolean profileCompleted,
             Boolean emailVerified,
             UserStatus status,
-            String tenantId,
             String language,
             String timezone,
             OffsetDateTime createdAt,

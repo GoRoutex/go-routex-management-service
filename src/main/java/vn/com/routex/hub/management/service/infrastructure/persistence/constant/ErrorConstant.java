@@ -9,6 +9,7 @@ public class ErrorConstant {
     public static final String TIMEOUT_ERROR_MESSAGE = "Timeout";
     public static final String RECORD_NOT_FOUND = "1407";
     public static final String ROLE_NOT_FOUND = "Role not found";
+    public static final String CUSTOMER_NOT_FOUND = "Customer infomration not found";
     public static final String ROLE_NOT_FOUND_ERROR = "Role %s not found";
     public static final String AUTHORITIES_NOT_FOUND = "Authorities not found";
     public static final String ROUTE_NOT_FOUND = "Route with Id %s not found";

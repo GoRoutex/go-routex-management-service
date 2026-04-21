@@ -21,7 +21,6 @@ public record UpdateUserResult(
         Boolean profileCompleted,
         Boolean emailVerified,
         UserStatus status,
-        String tenantId,
         String language,
         String timezone,
         Integer failLoginCount,

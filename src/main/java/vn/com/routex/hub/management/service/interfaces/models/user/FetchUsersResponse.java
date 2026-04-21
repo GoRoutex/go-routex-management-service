@@ -37,6 +37,7 @@ public class FetchUsersResponse extends BaseResponse<FetchUsersResponse.FetchUse
     public static class FetchUserResponseData {
         private String id;
         private String email;
+        private String fullName;
         private String phoneNumber;
         private String avatarUrl;
         private LocalDate dob;
@@ -45,7 +46,6 @@ public class FetchUsersResponse extends BaseResponse<FetchUsersResponse.FetchUse
         private Boolean profileCompleted;
         private Boolean emailVerified;
         private UserStatus status;
-        private String tenantId;
         private String language;
         private String timezone;
         private OffsetDateTime createdAt;

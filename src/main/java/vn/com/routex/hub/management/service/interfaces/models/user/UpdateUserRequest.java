@@ -45,7 +45,6 @@ public class UpdateUserRequest extends BaseRequest {
         private Boolean profileCompleted;
         private Boolean emailVerified;
         private UserStatus status;
-        private String tenantId;
         private String language;
         private String timezone;
         private Integer failLoginCount;
