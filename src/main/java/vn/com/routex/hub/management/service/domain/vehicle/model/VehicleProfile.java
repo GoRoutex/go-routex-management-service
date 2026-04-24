@@ -7,7 +7,6 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
 import vn.com.routex.hub.management.service.domain.vehicle.VehicleStatus;
-import vn.com.routex.hub.management.service.domain.vehicle.VehicleType;
 
 import java.time.OffsetDateTime;
 

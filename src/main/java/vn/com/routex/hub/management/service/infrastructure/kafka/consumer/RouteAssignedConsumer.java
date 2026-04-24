@@ -10,7 +10,6 @@ import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.management.service.application.handler.RouteEventHandler;
 import vn.com.routex.hub.management.service.infrastructure.kafka.event.DomainEvent;
 import vn.com.routex.hub.management.service.infrastructure.kafka.event.RouteAssignedEvent;
-import vn.com.routex.hub.management.service.infrastructure.kafka.event.RouteSellableEvent;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.JsonUtils;
