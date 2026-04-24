@@ -49,8 +49,7 @@ public class RouteServiceController {
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @PostMapping(SEARCH_PATH)
-    public ResponseEntity<SearchRouteResponse> searchRoute(@Valid @RequestBody SearchRouteRequest request,
-                                                           HttpServletRequest servletRequest) {
+    public ResponseEntity<SearchRouteResponse> searchRoute(@Valid @RequestBody SearchRouteRequest request) {
         sLog.info("[ROUTE-SERVICE] Search Route Request: {}", request);
         SearchRouteResult result = routeManagementService.searchRoute(SearchRouteQuery.builder()
                 .origin(request.getData().getOrigin())

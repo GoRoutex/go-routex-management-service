@@ -1,4 +1,4 @@
-package vn.com.routex.hub.management.service.domain.driver;
+package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.driver.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
+import vn.com.routex.hub.management.service.domain.driver.DriverStatus;
+import vn.com.routex.hub.management.service.domain.driver.OperationStatus;
 
 import java.time.LocalDate;
 
@@ -22,7 +24,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Table(name = "DRIVER_PROFILE")
-public class DriverProfile extends AbstractAuditingEntity {
+public class DriverProfileEntity extends AbstractAuditingEntity {
 
     @Id
     private String id;

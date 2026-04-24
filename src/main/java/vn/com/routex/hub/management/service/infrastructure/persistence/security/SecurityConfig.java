@@ -50,6 +50,7 @@ public class SecurityConfig {
                                 "/actuator/**",
                                 "/api/v1/management/merchant-service/**",
                                 "/api/v1/management/merchant-application-form-service/**",
+                                "/api/v1/management/route-service/search",
                                 "/error",
                                 "/swagger-ui/**",
                                 "/api/v1/media/**",

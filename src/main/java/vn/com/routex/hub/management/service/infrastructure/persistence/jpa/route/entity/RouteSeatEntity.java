@@ -25,8 +25,7 @@ import vn.com.routex.hub.management.service.domain.seat.SeatStatus;
 public class RouteSeatEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private String id;
 
     @Column(name = "ROUTE_ID")
     private String routeId;

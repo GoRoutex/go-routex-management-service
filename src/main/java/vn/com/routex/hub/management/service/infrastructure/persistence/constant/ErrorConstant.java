@@ -9,7 +9,8 @@ public class ErrorConstant {
     public static final String TIMEOUT_ERROR_MESSAGE = "Timeout";
     public static final String RECORD_NOT_FOUND = "1407";
     public static final String ROLE_NOT_FOUND = "Role not found";
-    public static final String CUSTOMER_NOT_FOUND = "Customer infomration not found";
+    public static final String ROUTE_ASSIGNMENT_NOT_FOUND = "Route Assignment not found";
+    public static final String CUSTOMER_NOT_FOUND = "Customer information not found";
     public static final String ROLE_NOT_FOUND_ERROR = "Role %s not found";
     public static final String AUTHORITIES_NOT_FOUND = "Authorities not found";
     public static final String ROUTE_NOT_FOUND = "Route with Id %s not found";
@@ -31,6 +32,8 @@ public class ErrorConstant {
     public static final String INVALID_HTTP_REQUEST_RESOURCE_ERROR = "4000";
     public static final String INVALID_HTTP_REQUEST_RESOURCE_ERROR_MESSAGE = "Resource %s path is not exists";
     public static final String INVALID_INPUT_ERROR = "0310";
+    public static final String INVALID_EVENT_MESSAGE = "Invalid %s event";
+    public static final String INVALID_DATA_ERROR_MESSAGE = "Invalid data error";
     public static final String FILE_UPLOAD_ERROR_MESSAGE = "File upload failed";
     public static final String FILE_UPLOAD_ERROR = "9310";
     public static final String CLOUDINARY_CONFIG_MESSAGE = "Cloudinary is not configured";

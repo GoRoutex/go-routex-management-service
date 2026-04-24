@@ -30,6 +30,9 @@ public class VehicleEntity extends AbstractAuditingEntity {
     @Column(name = "MERCHANT_ID")
     private String merchantId;
 
+    @Column(name = "TEMPLATE_ID")
+    private String templateId;
+
     @Column(name = "CREATOR")
     private String creator;
 
@@ -37,19 +40,6 @@ public class VehicleEntity extends AbstractAuditingEntity {
     @Enumerated(EnumType.STRING)
     private VehicleStatus status;
 
-    @Column(name = "TYPE")
-    @Enumerated(EnumType.STRING)
-    private VehicleType type;
-
     @Column(name = "VEHICLE_PLATE", nullable = false)
     private String vehiclePlate;
-
-    @Column(name = "SEAT_CAPACITY")
-    private Integer seatCapacity;
-
-    @Column(name = "HAS_FLOOR")
-    private boolean hasFloor;
-
-    @Column(name = "MANUFACTURER")
-    private String manufacturer;
 }

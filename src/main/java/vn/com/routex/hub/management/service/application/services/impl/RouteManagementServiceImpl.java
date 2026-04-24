@@ -2,6 +2,7 @@ package vn.com.routex.hub.management.service.application.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.management.service.application.command.common.PageContext;
 import vn.com.routex.hub.management.service.application.command.common.PageInfo;
 import vn.com.routex.hub.management.service.application.command.common.RequestContext;
@@ -60,6 +61,8 @@ public class RouteManagementServiceImpl implements RouteManagementService {
     private final RouteSeatAvailabilityPort routeSeatAvailabilityPort;
     private final RouteQueryPort routeQueryPort;
     private final MerchantRepositoryPort merchantRepositoryPort;
+
+    private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @Override
     public SearchRouteResult searchRoute(SearchRouteQuery query) {
@@ -204,9 +207,15 @@ public class RouteManagementServiceImpl implements RouteManagementService {
         RouteAssignmentRecord assignment = enrichment.assignments().get(route.getId());
         VehicleSnapshot vehicle = findVehicle(assignment, enrichment);
 
+
+        sLog.info("ASSIGNMENT RECORD: {}", assignment);
+
         return SearchRouteItemResult.builder()
                 .id(route.getId())
                 .merchantId(route.getMerchantId())
+                .vehicleId(assignment.getVehicleId())
+                .driverId(assignment.getDriverId())
+                .ticketPrice(assignment.getTicketPrice())
                 .merchantName(merchantNames.get(route.getMerchantId()))
                 .routeCode(route.getRouteCode())
                 .pickupBranch(route.getPickupBranch())

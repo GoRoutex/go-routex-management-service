@@ -15,6 +15,7 @@ import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.domain.assignment.RouteAssignmentStatus;
 import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @Getter
@@ -40,6 +41,9 @@ public class RouteAssignmentEntity extends AbstractAuditingEntity {
 
     @Column(name = "DRIVER_ID")
     private String driverId;
+
+    @Column(name = "TICKET_PRICE")
+    private BigDecimal ticketPrice;
 
     @Column(name = "VEHICLE_ID")
     private String vehicleId;

@@ -31,6 +31,7 @@ public class KafkaEventPublisher {
         try {
             DomainEvent domainEvent = toDomainEvent(outboxEvent);
             jsonPayload = objectMapper.writeValueAsString(domainEvent);
+            sLog.info("[DomainEvent] {}", jsonPayload);
         } catch (Exception e) {
             sLog.error("[OUTBOX-SERIALIZE-ERROR] eventId={}", outboxEvent.getId(), e);
             return CompletableFuture.failedFuture(e);
@@ -38,7 +39,7 @@ public class KafkaEventPublisher {
         CompletableFuture<SendResult<String, String>> kafkaFuture = kafkaTemplate.send(outboxEvent.getTopic(), outboxEvent.getAggregateId(), jsonPayload);
         return kafkaFuture.thenAccept(result -> {
             RecordMetadata recordMetadata = result.getRecordMetadata();
-            sLog.debug("[OUTBOX-PUBLISH-SUCCESS] eventId={}, topic={}, partition={}, offset={}",
+            sLog.info("[OUTBOX-PUBLISH-SUCCESS] eventId={}, topic={}, partition={}, offset={}",
                     outboxEvent.getId(),
                     outboxEvent.getTopic(),
                     recordMetadata.partition(),
@@ -93,6 +94,7 @@ public class KafkaEventPublisher {
                 .aggregateId(outBoxEvent.getAggregateId())
                 .header(outBoxEvent.getHeader())
                 .payload(outBoxEvent.getPayload())
+                .occurredAt(outBoxEvent.getProcessedAt())
                 .build();
     }
 }

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @Getter
@@ -16,10 +17,13 @@ import java.time.OffsetDateTime;
 public class RouteSearchView {
     private String id;
     private String merchantId;
+    private String vehicleId;
+    private String driverId;
     private String routeCode;
     private String pickupBranch;
     private String origin;
     private String destination;
+    private BigDecimal ticketPrice;
     private OffsetDateTime plannedStartTime;
     private OffsetDateTime plannedEndTime;
 }

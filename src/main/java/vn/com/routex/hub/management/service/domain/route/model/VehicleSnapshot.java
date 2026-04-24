@@ -14,6 +14,6 @@ import lombok.experimental.SuperBuilder;
 public class VehicleSnapshot {
     private String id;
     private String vehiclePlate;
-    private Integer seatCapacity;
+    private Long seatCapacity;
     private boolean hasFloor;
 }
