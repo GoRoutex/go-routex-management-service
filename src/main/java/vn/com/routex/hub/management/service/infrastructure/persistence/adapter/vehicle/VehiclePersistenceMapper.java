@@ -1,43 +1,41 @@
 package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.vehicle;
 
+import lombok.experimental.UtilityClass;
 import vn.com.routex.hub.management.service.domain.vehicle.model.VehicleProfile;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.vehicle.entity.VehicleEntity;
 
-final class VehiclePersistenceMapper {
 
-    private VehiclePersistenceMapper() {
-    }
+@UtilityClass
+public class VehiclePersistenceMapper {
 
-    static VehicleProfile toDomain(VehicleEntity entity) {
+    public VehicleProfile toDomain(VehicleEntity entity) {
         if (entity == null) return null;
         return VehicleProfile.builder()
                 .id(entity.getId())
                 .merchantId(entity.getMerchantId())
+                .templateId(entity.getTemplateId())
                 .creator(entity.getCreator())
                 .status(entity.getStatus())
-                .type(entity.getType())
                 .vehiclePlate(entity.getVehiclePlate())
-                .seatCapacity(entity.getSeatCapacity())
-                .hasFloor(entity.isHasFloor())
-                .manufacturer(entity.getManufacturer())
                 .createdAt(entity.getCreatedAt())
                 .createdBy(entity.getCreatedBy())
+                .updatedAt(entity.getUpdatedAt())
+                .updatedBy(entity.getUpdatedBy())
                 .build();
     }
 
-    static VehicleEntity toEntity(VehicleProfile vehicleProfile) {
+    public VehicleEntity toEntity(VehicleProfile vehicleProfile) {
         return VehicleEntity.builder()
                 .id(vehicleProfile.getId())
                 .merchantId(vehicleProfile.getMerchantId())
+                .templateId(vehicleProfile.getTemplateId())
                 .creator(vehicleProfile.getCreator())
                 .status(vehicleProfile.getStatus())
-                .type(vehicleProfile.getType())
                 .vehiclePlate(vehicleProfile.getVehiclePlate())
-                .seatCapacity(vehicleProfile.getSeatCapacity())
-                .hasFloor(vehicleProfile.isHasFloor())
-                .manufacturer(vehicleProfile.getManufacturer())
                 .createdAt(vehicleProfile.getCreatedAt())
                 .createdBy(vehicleProfile.getCreatedBy())
+                .updatedAt(vehicleProfile.getUpdatedAt())
+                .updatedBy(vehicleProfile.getUpdatedBy())
                 .build();
     }
 }

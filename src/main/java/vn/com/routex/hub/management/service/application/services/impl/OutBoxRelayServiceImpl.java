@@ -43,6 +43,7 @@ public class OutBoxRelayServiceImpl implements OutBoxRelayService {
         for (OutBoxEvent event : outBoxEventList) {
             CompletableFuture<Void> future = kafkaEventPublisher.publishAsync(event)
                     .thenRun(() -> {
+                        sLog.info("[OUTBOX-EVENT] Event published successfully: eventId={} eventType", event.getId(), event.getEventType());
                         synchronized (processedIds) {
                             processedIds.add(event.getId());
                         }

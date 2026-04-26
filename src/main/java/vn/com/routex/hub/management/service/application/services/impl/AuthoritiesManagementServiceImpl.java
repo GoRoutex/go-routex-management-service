@@ -16,9 +16,8 @@ import vn.com.routex.hub.management.service.domain.authorities.model.PermissionP
 import vn.com.routex.hub.management.service.domain.authorities.model.RoleAggregate;
 import vn.com.routex.hub.management.service.domain.authorities.model.UserRoleAssignment;
 import vn.com.routex.hub.management.service.domain.authorities.port.PermissionRepositoryPort;
-import vn.com.routex.hub.management.service.domain.authorities.port.RoleRepositoryPort;
-import vn.com.routex.hub.management.service.domain.authorities.port.UserAccountLookupPort;
 import vn.com.routex.hub.management.service.domain.authorities.port.UserRoleAssignmentRepositoryPort;
+import vn.com.routex.hub.management.service.domain.role.port.RoleRepositoryPort;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 
@@ -44,7 +43,6 @@ public class AuthoritiesManagementServiceImpl implements AuthoritiesManagementSe
     private final RoleRepositoryPort roleRepositoryPort;
     private final PermissionRepositoryPort permissionRepositoryPort;
     private final UserRoleAssignmentRepositoryPort userRoleAssignmentRepositoryPort;
-    private final UserAccountLookupPort userAccountLookupPort;
 
     @Override
     public AddRoleResult addRole(AddRoleCommand command) {

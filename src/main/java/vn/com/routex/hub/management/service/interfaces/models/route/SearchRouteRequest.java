@@ -12,7 +12,6 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
 
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.RegexConstant.HOUR_MINUTES_REGEX;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.RegexConstant.ONLY_CHARACTER_REGEX;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.RegexConstant.ONLY_NUMBER_REGEX;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.RegexConstant.YEAR_MONTH_DATE_REGEX;
@@ -50,12 +49,6 @@ public class SearchRouteRequest extends BaseRequest {
 
         @Pattern(regexp = ONLY_NUMBER_REGEX, message = "only digits are allowed for this field")
         private String seat;
-
-        @Pattern(regexp = HOUR_MINUTES_REGEX, message = "must be in format of HH:mm")
-        private String fromTime;
-
-        @Pattern(regexp = HOUR_MINUTES_REGEX, message = "must be in format of HH:mm")
-        private String toTime;
 
         @Pattern(regexp = ONLY_NUMBER_REGEX, message = "only digits are allowed for this field")
         private String pageSize;

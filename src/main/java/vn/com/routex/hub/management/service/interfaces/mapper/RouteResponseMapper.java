@@ -52,13 +52,42 @@ public class RouteResponseMapper {
                 .build();
     }
 
+    public FetchRouteResponse.FetchRouteResponseData toFetchRouteDetailResponseData(FetchRouteResult item) {
+        return FetchRouteResponse.FetchRouteResponseData.builder()
+                .id(item.id())
+                .creator(item.creator())
+                .pickupBranch(item.pickupBranch())
+                .routeCode(item.routeCode())
+                .origin(item.origin())
+                .destination(item.destination())
+                .plannedStartTime(item.plannedStartTime())
+                .plannedEndTime(item.plannedEndTime())
+                .actualStartTime(item.actualStartTime())
+                .actualEndTime(item.actualEndTime())
+                .status(item.status())
+                .availableSeats(item.availableSeats())
+                .vehicleId(item.vehicleId())
+                .vehiclePlate(item.vehiclePlate())
+                .hasFloor(item.hasFloor())
+                .assignedAt(item.assignedAt())
+                .routePoints(item.routePoints() == null ? null : item.routePoints().stream()
+                        .map(this::toSearchRoutePoint)
+                        .toList())
+                .build();
+    }
+
 
     public SearchRouteResponse.SearchRouteResponseData toSearchRouteResponseData(SearchRouteItemResult item) {
         return SearchRouteResponse.SearchRouteResponseData.builder()
                 .id(item.id())
+                .merchantId(item.merchantId())
+                .merchantName(item.merchantName())
                 .pickupBranch(item.pickupBranch())
+                .vehicleId(item.vehicleId())
+                .driverId(item.driverId())
                 .origin(item.origin())
                 .destination(item.destination())
+                .ticketPrice(item.ticketPrice())
                 .availableSeats(item.availableSeats())
                 .plannedStartTime(item.plannedStartTime())
                 .plannedEndTime(item.plannedEndTime())

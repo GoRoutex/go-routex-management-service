@@ -2,117 +2,168 @@ package vn.com.routex.hub.management.service.infrastructure.persistence.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.customizers.OperationCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.http.HttpMethod;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class OpenApiConfig {
 
-    private static final String BEARER_AUTH_SCHEME = "bearerAuth";
+
+    private static final String BEARER_SCHEME = "bearerAuth";
+    private static final Map<String, String> HEADER_EXAMPLES = Map.of(
+            RequestAttributes.REQUEST_ID, "123e4567-e89b-12d3-a456-426614174000",
+            RequestAttributes.REQUEST_DATE_TIME, "2026-04-08T10:30:00.000+07:00",
+            RequestAttributes.CHANNEL, "ONL"
+    );
 
     @Bean
-    public OpenAPI managementServiceOpenAPI() {
+    public OpenAPI goRoutexOpenApi() {
         return new OpenAPI()
-                .components(new Components()
-                        .addSecuritySchemes(BEARER_AUTH_SCHEME, new SecurityScheme()
+                .info(new Info().title("GoRoutex API").version("v1"))
+                .components(new Components().addSecuritySchemes(
+                        BEARER_SCHEME,
+                        new SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP)
                                 .scheme("bearer")
                                 .bearerFormat("JWT")
-                                .description("JWT Bearer token")))
-                .addSecurityItem(new SecurityRequirement().addList(BEARER_AUTH_SCHEME));
+                ));
     }
 
     @Bean
-    public OperationCustomizer envelopeHeadersForGetCustomizer() {
+    public OperationCustomizer operationCustomizer() {
         return (operation, handlerMethod) -> {
-            ensureBearerAuth(operation);
-
-            if (!isGetOperation(operation, handlerMethod)) {
-                return operation;
+            ensureEnvelopeHeaders(operation);
+            if (requiresAuthorization(handlerMethod)) {
+                operation.addSecurityItem(new SecurityRequirement().addList(BEARER_SCHEME));
             }
-
-            ensureHeader(operation, RequestAttributes.REQUEST_ID,
-                    "Envelope request id. Example: 123e4567-e89b-12d3-a456-426614174000");
-            ensureHeader(operation, RequestAttributes.REQUEST_DATE_TIME,
-                    "Envelope request datetime. Example: 2026-04-10T20:00:00.000+07:00");
-            ensureHeader(operation, RequestAttributes.CHANNEL,
-                    "Envelope channel. Allowed values: ONL, OFF");
-
             return operation;
         };
     }
 
-    private void ensureBearerAuth(Operation operation) {
-        List<SecurityRequirement> securityRequirements = operation.getSecurity();
-        if (securityRequirements == null) {
-            securityRequirements = new ArrayList<>();
-            operation.setSecurity(securityRequirements);
-        }
+    private void ensureEnvelopeHeaders(io.swagger.v3.oas.models.Operation operation) {
+        List<Parameter> parameters = operation.getParameters() == null
+                ? new ArrayList<>()
+                : new ArrayList<>(operation.getParameters());
 
-        boolean exists = securityRequirements.stream()
-                .anyMatch(requirement -> requirement.containsKey(BEARER_AUTH_SCHEME));
-        if (!exists) {
-            securityRequirements.add(new SecurityRequirement().addList(BEARER_AUTH_SCHEME));
-        }
+        addHeaderIfMissing(parameters, "X-Request-Id", true, "Request correlation id");
+        addHeaderIfMissing(parameters, "X-Request-DateTime", true, "Request timestamp in ISO-8601 format");
+        addHeaderIfMissing(parameters, "X-Channel", true, "Request channel, for example ONL or OFF");
+
+        operation.setParameters(parameters);
     }
 
-    private boolean isGetOperation(Operation operation, HandlerMethod handlerMethod) {
-        if (handlerMethod == null) {
-            return false;
-        }
-
-        if (handlerMethod.hasMethodAnnotation(org.springframework.web.bind.annotation.GetMapping.class)) {
-            return true;
-        }
-
-        RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(
-                handlerMethod.getMethod(),
-                RequestMapping.class
-        );
-
-        if (requestMapping == null) {
-            return false;
-        }
-
-        for (org.springframework.web.bind.annotation.RequestMethod requestMethod : requestMapping.method()) {
-            if (HttpMethod.GET.matches(requestMethod.name())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private void ensureHeader(Operation operation, String headerName, String description) {
-        List<Parameter> parameters = operation.getParameters();
-        if (parameters == null) {
-            parameters = new ArrayList<>();
-            operation.setParameters(parameters);
-        }
-
-        boolean exists = parameters.stream()
-                .anyMatch(parameter -> "header".equalsIgnoreCase(parameter.getIn())
-                        && headerName.equalsIgnoreCase(parameter.getName()));
+    private void addHeaderIfMissing(List<Parameter> parameters, String name, boolean required, String description) {
+        boolean exists = parameters.stream().anyMatch(parameter -> name.equalsIgnoreCase(parameter.getName()));
         if (exists) {
             return;
         }
 
         parameters.add(new Parameter()
                 .in("header")
-                .required(true)
-                .name(headerName)
-                .description(description));
+                .name(name)
+                .required(required)
+                .description(description)
+                .example(HEADER_EXAMPLES.get(name)));
+    }
+
+    private boolean requiresAuthorization(HandlerMethod handlerMethod) {
+        String[] publicPrefixes = {
+                "/api/v1/authentication",
+                "/api/v1/public",
+                "/actuator",
+                "/error"
+        };
+
+        for (String pattern : handlerMethod.getMethodAnnotation(org.springframework.web.bind.annotation.RequestMapping.class) != null
+                ? handlerMethod.getMethodAnnotation(org.springframework.web.bind.annotation.RequestMapping.class).value()
+                : new String[0]) {
+            if (startsWithAny(pattern, publicPrefixes)) {
+                return false;
+            }
+        }
+
+        String classLevelPath = "";
+        org.springframework.web.bind.annotation.RequestMapping classMapping =
+                handlerMethod.getBeanType().getAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+        if (classMapping != null && classMapping.value().length > 0) {
+            classLevelPath = classMapping.value()[0];
+        }
+
+        String methodPath = resolveMethodPath(handlerMethod);
+        return !startsWithAny(classLevelPath + methodPath, publicPrefixes);
+    }
+
+    private String resolveMethodPath(HandlerMethod handlerMethod) {
+        GetMappingData mapping = GetMappingData.from(handlerMethod);
+        return mapping.path();
+    }
+
+    private boolean startsWithAny(String path, String[] prefixes) {
+        for (String prefix : prefixes) {
+            if (path.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private record GetMappingData(String path) {
+        private static GetMappingData from(HandlerMethod handlerMethod) {
+            if (handlerMethod.hasMethodAnnotation(org.springframework.web.bind.annotation.GetMapping.class)) {
+                return new GetMappingData(resolvePath(handlerMethod, org.springframework.web.bind.annotation.GetMapping.class));
+            }
+            if (handlerMethod.hasMethodAnnotation(org.springframework.web.bind.annotation.PostMapping.class)) {
+                return new GetMappingData(resolvePath(handlerMethod, org.springframework.web.bind.annotation.PostMapping.class));
+            }
+            if (handlerMethod.hasMethodAnnotation(org.springframework.web.bind.annotation.PutMapping.class)) {
+                return new GetMappingData(resolvePath(handlerMethod, org.springframework.web.bind.annotation.PutMapping.class));
+            }
+            if (handlerMethod.hasMethodAnnotation(org.springframework.web.bind.annotation.DeleteMapping.class)) {
+                return new GetMappingData(resolvePath(handlerMethod, org.springframework.web.bind.annotation.DeleteMapping.class));
+            }
+            org.springframework.web.bind.annotation.RequestMapping mapping =
+                    handlerMethod.getMethodAnnotation(org.springframework.web.bind.annotation.RequestMapping.class);
+            if (mapping != null && mapping.value().length > 0) {
+                return new GetMappingData(mapping.value()[0]);
+            }
+            return new GetMappingData("");
+        }
+
+        private static <A extends java.lang.annotation.Annotation> String resolvePath(HandlerMethod handlerMethod, Class<A> annotationType) {
+            A annotation = handlerMethod.getMethodAnnotation(annotationType);
+            if (annotation instanceof org.springframework.web.bind.annotation.GetMapping getMapping) {
+                return firstPath(getMapping.value(), getMapping.path());
+            }
+            if (annotation instanceof org.springframework.web.bind.annotation.PostMapping postMapping) {
+                return firstPath(postMapping.value(), postMapping.path());
+            }
+            if (annotation instanceof org.springframework.web.bind.annotation.PutMapping putMapping) {
+                return firstPath(putMapping.value(), putMapping.path());
+            }
+            if (annotation instanceof org.springframework.web.bind.annotation.DeleteMapping deleteMapping) {
+                return firstPath(deleteMapping.value(), deleteMapping.path());
+            }
+            return "";
+        }
+
+        private static String firstPath(String[] values, String[] paths) {
+            if (values.length > 0) {
+                return values[0];
+            }
+            if (paths.length > 0) {
+                return paths[0];
+            }
+            return "";
+        }
     }
 }

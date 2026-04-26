@@ -1,7 +1,6 @@
 package vn.com.routex.hub.management.service.interfaces.models.merchant;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,7 +11,6 @@ import vn.com.routex.hub.management.service.domain.merchant.MerchantStatus;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 
 @Getter
 @Setter

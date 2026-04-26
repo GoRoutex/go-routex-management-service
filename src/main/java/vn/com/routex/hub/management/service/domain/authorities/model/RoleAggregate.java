@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
 
 import java.time.OffsetDateTime;
 import java.util.HashSet;
@@ -15,14 +16,13 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
-public class RoleAggregate {
+public class RoleAggregate extends AbstractAuditingEntity {
     private String id;
     private String code;
     private String name;
     private String description;
     private Boolean enabled;
     private OffsetDateTime createdAt;
-    private String createdBy;
     private Set<String> authorityCodes;
 
     public static RoleAggregate create(

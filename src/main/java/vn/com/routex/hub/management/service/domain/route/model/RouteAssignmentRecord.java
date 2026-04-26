@@ -6,7 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.domain.assignment.RouteAssignmentStatus;
+import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @Getter
@@ -14,18 +16,17 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
-public class RouteAssignmentRecord {
+public class RouteAssignmentRecord extends AbstractAuditingEntity {
     private String id;
     private String merchantId;
     private String routeId;
     private String creator;
     private String vehicleId;
     private String driverId;
+    private BigDecimal ticketPrice;
     private OffsetDateTime assignedAt;
     private OffsetDateTime unAssignedAt;
     private RouteAssignmentStatus status;
-    private OffsetDateTime updatedAt;
-    private String updatedBy;
 
     public static RouteAssignmentRecord assign(
             String id,
@@ -34,24 +35,26 @@ public class RouteAssignmentRecord {
             String creator,
             String vehicleId,
             String driverId,
+            BigDecimal ticketPrice,
             OffsetDateTime assignedAt
     ) {
         return RouteAssignmentRecord.builder()
                 .id(id)
-                .merchantId(merchantId)
                 .routeId(routeId)
                 .creator(creator)
+                .merchantId(merchantId)
                 .driverId(driverId)
                 .vehicleId(vehicleId)
                 .assignedAt(assignedAt)
-                .status(RouteAssignmentStatus.ASSIGNED)
+                .ticketPrice(ticketPrice)
+                .status(RouteAssignmentStatus.PENDING_ASSIGNMENT)
                 .build();
     }
 
     public void cancel(String actor, OffsetDateTime at) {
         this.status = RouteAssignmentStatus.CANCELED;
         this.unAssignedAt = at;
-        this.updatedAt = at;
-        this.updatedBy = actor;
+        this.setUpdatedAt(at);
+        this.setUpdatedBy(actor);
     }
 }

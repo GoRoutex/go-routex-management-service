@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseResponse;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -21,6 +22,10 @@ public class SearchRouteResponse extends BaseResponse<List<SearchRouteResponse.S
     @SuperBuilder
     public static class SearchRouteResponseData {
         private String id;
+        private String merchantId;
+        private String driverId;
+        private String vehicleId;
+        private String merchantName;
         private String pickupBranch;
         private String origin;
         private String destination;
@@ -30,6 +35,7 @@ public class SearchRouteResponse extends BaseResponse<List<SearchRouteResponse.S
         private String vehiclePlate;
         private boolean hasFloor;
         private String routeCode;
+        private BigDecimal ticketPrice;
         private List<SearchRoutePoints> routePoints;
     }
 

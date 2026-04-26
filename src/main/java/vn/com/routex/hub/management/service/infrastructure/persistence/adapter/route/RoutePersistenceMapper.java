@@ -9,6 +9,7 @@ import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.assig
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.route.entity.RouteEntity;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.routepoint.entity.RoutePointEntity;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.vehicle.entity.VehicleEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.vehicle.entity.VehicleTemplateEntity;
 
 
 @Component
@@ -103,10 +104,13 @@ final class RoutePersistenceMapper {
                 .routeId(assignment.getRouteId())
                 .creator(assignment.getCreator())
                 .driverId(assignment.getDriverId())
+                .ticketPrice(assignment.getTicketPrice())
                 .vehicleId(assignment.getVehicleId())
                 .assignedAt(assignment.getAssignedAt())
                 .unAssignedAt(assignment.getUnAssignedAt())
                 .status(assignment.getStatus())
+                .createdAt(assignment.getCreatedAt())
+                .createdBy(assignment.getCreatedBy())
                 .updatedAt(assignment.getUpdatedAt())
                 .updatedBy(assignment.getUpdatedBy())
                 .build();
@@ -120,20 +124,23 @@ final class RoutePersistenceMapper {
                 .creator(record.getCreator())
                 .driverId(record.getDriverId())
                 .vehicleId(record.getVehicleId())
+                .ticketPrice(record.getTicketPrice())
                 .assignedAt(record.getAssignedAt())
                 .unAssignedAt(record.getUnAssignedAt())
                 .status(record.getStatus())
+                .createdAt(record.getCreatedAt())
+                .createdBy(record.getCreatedBy())
                 .updatedAt(record.getUpdatedAt())
                 .updatedBy(record.getUpdatedBy())
                 .build();
     }
 
-    public VehicleSnapshot toVehicleSnapshot(VehicleEntity vehicle) {
+    public VehicleSnapshot toVehicleSnapshot(VehicleEntity vehicle, VehicleTemplateEntity template) {
         return VehicleSnapshot.builder()
                 .id(vehicle.getId())
                 .vehiclePlate(vehicle.getVehiclePlate())
-                .seatCapacity(vehicle.getSeatCapacity())
-                .hasFloor(vehicle.isHasFloor())
+                .seatCapacity(template.getSeatCapacity())
+                .hasFloor(template.isHasFloor())
                 .build();
     }
 }

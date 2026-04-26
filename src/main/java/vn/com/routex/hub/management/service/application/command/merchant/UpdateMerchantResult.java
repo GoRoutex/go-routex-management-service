@@ -4,7 +4,6 @@ import lombok.Builder;
 import vn.com.routex.hub.management.service.domain.merchant.MerchantStatus;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 
 @Builder
 public record UpdateMerchantResult(

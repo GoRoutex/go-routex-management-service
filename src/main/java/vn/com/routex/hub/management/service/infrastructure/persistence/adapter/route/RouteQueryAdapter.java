@@ -10,20 +10,28 @@ import org.springframework.stereotype.Component;
 import vn.com.routex.hub.management.service.application.specification.RouteSpecification;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
 import vn.com.routex.hub.management.service.domain.route.RouteStatus;
+import vn.com.routex.hub.management.service.domain.route.model.RouteAssignmentRecord;
+import vn.com.routex.hub.management.service.domain.route.port.RouteAssignmentRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteQueryPort;
 import vn.com.routex.hub.management.service.domain.route.readmodel.RouteFetchView;
 import vn.com.routex.hub.management.service.domain.route.readmodel.RouteSearchView;
+import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.route.entity.RouteEntity;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.route.repository.RouteEntityRepository;
+import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_ASSIGNMENT_NOT_FOUND;
 
 @Component
 @RequiredArgsConstructor
 public class RouteQueryAdapter implements RouteQueryPort {
 
     private final RouteEntityRepository routeEntityRepository;
+    private final RouteAssignmentRepositoryPort routeAssignmentRepositoryPort;
 
     @Override
     public List<RouteSearchView> searchAssignedRoutes(
@@ -34,7 +42,7 @@ public class RouteQueryAdapter implements RouteQueryPort {
             OffsetDateTime endTime,
             int pageNumber,
             int pageSize
-    ) {
+        ) {
         Specification<RouteEntity> specification = Specification.where(RouteSpecification.hasMerchantId(merchantId))
                 .and(RouteSpecification.originContainsIgnoreCase(origin))
                 .and(RouteSpecification.destinationContainsIgnoreCase(destination))
@@ -47,8 +55,16 @@ public class RouteQueryAdapter implements RouteQueryPort {
                 .getContent()
                 .stream()
                 .map(route -> {
+
+                    RouteAssignmentRecord record = routeAssignmentRepositoryPort.findActiveByRouteId(route.getId(), route.getMerchantId())
+                            .orElseThrow(() -> new BusinessException(ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, ROUTE_ASSIGNMENT_NOT_FOUND)));
+
                     RouteSearchView searchView = new RouteSearchView();
                     searchView.setId(route.getId());
+                    searchView.setDriverId(record.getDriverId());
+                    searchView.setVehicleId(record.getVehicleId());
+                    searchView.setMerchantId(route.getMerchantId());
+                    searchView.setTicketPrice(record.getTicketPrice());
                     searchView.setRouteCode(route.getRouteCode());
                     searchView.setPickupBranch(route.getPickupBranch());
                     searchView.setOrigin(route.getOrigin());

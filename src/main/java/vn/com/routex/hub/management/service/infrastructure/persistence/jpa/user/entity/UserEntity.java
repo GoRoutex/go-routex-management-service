@@ -1,6 +1,5 @@
 package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.user.entity;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,8 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import vn.com.routex.hub.management.service.domain.profile.Gender;
-import vn.com.routex.hub.management.service.domain.user.UserStatus;
+import vn.com.routex.hub.management.service.domain.user.model.Gender;
+import vn.com.routex.hub.management.service.domain.user.model.UserStatus;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
 
 import java.time.LocalDate;
@@ -31,9 +30,6 @@ public class UserEntity extends AbstractAuditingEntity {
 
     @Id
     private String id;
-
-    @Column(name = "CUSTOMER_MEMBERSHIP_ID")
-    private String customerMembershipId;
 
     @Column(name = "PASSWORD_HASH", nullable = false)
     private String passwordHash;
@@ -75,9 +71,6 @@ public class UserEntity extends AbstractAuditingEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "STATUS", nullable = false)
     private UserStatus status;
-
-    @Column(name = "TENANT_ID")
-    private String tenantId;
 
     @Column(name = "LANGUAGE")
     private String language;

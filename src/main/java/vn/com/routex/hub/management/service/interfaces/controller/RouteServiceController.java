@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.management.service.application.command.common.PageContext;
+import vn.com.routex.hub.management.service.application.command.route.FetchRouteQuery;
+import vn.com.routex.hub.management.service.application.command.route.FetchRouteResult;
 import vn.com.routex.hub.management.service.application.command.route.FetchRoutesQuery;
 import vn.com.routex.hub.management.service.application.command.route.FetchRoutesResult;
 import vn.com.routex.hub.management.service.application.command.route.SearchRouteQuery;
@@ -23,12 +25,14 @@ import vn.com.routex.hub.management.service.infrastructure.persistence.utils.Htt
 import vn.com.routex.hub.management.service.interfaces.factory.ApiResultFactory;
 import vn.com.routex.hub.management.service.interfaces.mapper.RouteResponseMapper;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
+import vn.com.routex.hub.management.service.interfaces.models.route.FetchRouteDetailResponse;
 import vn.com.routex.hub.management.service.interfaces.models.route.FetchRouteResponse;
 import vn.com.routex.hub.management.service.interfaces.models.route.SearchRouteRequest;
 import vn.com.routex.hub.management.service.interfaces.models.route.SearchRouteResponse;
 
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.API_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.API_VERSION;
+import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.DETAIL_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.FETCH_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.MANAGEMENT_PATH;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApiConstant.ROUTE_SERVICE;
@@ -45,19 +49,13 @@ public class RouteServiceController {
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @PostMapping(SEARCH_PATH)
-    public ResponseEntity<SearchRouteResponse> searchRoute(@Valid @RequestBody SearchRouteRequest request,
-                                                           HttpServletRequest servletRequest) {
+    public ResponseEntity<SearchRouteResponse> searchRoute(@Valid @RequestBody SearchRouteRequest request) {
         sLog.info("[ROUTE-SERVICE] Search Route Request: {}", request);
-        String merchantId = ApiRequestUtils.getMerchantId(servletRequest);
         SearchRouteResult result = routeManagementService.searchRoute(SearchRouteQuery.builder()
-
-                .merchantId(merchantId)
                 .origin(request.getData().getOrigin())
                 .destination(request.getData().getDestination())
                 .departureDate(request.getData().getDepartureDate())
                 .seat(request.getData().getSeat())
-                .fromTime(request.getData().getFromTime())
-                .toTime(request.getData().getToTime())
                 .pageContext(PageContext.builder()
                         .pageSize(request.getData().getPageSize())
                         .pageNumber(request.getData().getPageNumber())
@@ -73,6 +71,29 @@ public class RouteServiceController {
                 .build();
 
         return HttpUtils.buildResponse(request, response);
+    }
+
+    @GetMapping(DETAIL_PATH)
+    public ResponseEntity<FetchRouteDetailResponse> fetchRouteDetail(
+            HttpServletRequest servletRequest,
+            @RequestParam String routeId
+    ) {
+        BaseRequest baseRequest = ApiRequestUtils.getBaseRequestOrDefault(servletRequest);
+        sLog.info("[ROUTE-SERVICE] Fetch Route Detail Request routeId: {}", routeId);
+
+        FetchRouteResult result = routeManagementService.fetchRouteDetail(FetchRouteQuery.builder()
+                .routeId(routeId)
+                .requestId(baseRequest.getRequestId())
+                .requestDateTime(baseRequest.getRequestDateTime())
+                .channel(baseRequest.getChannel())
+                .build());
+
+        FetchRouteDetailResponse response = FetchRouteDetailResponse.builder()
+                .result(apiResultFactory.buildSuccess())
+                .data(routeResponseMapper.toFetchRouteDetailResponseData(result))
+                .build();
+
+        return HttpUtils.buildResponse(baseRequest, response);
     }
 
     @GetMapping(FETCH_PATH)
