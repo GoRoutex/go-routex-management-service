@@ -21,7 +21,7 @@ create table driver_profile
     operation_status        varchar(255) not null
         constraint driver_profile_operation_status_check
             check ((operation_status)::text = ANY
-                   ((ARRAY ['ONLINE'::character varying, 'OFFLINE'::character varying, 'AVAILABLE'::character varying, 'BUSY'::character varying, 'ON_TRIP'::character varying])::text[])),
+                   ((ARRAY ['AVAILABLE'::character varying,'ON_TRIP'::character varying])::text[])),
     points_delta            integer,
     points_reason           varchar(255),
     rating                  double precision,
@@ -33,6 +33,17 @@ create table driver_profile
     training_completed      boolean,
     user_id                 varchar(255)
 );
+
+
+
+alter table driver_profile
+    drop column operation_status;
+
+alter table driver_profile
+    add column operation_status        varchar(255) not null
+    constraint driver_profile_operation_status_check
+    check ((operation_status)::text = ANY
+    ((ARRAY ['AVAILABLE'::character varying,'ON_TRIP'::character varying])::text[])),
 
 alter table driver_profile
 drop column current_route_id;

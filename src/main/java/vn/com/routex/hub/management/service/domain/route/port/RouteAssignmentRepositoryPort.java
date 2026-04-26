@@ -1,5 +1,6 @@
 package vn.com.routex.hub.management.service.domain.route.port;
 
+import vn.com.routex.hub.management.service.domain.assignment.RouteAssignmentStatus;
 import vn.com.routex.hub.management.service.domain.route.model.RouteAssignmentRecord;
 
 import java.util.List;
@@ -10,6 +11,9 @@ public interface RouteAssignmentRepositoryPort {
     boolean existsActiveByRouteId(String routeId);
 
     boolean existsActiveByRouteId(String routeId, String merchantId);
+
+
+    Optional<RouteAssignmentRecord> findByRouteIdAndStatus(String routeId, RouteAssignmentStatus status);
 
     Optional<RouteAssignmentRecord> findActiveByRouteId(String routeId);
 

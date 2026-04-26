@@ -33,7 +33,7 @@ public class RouteAssignedConsumer {
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @KafkaListener(
-            topics = "${spring.kafka.events.route-assigned}",
+            topics = "${spring.kafka.topics.routes}",
             containerFactory = "kafkaListenerContainerFactory",
             groupId = "${spring.kafka.group-id.routes}"
     )
@@ -64,12 +64,13 @@ public class RouteAssignedConsumer {
         BaseRequest context = JsonUtils.convertValue(event.header().get("context"), BaseRequest.class);
         RouteAssignedEvent routeEvent = JsonUtils.convertValue(event.payload().get("data"), RouteAssignedEvent.class);
 
-        sLog.info("[ROUTE-ASSIGNED] Processing event: eventName={} eventId={} aggregateId={} routeId={} vehicleId={}",
+        sLog.info("[ROUTE-ASSIGNED] Processing event: eventType={} eventId={} aggregateId={} routeId={} vehicleId={} driverId={}",
                 event.eventType(),
                 event.eventId(),
                 event.aggregateId(),
                 routeEvent.routeId(),
-                routeEvent.vehicleId());
+                routeEvent.vehicleId(),
+                routeEvent.driverId());
 
         sLog.info("[ROUTE-ASSIGNED] Route Assigned Event: {}", routeEvent);
 
@@ -102,7 +103,8 @@ public class RouteAssignedConsumer {
                 || context.getRequestDateTime().isBlank()
                 || context.getChannel().isBlank()
                 || data.routeId().isBlank()
-                || data.vehicleId().isBlank()) {
+                || data.vehicleId().isBlank()
+                || data.driverId().isBlank()) {
             throw new BusinessException(ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, String.format(INVALID_EVENT_MESSAGE, event.eventType())));
         }
     }

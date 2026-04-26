@@ -28,6 +28,9 @@ public class RouteSeatEntity {
     @Column(name = "ROUTE_ID")
     private String routeId;
 
+    @Column(name = "SEAT_TEMPLATE_ID")
+    private String seatTemplateId;
+
     @Column(name = "SEAT_NO")
     private String seatNo;
 

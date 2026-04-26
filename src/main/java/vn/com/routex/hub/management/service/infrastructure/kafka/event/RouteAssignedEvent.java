@@ -10,7 +10,6 @@ public record RouteAssignedEvent(
         String routeId,
         String vehicleId,
         String driverId,
-        String driverUserId,
         OffsetDateTime departureTime,
         String originName,
         String destinationName,

@@ -35,17 +35,19 @@ public class RouteAssignmentRecord extends AbstractAuditingEntity {
             String creator,
             String vehicleId,
             String driverId,
+            BigDecimal ticketPrice,
             OffsetDateTime assignedAt
     ) {
         return RouteAssignmentRecord.builder()
                 .id(id)
-                .merchantId(merchantId)
                 .routeId(routeId)
                 .creator(creator)
+                .merchantId(merchantId)
                 .driverId(driverId)
                 .vehicleId(vehicleId)
                 .assignedAt(assignedAt)
-                .status(RouteAssignmentStatus.ASSIGNED)
+                .ticketPrice(ticketPrice)
+                .status(RouteAssignmentStatus.PENDING_ASSIGNMENT)
                 .build();
     }
 
