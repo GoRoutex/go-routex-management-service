@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.com.routex.hub.management.service.domain.assignment.RouteAssignmentStatus;
-import vn.com.routex.hub.management.service.domain.route.model.RouteAssignmentRecord;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.assignment.entity.RouteAssignmentEntity;
 
 import java.util.List;

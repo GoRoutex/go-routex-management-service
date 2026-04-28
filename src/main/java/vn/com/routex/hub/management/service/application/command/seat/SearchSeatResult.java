@@ -4,7 +4,6 @@ import lombok.Builder;
 import vn.com.routex.hub.management.service.domain.seat.SeatFloor;
 import vn.com.routex.hub.management.service.domain.seat.SeatStatus;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Builder

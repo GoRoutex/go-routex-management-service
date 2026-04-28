@@ -8,8 +8,6 @@ import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
 import vn.com.routex.hub.management.service.domain.seat.SeatStatus;
 
-import java.math.BigDecimal;
-
 /**
  * Domain model for route seat.
  * Persistence concerns (JPA annotations, table/column mapping) live in infrastructure layer:

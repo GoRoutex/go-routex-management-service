@@ -10,7 +10,6 @@ import vn.com.routex.hub.management.service.domain.seat.SeatFloor;
 import vn.com.routex.hub.management.service.domain.seat.SeatStatus;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseResponse;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
