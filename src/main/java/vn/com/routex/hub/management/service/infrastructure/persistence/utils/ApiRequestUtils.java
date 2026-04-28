@@ -18,8 +18,6 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 
 @UtilityClass
 public class ApiRequestUtils {
-
-
     public List<Integer> validatePageContext(RequestContext context, PageContext query) {
         int pageSize = parseIntOrDefault(query.pageSize(), DEFAULT_PAGE_SIZE, "pageSize",
                 context.requestId(), context.requestDateTime(), context.channel());
