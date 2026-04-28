@@ -42,11 +42,11 @@ public class RouteAssignmentEntity extends AbstractAuditingEntity {
     @Column(name = "DRIVER_ID")
     private String driverId;
 
-    @Column(name = "TICKET_PRICE")
-    private BigDecimal ticketPrice;
-
     @Column(name = "VEHICLE_ID")
     private String vehicleId;
+
+    @Column(name = "TICKET_PRICE")
+    private BigDecimal ticketPrice;
 
     @Column(name = "ASSIGNED_AT")
     private OffsetDateTime assignedAt;

@@ -5,13 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
 import vn.com.routex.hub.management.service.domain.seat.SeatStatus;
 
-import java.time.OffsetDateTime;
+import java.math.BigDecimal;
 
 /**
  * Domain model for route seat.
- *
  * Persistence concerns (JPA annotations, table/column mapping) live in infrastructure layer:
  * {@code infrastructure.persistence.jpa.route.entity.RouteSeatEntity}.
  */
@@ -20,14 +20,12 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
-public class RouteSeat {
+public class RouteSeat extends AbstractAuditingEntity {
     private String id;
     private String routeId;
     private String seatNo;
     private SeatStatus status;
-    private String ticketId;
-    private OffsetDateTime holdUntil;
-    private String holdBy;
     private String creator;
+    private String seatTemplateId;
 }
 

@@ -23,7 +23,6 @@ public class RouteSearchView {
     private String pickupBranch;
     private String origin;
     private String destination;
-    private BigDecimal ticketPrice;
     private OffsetDateTime plannedStartTime;
     private OffsetDateTime plannedEndTime;
 }

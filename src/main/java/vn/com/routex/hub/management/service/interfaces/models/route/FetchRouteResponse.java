@@ -40,7 +40,6 @@ public class FetchRouteResponse extends BaseResponse<FetchRouteResponse.FetchRou
         private OffsetDateTime actualStartTime;
         private OffsetDateTime actualEndTime;
         private String status;
-        private Long availableSeats;
         private String vehicleId;
         private String vehiclePlate;
         private Boolean hasFloor;

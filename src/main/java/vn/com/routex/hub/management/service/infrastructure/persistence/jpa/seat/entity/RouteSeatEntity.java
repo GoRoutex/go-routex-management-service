@@ -1,4 +1,4 @@
-package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.route.entity;
+package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.seat.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,6 +12,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.domain.seat.SeatStatus;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.entity.AbstractAuditingEntity;
+
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -20,7 +23,7 @@ import vn.com.routex.hub.management.service.domain.seat.SeatStatus;
 @SuperBuilder
 @Entity
 @Table(name = "ROUTE_SEAT")
-public class RouteSeatEntity {
+public class RouteSeatEntity extends AbstractAuditingEntity {
 
     @Id
     private String id;
@@ -28,11 +31,11 @@ public class RouteSeatEntity {
     @Column(name = "ROUTE_ID")
     private String routeId;
 
-    @Column(name = "SEAT_TEMPLATE_ID")
-    private String seatTemplateId;
-
     @Column(name = "SEAT_NO")
     private String seatNo;
+
+    @Column(name = "SEAT_TEMPLATE_ID")
+    private String seatTemplateId;
 
     @Column(name = "STATUS")
     @Enumerated(EnumType.STRING)
@@ -40,5 +43,5 @@ public class RouteSeatEntity {
 
     @Column(name = "CREATOR")
     private String creator;
-}
 
+}

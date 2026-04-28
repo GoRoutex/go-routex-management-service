@@ -18,7 +18,6 @@ public record FetchRouteResult(
         OffsetDateTime actualStartTime,
         OffsetDateTime actualEndTime,
         String status,
-        Long availableSeats,
         String vehicleId,
         String vehiclePlate,
         Boolean hasFloor,

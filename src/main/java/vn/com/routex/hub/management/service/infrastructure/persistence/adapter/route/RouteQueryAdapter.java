@@ -64,7 +64,6 @@ public class RouteQueryAdapter implements RouteQueryPort {
                     searchView.setDriverId(record.getDriverId());
                     searchView.setVehicleId(record.getVehicleId());
                     searchView.setMerchantId(route.getMerchantId());
-                    searchView.setTicketPrice(record.getTicketPrice());
                     searchView.setRouteCode(route.getRouteCode());
                     searchView.setPickupBranch(route.getPickupBranch());
                     searchView.setOrigin(route.getOrigin());

@@ -206,10 +206,6 @@ public class RouteManagementServiceImpl implements RouteManagementService {
     ) {
         RouteAssignmentRecord assignment = enrichment.assignments().get(route.getId());
         VehicleSnapshot vehicle = findVehicle(assignment, enrichment);
-
-
-        sLog.info("ASSIGNMENT RECORD: {}", assignment);
-
         return SearchRouteItemResult.builder()
                 .id(route.getId())
                 .merchantId(route.getMerchantId())
@@ -275,7 +271,6 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .actualStartTime(route.getActualStartTime())
                 .actualEndTime(route.getActualEndTime())
                 .status(route.getStatus())
-                .availableSeats(enrichment.seatAvailable().getOrDefault(route.getId(), 0L))
                 .vehicleId(assignment == null ? null : assignment.getVehicleId())
                 .vehiclePlate(vehicle == null ? null : vehicle.getVehiclePlate())
                 .hasFloor(vehicle != null && vehicle.isHasFloor())
@@ -300,7 +295,6 @@ public class RouteManagementServiceImpl implements RouteManagementService {
                 .actualStartTime(route.getActualStartTime())
                 .actualEndTime(route.getActualEndTime())
                 .status(route.getStatus() == null ? null : route.getStatus().name())
-                .availableSeats(enrichment.seatAvailable().getOrDefault(route.getId(), 0L))
                 .vehicleId(assignment == null ? null : assignment.getVehicleId())
                 .vehiclePlate(vehicle == null ? null : vehicle.getVehiclePlate())
                 .hasFloor(vehicle != null && vehicle.isHasFloor())

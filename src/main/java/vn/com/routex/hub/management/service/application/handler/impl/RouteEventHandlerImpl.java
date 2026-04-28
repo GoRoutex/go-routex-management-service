@@ -24,8 +24,6 @@ import vn.com.routex.hub.management.service.infrastructure.persistence.exception
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
 
-import java.util.Objects;
-
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DRIVER_NOT_FOUND_MESSAGE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
@@ -71,12 +69,10 @@ public class RouteEventHandlerImpl implements RouteEventHandler {
                 assignedEvent.driverId(),
                 vehicleProfile.getStatus(),
                 driverProfile.getStatus(),
-                driverProfile.getOperationStatus(),
-                driverProfile.getCurrentRouteId());
+                driverProfile.getOperationStatus());
 
         if (VehicleStatus.IN_SERVICE.equals(vehicleProfile.getStatus())
                 && OperationStatus.ON_TRIP.equals(driverProfile.getOperationStatus())
-                && Objects.equals(driverProfile.getCurrentRouteId(), assignedEvent.routeId())
                 && RouteStatus.ASSIGNED.equals(routeAggregate.getStatus())
                 && RouteAssignmentStatus.ASSIGNED.equals(routeAssignmentRecord.getStatus())) {
             sLog.info("[ROUTE-ASSIGNED] Skip eventId={} routeId={} because vehicle, driver, routes are already assigned",
@@ -90,10 +86,8 @@ public class RouteEventHandlerImpl implements RouteEventHandler {
 
         vehicleProfile.setStatus(VehicleStatus.IN_SERVICE);
         driverProfile.setOperationStatus(OperationStatus.ON_TRIP);
-        driverProfile.setCurrentRouteId(assignedEvent.routeId());
         routeAggregate.setStatus(RouteStatus.ASSIGNED);
         routeAssignmentRecord.setStatus(RouteAssignmentStatus.ASSIGNED);
-
         routeAssignmentRepositoryPort.save(routeAssignmentRecord);
         routeAggregateRepositoryPort.save(routeAggregate);
         driverProfileRepositoryPort.save(driverProfile);
@@ -105,8 +99,7 @@ public class RouteEventHandlerImpl implements RouteEventHandler {
                 assignedEvent.vehicleId(),
                 assignedEvent.driverId(),
                 vehicleProfile.getStatus(),
-                driverProfile.getOperationStatus(),
-                driverProfile.getCurrentRouteId());
+                driverProfile.getOperationStatus());
 
     }
 
@@ -153,20 +146,6 @@ public class RouteEventHandlerImpl implements RouteEventHandler {
                             INVALID_INPUT_ERROR,
                             String.format("Driver %s cannot be assigned while status is %s",
                                     assignedEvent.driverId(), driverProfile.getStatus())
-                    )
-            );
-        }
-
-        if (OperationStatus.ON_TRIP.equals(driverProfile.getOperationStatus())
-                && !Objects.equals(driverProfile.getCurrentRouteId(), assignedEvent.routeId())) {
-            throw new BusinessException(
-                    context.getRequestId(),
-                    context.getRequestDateTime(),
-                    context.getChannel(),
-                    ExceptionUtils.buildResultResponse(
-                            INVALID_INPUT_ERROR,
-                            String.format("Driver %s is already on another route %s",
-                                    assignedEvent.driverId(), driverProfile.getCurrentRouteId())
                     )
             );
         }

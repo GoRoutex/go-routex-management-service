@@ -39,6 +39,7 @@ public class ErrorConstant {
     public static final String CLOUDINARY_CONFIG_MESSAGE = "Cloudinary is not configured";
     public static final String INVALID_FILE_MESSAGE = "Invalid file";
     public static final String SEAT_NOT_AVAILABLE = "Seat %s is not available";
+    public static final String SEAT_TEMPLATE_NOT_FOUND = "Seat Template with id %s not found";
     public static final String INVALID_INPUT_MESSAGE = "Invalid Input";
     public static final String INVALID_REQUEST_TIMESTAMP = "5186";
     public static final String DUPLICATE_ERROR = "9400";

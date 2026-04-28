@@ -27,7 +27,6 @@ public class RouteAssignmentRecord extends AbstractAuditingEntity {
     private OffsetDateTime assignedAt;
     private OffsetDateTime unAssignedAt;
     private RouteAssignmentStatus status;
-
     public static RouteAssignmentRecord assign(
             String id,
             String merchantId,

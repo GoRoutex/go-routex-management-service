@@ -20,13 +20,13 @@ public class DriverProfile extends AbstractAuditingEntity {
 
     private String id;
 
+    private String merchantId;
+
     private String userId;
 
     private String fullName;
 
     private String phoneNumber;
-
-    private String currentRouteId;
 
     private String employeeCode;
 
