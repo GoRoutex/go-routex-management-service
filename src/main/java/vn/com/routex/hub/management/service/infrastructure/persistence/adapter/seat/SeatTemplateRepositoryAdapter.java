@@ -9,6 +9,7 @@ import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.seat.
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 
 @Component
@@ -34,5 +35,13 @@ public class SeatTemplateRepositoryAdapter implements SeatTemplateRepositoryPort
     public Optional<SeatTemplate> findById(String id) {
         return seatTemplateEntityRepository.findById(id)
                 .map(seatTemplatePersistenceMapper::toDomain);
+    }
+
+    @Override
+    public List<SeatTemplate> findAllByIdIn(Set<String> seatTemplateIds) {
+        return seatTemplateEntityRepository.findAllByIdIn(seatTemplateIds)
+                .stream()
+                .map(seatTemplatePersistenceMapper::toDomain)
+                .toList();
     }
 }

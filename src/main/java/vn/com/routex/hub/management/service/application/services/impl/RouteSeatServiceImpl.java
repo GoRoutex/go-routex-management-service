@@ -10,18 +10,20 @@ import vn.com.routex.hub.management.service.domain.seat.model.RouteSeat;
 import vn.com.routex.hub.management.service.domain.seat.model.SeatTemplate;
 import vn.com.routex.hub.management.service.domain.seat.port.RouteSeatRepositoryPort;
 import vn.com.routex.hub.management.service.domain.seat.port.SeatTemplateRepositoryPort;
+import vn.com.routex.hub.management.service.infrastructure.cache.redis.models.RouteCacheSeat;
+import vn.com.routex.hub.management.service.infrastructure.cache.redis.service.RouteSeatCacheService;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.RECORD_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.ROUTE_SEAT_NOT_FOUND;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.SEAT_TEMPLATE_NOT_FOUND;
 
 
 @Service
@@ -30,51 +32,69 @@ public class RouteSeatServiceImpl implements RouteSeatService {
 
     private final RouteSeatRepositoryPort routeSeatRepositoryPort;
     private final SeatTemplateRepositoryPort seatTemplateRepositoryPort;
+    private final RouteSeatCacheService routeSeatCacheService;
 
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @Override
     public SearchSeatResult searchSeat(SearchSeatCommand command) {
-        List<RouteSeat> seatLists = routeSeatRepositoryPort.findAllByRouteIdOrderBySeatNoAsc(command.routeId());
 
-        if (seatLists.isEmpty()) {
-            throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                    ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_SEAT_NOT_FOUND, command.routeId())));
+        sLog.info("[SEARCH-SEAT] Search Seat Command: {}", command);
+        List<RouteCacheSeat> cacheSeats = routeSeatCacheService.getSeats(command.routeId());
+
+        if(cacheSeats.isEmpty()) {
+            List<RouteSeat> seatLists = routeSeatRepositoryPort.findAllByRouteIdOrderBySeatNoAsc(command.routeId());
+
+            if (seatLists.isEmpty()) {
+                throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
+                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_SEAT_NOT_FOUND, command.routeId())));
+            }
+
+            Set<String> seatTemplateIds = seatLists
+                    .stream()
+                    .map(RouteSeat::getSeatTemplateId)
+                    .collect(Collectors.toSet());
+
+            List<SeatTemplate> seatTemplates = seatTemplateRepositoryPort.findAllByIdIn(seatTemplateIds);
+
+            Map<String, SeatTemplate> templateMap = seatTemplates.stream()
+                    .collect(Collectors.toMap(
+                            SeatTemplate::getId,
+                            Function.identity()
+                            ));
+
+
+            sLog.info("[TEST");
+            cacheSeats = seatLists.stream()
+                    .map(s -> {
+                        SeatTemplate seatTemplate = templateMap.get(s.getSeatTemplateId());
+                        return RouteCacheSeat.builder()
+                                .seatId(s.getId())
+                                .seatTemplateId(s.getSeatTemplateId())
+                                .routeId(s.getRouteId())
+                                .seatNo(s.getSeatNo())
+                                .status(s.getStatus())
+                                .floor(seatTemplate != null ? seatTemplate.getFloor() : null)
+                                .colNo(seatTemplate != null ? seatTemplate.getColumnNo() : 0)
+                                .rowNo(seatTemplate != null ? seatTemplate.getRowNo() : 0)
+                                .build();
+                    })
+                    .toList();
+            routeSeatCacheService.putSeats(command.routeId(), cacheSeats);
         }
-        Map<String, SeatTemplate> templateMap = seatLists
-                .stream()
-                .map(RouteSeat::getSeatTemplateId)
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        templateId -> seatTemplateRepositoryPort.findById(templateId)
-                                .orElseThrow(() -> new BusinessException(
-                                        command.context().requestId(),
-                                        command.context().requestDateTime(),
-                                        command.context().channel(),
-                                        ExceptionUtils.buildResultResponse(
-                                                RECORD_NOT_FOUND,
-                                                String.format(SEAT_TEMPLATE_NOT_FOUND, templateId)
-                                        )))
-                ));
-
-
-        List<SearchSeatResult.SearchSeatResultData> seats = seatLists.stream()
-                .map(rs -> {
-                    SeatTemplate seatTemplate = templateMap.get(rs.getSeatTemplateId());
-
-                    return SearchSeatResult.SearchSeatResultData.builder()
-                            .seatId(rs.getId())
-                            .floor(seatTemplate.getFloor())
-                            .code(rs.getSeatNo())
-                            .status(rs.getStatus())
-                            .floor(seatTemplate.getFloor())
-                            .rowNo(seatTemplate.getRowNo())
-                            .colNo(seatTemplate.getColumnNo())
-                            .build();
-                })
+        List<SearchSeatResult.SearchSeatResultData> seats = cacheSeats.stream()
+                .map(rs -> SearchSeatResult.SearchSeatResultData.builder()
+                        .seatId(rs.seatId())
+                        .floor(rs.floor())
+                        .code(rs.seatNo())
+                        .status(rs.status())
+                        .rowNo(rs.rowNo())
+                        .colNo(rs.colNo())
+                        .build())
                 .sorted(Comparator.comparing(SearchSeatResult.SearchSeatResultData::code))
                 .toList();
 
+        sLog.info("[SEARCH-SEAT] Search Seat Result Data: {}", seats);
         return SearchSeatResult.builder()
                 .data(seats)
                 .build();
