@@ -1,10 +1,10 @@
 package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.driver;
 
-import lombok.experimental.UtilityClass;
+import org.springframework.stereotype.Component;
 import vn.com.routex.hub.management.service.domain.driver.model.DriverProfile;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.driver.entity.DriverProfileEntity;
 
-@UtilityClass
+@Component
 public class DriverProfilePersistenceMapper {
     public DriverProfile toDomain(DriverProfileEntity entity) {
         if (entity == null) {
@@ -13,11 +13,11 @@ public class DriverProfilePersistenceMapper {
         return DriverProfile.builder()
                 .id(entity.getId())
                 .userId(entity.getUserId())
-                .currentRouteId(entity.getCurrentRouteId())
                 .employeeCode(entity.getEmployeeCode())
                 .emergencyContactName(entity.getEmergencyContactName())
                 .emergencyContactPhone(entity.getEmergencyContactPhone())
                 .status(entity.getStatus())
+                .merchantId(entity.getMerchantId())
                 .operationStatus(entity.getOperationStatus())
                 .rating(entity.getRating())
                 .totalTrips(entity.getTotalTrips())
@@ -44,8 +44,8 @@ public class DriverProfilePersistenceMapper {
         return DriverProfileEntity.builder()
                 .id(domain.getId())
                 .userId(domain.getUserId())
-                .currentRouteId(domain.getCurrentRouteId())
                 .employeeCode(domain.getEmployeeCode())
+                .merchantId(domain.getMerchantId())
                 .emergencyContactName(domain.getEmergencyContactName())
                 .emergencyContactPhone(domain.getEmergencyContactPhone())
                 .status(domain.getStatus())

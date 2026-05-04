@@ -30,19 +30,20 @@ spring:
         max.poll.records: 500
 
     events:
-      route-ready-for-sale: "routex.route.ready-for-sale"
-      route-assigned: "routex.route.assigned"
+      trip-ready-for-sale: "routex.trip.ready-for-sale"
+      trip-assigned: "routex.trip.assigned"
       notification-email: "routex.notification.email"
       notification-sms: "routex.notification.sms"
 
     topics:
+      trips: "trip.management.event"
       routes: "route.management.event"
       booking: "route.bookings.event"
 
     group-id:
+      trips: "trip-service"
       bookings: "booking-service"
       payments: "payment-service"
-      routes: "routes-service"
 
     listener:
       ack-mode: manual
@@ -105,3 +106,9 @@ logging:
     org.springframework.security: DEBUG
     org.springframework.kafka: INFO
     org.apache.kafka: WARN
+
+clients:
+  merchant-platform:
+    base-url: ${MERCHANT_PLATFORM_BASE_URL:http://localhost:8083}
+  user-service:
+    base-url: ${USER_SERVICE_BASE_URL:http://localhost:8081}

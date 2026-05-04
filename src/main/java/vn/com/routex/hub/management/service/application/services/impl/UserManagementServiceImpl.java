@@ -12,16 +12,21 @@ import vn.com.routex.hub.management.service.application.command.user.UpdateUserC
 import vn.com.routex.hub.management.service.application.command.user.UpdateUserResult;
 import vn.com.routex.hub.management.service.application.services.UserManagementService;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
-import vn.com.routex.hub.management.service.domain.customer.model.Customer;
-import vn.com.routex.hub.management.service.domain.customer.port.CustomerRepositoryPort;
 import vn.com.routex.hub.management.service.domain.user.model.User;
 import vn.com.routex.hub.management.service.domain.user.model.UserStatus;
 import vn.com.routex.hub.management.service.domain.user.port.UserRepositoryPort;
+import vn.com.routex.hub.management.service.infrastructure.integration.common.support.InternalApiExecutor;
+import vn.com.routex.hub.management.service.infrastructure.integration.userservice.client.UserServiceInternalClient;
+import vn.com.routex.hub.management.service.infrastructure.integration.userservice.model.UserServiceFetchCustomersRequest;
+import vn.com.routex.hub.management.service.infrastructure.integration.userservice.model.UserServiceInternalModels;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.CUSTOMER_NOT_FOUND;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.DUPLICATE_ERROR;
@@ -41,7 +46,7 @@ public class UserManagementServiceImpl implements UserManagementService {
     private static final int DEFAULT_PAGE_NUMBER = 1;
 
     private final UserRepositoryPort userRepositoryPort;
-    private final CustomerRepositoryPort customerRepositoryPort;
+    private final UserServiceInternalClient userServiceInternalClient;
 
     @Override
     public FetchUsersResult fetchUsers(FetchUsersQuery query) {
@@ -60,12 +65,18 @@ public class UserManagementServiceImpl implements UserManagementService {
         }
 
         PagedResult<User> page = userRepositoryPort.fetch(pageNumber - 1, pageSize);
+        Map<String, UserServiceInternalModels.CustomerData> customersByUserId = fetchCustomersByUserIds(
+                page.getItems().stream().map(User::getId).toList(),
+                query
+        );
+
         List<FetchUsersResult.FetchUserItemResult> items = page.getItems().stream()
                 .map(item -> {
-
-                    Customer customer = customerRepositoryPort.findByUserId(item.getId())
-                            .orElseThrow(() -> new BusinessException(query.context().requestId(), query.context().requestDateTime(), query.context().channel(),
-                                    ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, CUSTOMER_NOT_FOUND)));
+                    UserServiceInternalModels.CustomerData customer = customersByUserId.get(item.getId());
+                    if (customer == null) {
+                        throw new BusinessException(query.context().requestId(), query.context().requestDateTime(), query.context().channel(),
+                                ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, CUSTOMER_NOT_FOUND));
+                    }
                     return toFetchUserItem(item, customer);
                 })
                 .toList();
@@ -132,6 +143,20 @@ public class UserManagementServiceImpl implements UserManagementService {
                 .build();
     }
 
+    private Map<String, UserServiceInternalModels.CustomerData> fetchCustomersByUserIds(List<String> userIds, FetchUsersQuery query) {
+        UserServiceFetchCustomersRequest request = new UserServiceFetchCustomersRequest();
+        request.setUserIds(userIds);
+
+        return InternalApiExecutor.execute(
+                query.context(),
+                () -> userServiceInternalClient.fetchCustomersByUserIds(request)
+        ).getItems().stream().collect(Collectors.toMap(
+                UserServiceInternalModels.CustomerData::getUserId,
+                Function.identity(),
+                (left, right) -> left
+        ));
+    }
+
     private void validateDuplicates(UpdateUserCommand command, User existing) {
         if (command.email() != null && !command.email().isBlank()
                 && userRepositoryPort.existsByEmailAndIdNot(command.email().trim(), existing.getId())) {
@@ -169,7 +194,7 @@ public class UserManagementServiceImpl implements UserManagementService {
         return user;
     }
 
-    private FetchUsersResult.FetchUserItemResult toFetchUserItem(User user, Customer customer) {
+    private FetchUsersResult.FetchUserItemResult toFetchUserItem(User user, UserServiceInternalModels.CustomerData customer) {
         return FetchUsersResult.FetchUserItemResult.builder()
                 .id(user.getId())
                 .email(user.getEmail())

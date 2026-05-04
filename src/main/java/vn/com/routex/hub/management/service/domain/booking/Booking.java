@@ -37,7 +37,7 @@ public class Booking extends AbstractAuditingEntity {
     @Column(name = "VEHICLE_ID", nullable = false)
     private String vehicleId;
 
-    @Column(name = "CUSTOMER_ID", nullable = false)
+    @Column(name = "CUSTOMER_ID")
     private String customerId;
 
     @Column(name = "CHANNEL", nullable = false)

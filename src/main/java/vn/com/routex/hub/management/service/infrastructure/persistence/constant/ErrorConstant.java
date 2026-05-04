@@ -13,6 +13,7 @@ public class ErrorConstant {
     public static final String CUSTOMER_NOT_FOUND = "Customer information not found";
     public static final String ROLE_NOT_FOUND_ERROR = "Role %s not found";
     public static final String AUTHORITIES_NOT_FOUND = "Authorities not found";
+    public static final String TRIP_NOT_FOUND = "Trip with Id %s not found";
     public static final String ROUTE_NOT_FOUND = "Route with Id %s not found";
     public static final String OPERATION_POINT_NOT_FOUND = "Operation point with Id %s not found";
     public static final String PROVINCE_NOT_FOUND = "Province with Id %s not found";
@@ -39,6 +40,7 @@ public class ErrorConstant {
     public static final String CLOUDINARY_CONFIG_MESSAGE = "Cloudinary is not configured";
     public static final String INVALID_FILE_MESSAGE = "Invalid file";
     public static final String SEAT_NOT_AVAILABLE = "Seat %s is not available";
+    public static final String SEAT_TEMPLATE_NOT_FOUND = "Seat Template with id %s not found";
     public static final String INVALID_INPUT_MESSAGE = "Invalid Input";
     public static final String INVALID_REQUEST_TIMESTAMP = "5186";
     public static final String DUPLICATE_ERROR = "9400";
