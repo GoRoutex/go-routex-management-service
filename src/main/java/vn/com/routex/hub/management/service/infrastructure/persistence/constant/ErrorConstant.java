@@ -13,6 +13,7 @@ public class ErrorConstant {
     public static final String CUSTOMER_NOT_FOUND = "Customer information not found";
     public static final String ROLE_NOT_FOUND_ERROR = "Role %s not found";
     public static final String AUTHORITIES_NOT_FOUND = "Authorities not found";
+    public static final String TRIP_NOT_FOUND = "Trip with Id %s not found";
     public static final String ROUTE_NOT_FOUND = "Route with Id %s not found";
     public static final String OPERATION_POINT_NOT_FOUND = "Operation point with Id %s not found";
     public static final String PROVINCE_NOT_FOUND = "Province with Id %s not found";

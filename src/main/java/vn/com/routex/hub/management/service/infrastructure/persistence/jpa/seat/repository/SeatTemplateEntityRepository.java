@@ -4,7 +4,6 @@ package vn.com.routex.hub.management.service.infrastructure.persistence.jpa.seat
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import vn.com.routex.hub.management.service.domain.seat.SeatFloor;
-import vn.com.routex.hub.management.service.domain.seat.model.SeatTemplate;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.seat.entity.SeatTemplateEntity;
 
 import java.util.List;

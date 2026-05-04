@@ -1,6 +1,6 @@
 package vn.com.routex.hub.management.service.domain.route.port;
 
-import vn.com.routex.hub.management.service.infrastructure.kafka.event.RouteSellableEvent;
+import vn.com.routex.hub.management.service.infrastructure.kafka.event.TripSellableEvent;
 
 public interface RouteSaleEventPort {
     void publishRouteReadyForSale(
@@ -8,6 +8,6 @@ public interface RouteSaleEventPort {
             String requestDateTime,
             String channel,
             String aggregateId,
-            RouteSellableEvent payload
+            TripSellableEvent payload
     );
 }

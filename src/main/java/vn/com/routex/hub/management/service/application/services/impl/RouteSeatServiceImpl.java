@@ -6,11 +6,11 @@ import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.management.service.application.command.seat.SearchSeatCommand;
 import vn.com.routex.hub.management.service.application.command.seat.SearchSeatResult;
 import vn.com.routex.hub.management.service.application.services.RouteSeatService;
-import vn.com.routex.hub.management.service.domain.seat.model.RouteSeat;
 import vn.com.routex.hub.management.service.domain.seat.model.SeatTemplate;
+import vn.com.routex.hub.management.service.domain.seat.model.TripSeat;
 import vn.com.routex.hub.management.service.domain.seat.port.RouteSeatRepositoryPort;
 import vn.com.routex.hub.management.service.domain.seat.port.SeatTemplateRepositoryPort;
-import vn.com.routex.hub.management.service.infrastructure.cache.redis.models.RouteCacheSeat;
+import vn.com.routex.hub.management.service.infrastructure.cache.redis.models.TripCacheSeat;
 import vn.com.routex.hub.management.service.infrastructure.cache.redis.service.RouteSeatCacheService;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
@@ -40,10 +40,10 @@ public class RouteSeatServiceImpl implements RouteSeatService {
     public SearchSeatResult searchSeat(SearchSeatCommand command) {
 
         sLog.info("[SEARCH-SEAT] Search Seat Command: {}", command);
-        List<RouteCacheSeat> cacheSeats = routeSeatCacheService.getSeats(command.routeId());
+        List<TripCacheSeat> cacheSeats = routeSeatCacheService.getSeats(command.routeId());
 
         if(cacheSeats.isEmpty()) {
-            List<RouteSeat> seatLists = routeSeatRepositoryPort.findAllByRouteIdOrderBySeatNoAsc(command.routeId());
+            List<TripSeat> seatLists = routeSeatRepositoryPort.findAllByTripIdOrderBySeatNoAsc(command.routeId());
 
             if (seatLists.isEmpty()) {
                 throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
@@ -52,7 +52,7 @@ public class RouteSeatServiceImpl implements RouteSeatService {
 
             Set<String> seatTemplateIds = seatLists
                     .stream()
-                    .map(RouteSeat::getSeatTemplateId)
+                    .map(TripSeat::getSeatTemplateId)
                     .collect(Collectors.toSet());
 
             List<SeatTemplate> seatTemplates = seatTemplateRepositoryPort.findAllByIdIn(seatTemplateIds);
@@ -68,10 +68,10 @@ public class RouteSeatServiceImpl implements RouteSeatService {
             cacheSeats = seatLists.stream()
                     .map(s -> {
                         SeatTemplate seatTemplate = templateMap.get(s.getSeatTemplateId());
-                        return RouteCacheSeat.builder()
+                        return TripCacheSeat.builder()
                                 .seatId(s.getId())
                                 .seatTemplateId(s.getSeatTemplateId())
-                                .routeId(s.getRouteId())
+                                .tripId(s.getTripId())
                                 .seatNo(s.getSeatNo())
                                 .status(s.getStatus())
                                 .floor(seatTemplate != null ? seatTemplate.getFloor() : null)

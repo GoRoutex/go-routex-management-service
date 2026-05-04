@@ -1,21 +1,21 @@
 package vn.com.routex.hub.management.service.domain.seat.port;
 
 
-import vn.com.routex.hub.management.service.domain.seat.model.RouteSeat;
+import vn.com.routex.hub.management.service.domain.seat.model.TripSeat;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface RouteSeatRepositoryPort {
-    boolean existsByRouteId(String routeId);
+    boolean existsByTripId(String tripId);
 
-    List<RouteSeat> findAllByRouteIdOrderBySeatNoAsc(String routeId);
+    List<TripSeat> findAllByTripIdOrderBySeatNoAsc(String tripId);
 
-    List<RouteSeat> findAllByRouteIdAndSeatNoInForUpdate(String routeId, List<String> seatNos);
+    List<TripSeat> findAllByTripIdAndSeatNoInForUpdate(String tripId, List<String> seatNos);
 
-    Optional<RouteSeat> findByRouteIdAndSeatNo(String routeId, String seatNo);
+    Optional<TripSeat> findByTripIdAndSeatNo(String tripId, String seatNo);
 
-    List<RouteSeat> saveAll(List<RouteSeat> routeSeats);
+    List<TripSeat> saveAll(List<TripSeat> tripSeats);
 
-    RouteSeat save(RouteSeat routeSeat);
+    TripSeat save(TripSeat tripSeat);
 }

@@ -2,7 +2,7 @@ package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import vn.com.routex.hub.management.service.domain.route.model.ProvincesCodePair;
+import vn.com.routex.hub.management.service.domain.route.model.ProvincesInformationPair;
 import vn.com.routex.hub.management.service.domain.route.port.RouteProvincesLookupPort;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.provinces.projection.ProvincesCodeProjection;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.provinces.repository.ProvincesEntityRepository;
@@ -14,8 +14,8 @@ public class RouteProvincesLookupAdapter implements RouteProvincesLookupPort {
     private final ProvincesEntityRepository provincesEntityRepository;
 
     @Override
-    public ProvincesCodePair getCodes(String origin, String destination) {
+    public ProvincesInformationPair getCodes(String origin, String destination) {
         ProvincesCodeProjection view = provincesEntityRepository.selectProvincesCode(origin, destination);
-        return new ProvincesCodePair(view.getOriginCode(), view.getDestinationCode());
+        return new ProvincesInformationPair(view.getOriginCode(), view.getDestinationCode(), view.getOriginName(), view.getDestinationName());
     }
 }

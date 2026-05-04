@@ -16,10 +16,4 @@ public interface RouteEntityRepository extends JpaRepository<RouteEntity, String
     Optional<RouteEntity> findByIdAndMerchantId(String id, String merchantId);
 
     List<RouteEntity> findByMerchantId(String merchantId);
-
-    @Query(value = """
-            SELECT generate_route_code(:origin, :destination)
-            """, nativeQuery = true)
-    String generateRouteCode(@Param("origin") String origin,
-                             @Param("destination") String destination);
 }

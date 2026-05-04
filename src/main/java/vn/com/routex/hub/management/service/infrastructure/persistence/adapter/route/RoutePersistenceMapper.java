@@ -1,11 +1,11 @@
 package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.route;
 
 import org.springframework.stereotype.Component;
+import vn.com.routex.hub.management.service.domain.assignment.model.TripAssignmentRecord;
 import vn.com.routex.hub.management.service.domain.route.model.RouteAggregate;
-import vn.com.routex.hub.management.service.domain.route.model.RouteAssignmentRecord;
 import vn.com.routex.hub.management.service.domain.route.model.RouteStopPlan;
 import vn.com.routex.hub.management.service.domain.route.model.VehicleSnapshot;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.assignment.entity.RouteAssignmentEntity;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.assignment.entity.TripAssignmentEntity;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.route.entity.RouteEntity;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.routepoint.entity.RoutePointEntity;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.vehicle.entity.VehicleEntity;
@@ -19,15 +19,11 @@ final class RoutePersistenceMapper {
         return RouteAggregate.builder()
                 .id(route.getId())
                 .merchantId(route.getMerchantId())
-                .routeCode(route.getRouteCode())
                 .creator(route.getCreator())
-                .pickupBranch(route.getPickupBranch())
-                .origin(route.getOrigin())
-                .destination(route.getDestination())
-                .plannedStartTime(route.getPlannedStartTime())
-                .plannedEndTime(route.getPlannedEndTime())
-                .actualStartTime(route.getActualStartTime())
-                .actualEndTime(route.getActualEndTime())
+                .originCode(route.getOriginCode())
+                .originName(route.getOriginName())
+                .destinationCode(route.getDestinationCode())
+                .destinationName(route.getDestinationName())
                 .status(route.getStatus())
                 .createdAt(route.getCreatedAt())
                 .createdBy(route.getCreatedBy())
@@ -40,15 +36,11 @@ final class RoutePersistenceMapper {
         return RouteEntity.builder()
                 .id(aggregate.getId())
                 .merchantId(aggregate.getMerchantId())
-                .routeCode(aggregate.getRouteCode())
                 .creator(aggregate.getCreator())
-                .pickupBranch(aggregate.getPickupBranch())
-                .origin(aggregate.getOrigin())
-                .destination(aggregate.getDestination())
-                .plannedStartTime(aggregate.getPlannedStartTime())
-                .plannedEndTime(aggregate.getPlannedEndTime())
-                .actualStartTime(aggregate.getActualStartTime())
-                .actualEndTime(aggregate.getActualEndTime())
+                .originCode(aggregate.getOriginCode())
+                .originName(aggregate.getOriginName())
+                .destinationCode(aggregate.getDestinationCode())
+                .destinationName(aggregate.getDestinationName())
                 .status(aggregate.getStatus())
                 .createdAt(aggregate.getCreatedAt())
                 .createdBy(aggregate.getCreatedBy())
@@ -97,11 +89,11 @@ final class RoutePersistenceMapper {
                 .build();
     }
 
-    public RouteAssignmentRecord toAssignmentRecord(RouteAssignmentEntity assignment) {
-        return RouteAssignmentRecord.builder()
+    public TripAssignmentRecord toAssignmentRecord(TripAssignmentEntity assignment) {
+        return TripAssignmentRecord.builder()
                 .id(assignment.getId())
                 .merchantId(assignment.getMerchantId())
-                .routeId(assignment.getRouteId())
+                .tripId(assignment.getTripId())
                 .creator(assignment.getCreator())
                 .driverId(assignment.getDriverId())
                 .vehicleId(assignment.getVehicleId())
@@ -116,11 +108,11 @@ final class RoutePersistenceMapper {
                 .build();
     }
 
-    public RouteAssignmentEntity toEntity(RouteAssignmentRecord record) {
-        return RouteAssignmentEntity.builder()
+    public TripAssignmentEntity toEntity(TripAssignmentRecord record) {
+        return TripAssignmentEntity.builder()
                 .id(record.getId())
                 .merchantId(record.getMerchantId())
-                .routeId(record.getRouteId())
+                .tripId(record.getTripId())
                 .creator(record.getCreator())
                 .driverId(record.getDriverId())
                 .vehicleId(record.getVehicleId())

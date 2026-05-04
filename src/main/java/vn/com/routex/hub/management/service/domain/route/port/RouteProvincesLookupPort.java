@@ -1,7 +1,7 @@
 package vn.com.routex.hub.management.service.domain.route.port;
 
-import vn.com.routex.hub.management.service.domain.route.model.ProvincesCodePair;
+import vn.com.routex.hub.management.service.domain.route.model.ProvincesInformationPair;
 
 public interface RouteProvincesLookupPort {
-    ProvincesCodePair getCodes(String origin, String destination);
+    ProvincesInformationPair getCodes(String origin, String destination);
 }
