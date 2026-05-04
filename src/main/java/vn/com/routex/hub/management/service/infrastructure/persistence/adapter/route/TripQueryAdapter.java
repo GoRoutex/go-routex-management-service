@@ -85,10 +85,10 @@ public class TripQueryAdapter implements TripQueryPort {
     }
 
     @Override
-    public PagedResult<TripFetchView> fetchTrips(String merchantId, String merchantName, int pageNumber, int pageSize) {
+    public PagedResult<TripFetchView> fetchTrips(String merchantId, List<String> merchantIds, int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.DESC, "departureDate"));
         Specification<TripEntity> specification = Specification.where(TripSpecification.hasMerchantId(merchantId))
-                .and(TripSpecification.hasMerchantName(merchantName));
+                .and(TripSpecification.hasMerchantIds(merchantIds));
         Page<TripEntity> page = tripEntityRepository.findAll(specification, pageable);
 
         List<TripFetchView> items = page.getContent().stream()

@@ -15,8 +15,6 @@ import lombok.experimental.SuperBuilder;
 import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
 import vn.com.routex.hub.management.service.domain.route.RouteStatus;
 
-import java.time.OffsetDateTime;
-
 @Getter
 @Setter
 @AllArgsConstructor

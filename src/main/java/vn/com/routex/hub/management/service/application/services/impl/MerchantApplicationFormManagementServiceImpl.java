@@ -7,11 +7,11 @@ import vn.com.routex.hub.management.service.application.command.merchant.FetchMe
 import vn.com.routex.hub.management.service.application.command.merchant.FetchPendingMerchantApplicationFormsQuery;
 import vn.com.routex.hub.management.service.application.command.merchant.FetchPendingMerchantApplicationFormsResult;
 import vn.com.routex.hub.management.service.application.services.MerchantApplicationFormManagementService;
-import vn.com.routex.hub.management.service.domain.common.PagedResult;
 import vn.com.routex.hub.management.service.domain.merchant.ApplicationFormStatus;
-import vn.com.routex.hub.management.service.domain.merchant.model.MerchantApplicationForm;
-import vn.com.routex.hub.management.service.domain.merchant.port.MerchantApplicationFormRepositoryPort;
+import vn.com.routex.hub.management.service.infrastructure.integration.common.support.InternalApiExecutor;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
+import vn.com.routex.hub.management.service.infrastructure.integration.merchantplatform.client.MerchantPlatformInternalClient;
+import vn.com.routex.hub.management.service.infrastructure.integration.merchantplatform.model.MerchantPlatformInternalModels;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 
@@ -30,7 +30,7 @@ public class MerchantApplicationFormManagementServiceImpl implements MerchantApp
     private static final int DEFAULT_PAGE_SIZE = 10;
     private static final int DEFAULT_PAGE_NUMBER = 1;
 
-    private final MerchantApplicationFormRepositoryPort merchantApplicationFormRepositoryPort;
+    private final MerchantPlatformInternalClient merchantPlatformInternalClient;
 
     @Override
     public FetchPendingMerchantApplicationFormsResult fetchPendingApplicationForms(FetchPendingMerchantApplicationFormsQuery query) {
@@ -49,9 +49,10 @@ public class MerchantApplicationFormManagementServiceImpl implements MerchantApp
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_NUMBER));
         }
 
-        PagedResult<MerchantApplicationForm> page = status == null
-                ? merchantApplicationFormRepositoryPort.fetch(pageNumber - 1, pageSize)
-                : merchantApplicationFormRepositoryPort.fetchByStatus(status, pageNumber - 1, pageSize);
+        MerchantPlatformInternalModels.MerchantApplicationFormPage page = InternalApiExecutor.execute(
+                query.context(),
+                () -> merchantPlatformInternalClient.fetchApplicationForms(status, pageNumber, pageSize)
+        );
 
         List<FetchPendingMerchantApplicationFormsResult.PendingMerchantApplicationFormItemResult> items = page.getItems().stream()
                 .map(form -> FetchPendingMerchantApplicationFormsResult.PendingMerchantApplicationFormItemResult.builder()
@@ -73,18 +74,18 @@ public class MerchantApplicationFormManagementServiceImpl implements MerchantApp
                         .submittedBy(form.getSubmittedBy())
                         .submittedAt(form.getSubmittedAt())
                         .status(form.getStatus())
-                        .contactName(form.getContact() == null ? null : form.getContact().getContactName())
-                        .contactPhone(form.getContact() == null ? null : form.getContact().getContactPhone())
-                        .contactEmail(form.getContact() == null ? null : form.getContact().getContactEmail())
+                        .contactName(form.getContactName())
+                        .contactPhone(form.getContactPhone())
+                        .contactEmail(form.getContactEmail())
                         .build())
                 .toList();
 
         return FetchPendingMerchantApplicationFormsResult.builder()
                 .items(items)
-                .pageNumber(page.getPageNumber() + 1)
-                .pageSize(page.getPageSize())
-                .totalElements(page.getTotalElements())
-                .totalPages(page.getTotalPages())
+                .pageNumber(page.getPagination().getPageNumber())
+                .pageSize(page.getPagination().getPageSize())
+                .totalElements(page.getPagination().getTotalElements())
+                .totalPages(page.getPagination().getTotalPages())
                 .build();
     }
 
@@ -113,16 +114,10 @@ public class MerchantApplicationFormManagementServiceImpl implements MerchantApp
 
     @Override
     public FetchMerchantApplicationFormDetailResult fetchApplicationFormDetail(FetchMerchantApplicationFormDetailQuery query) {
-        MerchantApplicationForm form = merchantApplicationFormRepositoryPort.findById(query.applicationFormId())
-                .orElseThrow(() -> new BusinessException(
-                        query.context().requestId(),
-                        query.context().requestDateTime(),
-                        query.context().channel(),
-                        ExceptionUtils.buildResultResponse(
-                                RECORD_NOT_FOUND,
-                                String.format(MERCHANT_APPLICATION_FORM_NOT_FOUND, query.applicationFormId())
-                        )
-                ));
+        MerchantPlatformInternalModels.MerchantApplicationFormData form = InternalApiExecutor.execute(
+                query.context(),
+                () -> merchantPlatformInternalClient.fetchApplicationFormDetail(query.applicationFormId())
+        );
 
         return FetchMerchantApplicationFormDetailResult.builder()
                 .id(form.getId())
@@ -150,22 +145,23 @@ public class MerchantApplicationFormManagementServiceImpl implements MerchantApp
                 .submittedBy(form.getSubmittedBy())
                 .submittedAt(form.getSubmittedAt())
                 .contact(FetchMerchantApplicationFormDetailResult.ContactResult.builder()
-                        .contactEmail(form.getContact() == null ? null : form.getContact().getContactEmail())
-                        .contactName(form.getContact() == null ? null : form.getContact().getContactName())
-                        .contactPhone(form.getContact() == null ? null : form.getContact().getContactPhone())
+                        .contactEmail(form.getContactEmail())
+                        .contactName(form.getContactName())
+                        .contactPhone(form.getContactPhone())
                         .build())
                 .bankInfo(FetchMerchantApplicationFormDetailResult.BankInfoResult.builder()
-                        .bankAccountName(form.getBankInfo() == null ? null : form.getBankInfo().getBankAccountName())
-                        .bankAccountNumber(form.getBankInfo() == null ? null : form.getBankInfo().getBankAccountNumber())
-                        .bankBranch(form.getBankInfo() == null ? null : form.getBankInfo().getBankBranch())
-                        .bankName(form.getBankInfo() == null ? null : form.getBankInfo().getBankName())
+                        .bankAccountName(form.getBankAccountName())
+                        .bankAccountNumber(form.getBankAccountNumber())
+                        .bankBranch(form.getBankBranch())
+                        .bankName(form.getBankName())
                         .build())
                 .ownerInfo(FetchMerchantApplicationFormDetailResult.OwnerInfoResult.builder()
-                        .ownerEmail(form.getOwnerInfo() == null ? null : form.getOwnerInfo().getOwnerEmail())
-                        .ownerFullName(form.getOwnerInfo() == null ? null : form.getOwnerInfo().getOwnerFullName())
-                        .ownerName(form.getOwnerInfo() == null ? null : form.getOwnerInfo().getOwnerName())
-                        .ownerPhone(form.getOwnerInfo() == null ? null : form.getOwnerInfo().getOwnerPhone())
+                        .ownerEmail(form.getOwnerEmail())
+                        .ownerFullName(form.getOwnerFullName())
+                        .ownerName(form.getOwnerName())
+                        .ownerPhone(form.getOwnerPhone())
                         .build())
                 .build();
     }
+
 }

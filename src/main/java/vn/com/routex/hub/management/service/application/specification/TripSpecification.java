@@ -1,18 +1,15 @@
 package vn.com.routex.hub.management.service.application.specification;
 
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
-import vn.com.routex.hub.management.service.domain.route.RouteStatus;
 import vn.com.routex.hub.management.service.domain.trip.TripStatus;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.merchant.entity.MerchantEntity;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.trip.entity.TripEntity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.List;
 
 
 @RequiredArgsConstructor
@@ -47,16 +44,15 @@ public class TripSpecification {
     }
 
 
-    public static Specification<TripEntity> hasMerchantName(String merchantName) {
+    public static Specification<TripEntity> hasMerchantIds(List<String> merchantIds) {
         return (root, query, cb) -> {
-            if (merchantName == null || merchantName.isBlank()) {
+            if (merchantIds == null) {
                 return cb.conjunction();
             }
-            Subquery<String> subquery = query.subquery(String.class);
-            Root<MerchantEntity> merchant = subquery.from(MerchantEntity.class);
-            subquery.select(merchant.get("id"))
-                    .where(cb.like(cb.lower(merchant.get("name")), "%" + merchantName.toLowerCase() + "%"));
-            return root.get("merchantId").in(subquery);
+            if (merchantIds.isEmpty()) {
+                return cb.disjunction();
+            }
+            return root.get("merchantId").in(merchantIds);
         };
     }
     public static OffsetDateTime dayStart(LocalDate date, ZoneId zoneId) {

@@ -15,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import vn.com.routex.hub.management.service.infrastructure.persistence.exception.feign.CustomerFeignException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseRequest;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseResponse;
@@ -95,6 +96,13 @@ public class ExceptionHandlerAdvice {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(buildBaseResponse(baseRequest, ex.getResult()));
 
         }
+    }
+
+    @ExceptionHandler(CustomerFeignException.class)
+    public ResponseEntity<BaseResponse<Void>> handleCustomerFeignException(HttpServletRequest request, CustomerFeignException ex) {
+        BaseRequest baseRequest = logAndGetBaseRequest(request, ex);
+        HttpStatus status = ex.getHttpStatus() >= 500 ? HttpStatus.BAD_GATEWAY : HttpStatus.BAD_REQUEST;
+        return ResponseEntity.status(status).body(buildBaseResponse(baseRequest, ex.getResult()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

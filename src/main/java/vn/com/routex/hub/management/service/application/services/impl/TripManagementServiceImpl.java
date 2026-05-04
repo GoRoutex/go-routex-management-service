@@ -20,7 +20,6 @@ import vn.com.routex.hub.management.service.application.specification.TripSpecif
 import vn.com.routex.hub.management.service.domain.assignment.model.TripAssignmentRecord;
 import vn.com.routex.hub.management.service.domain.assignment.port.TripAssignmentRepositoryPort;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
-import vn.com.routex.hub.management.service.domain.merchant.port.MerchantRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.model.RouteAggregate;
 import vn.com.routex.hub.management.service.domain.route.model.RouteStopPlan;
 import vn.com.routex.hub.management.service.domain.route.model.VehicleSnapshot;
@@ -33,6 +32,10 @@ import vn.com.routex.hub.management.service.domain.trip.model.TripAggregate;
 import vn.com.routex.hub.management.service.domain.trip.port.TripAggregateRepositoryPort;
 import vn.com.routex.hub.management.service.domain.trip.readmodel.TripFetchView;
 import vn.com.routex.hub.management.service.domain.trip.readmodel.TripSearchView;
+import vn.com.routex.hub.management.service.infrastructure.integration.common.support.InternalApiExecutor;
+import vn.com.routex.hub.management.service.infrastructure.integration.merchantplatform.client.MerchantPlatformInternalClient;
+import vn.com.routex.hub.management.service.infrastructure.integration.merchantplatform.model.MerchantPlatformFetchMerchantsRequest;
+import vn.com.routex.hub.management.service.infrastructure.integration.merchantplatform.model.MerchantPlatformInternalModels;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.DateTimeUtils;
@@ -64,7 +67,7 @@ public class TripManagementServiceImpl implements TripManagementService {
     private final RouteVehicleRepositoryPort routeVehicleRepositoryPort;
     private final RouteSeatAvailabilityPort routeSeatAvailabilityPort;
     private final TripQueryPort tripQueryPort;
-    private final MerchantRepositoryPort merchantRepositoryPort;
+    private final MerchantPlatformInternalClient merchantPlatformInternalClient;
 
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
     private final TripAggregateRepositoryPort tripAggregateRepositoryPort;
@@ -87,14 +90,10 @@ public class TripManagementServiceImpl implements TripManagementService {
                 null
         );
 
-        Map<String, String> merchantNames = searchedRoutes.stream()
-                .map(TripSearchView::getMerchantId)
-                .distinct()
-                .collect(Collectors.toMap(
-                        merchantId -> merchantId,
-                        this::findMerchantName,
-                        (left, right) -> left
-                ));
+        Map<String, String> merchantNames = fetchMerchantNames(
+                searchedRoutes.stream().map(TripSearchView::getMerchantId).distinct().toList(),
+                query.context()
+        );
 
         List<SearchTripItemResult> items = searchedRoutes.stream()
                 .map(route -> toSearchRouteItem(route, enrichment, merchantNames))
@@ -151,7 +150,7 @@ public class TripManagementServiceImpl implements TripManagementService {
         // external is 1-based; Spring Data is 0-based
         PagedResult<TripFetchView> page = tripQueryPort.fetchTrips(
                 query.merchantId(),
-                query.merchantName(),
+                resolveMerchantIds(query),
                 pageInfo.pageNumber() - 1,
                 pageInfo.pageSize()
         );
@@ -240,15 +239,35 @@ public class TripManagementServiceImpl implements TripManagementService {
                 .build();
     }
 
-    private String findMerchantName(String merchantId) {
-        if (merchantId == null || merchantId.isBlank()) {
+    private List<String> resolveMerchantIds(FetchTripsQuery query) {
+        if (query.merchantName() == null || query.merchantName().isBlank()) {
             return null;
         }
-        return merchantRepositoryPort.findById(merchantId)
-                .map(merchant -> merchant.getDisplayName() != null && !merchant.getDisplayName().isBlank()
+
+        return InternalApiExecutor.execute(
+                query.context(),
+                () -> merchantPlatformInternalClient.searchMerchantIds(query.merchantName().trim())
+        );
+    }
+
+    private Map<String, String> fetchMerchantNames(List<String> merchantIds, RequestContext context) {
+        if (merchantIds == null || merchantIds.isEmpty()) {
+            return Map.of();
+        }
+
+        MerchantPlatformFetchMerchantsRequest request = new MerchantPlatformFetchMerchantsRequest();
+        request.setMerchantIds(merchantIds);
+
+        return InternalApiExecutor.execute(
+                context,
+                () -> merchantPlatformInternalClient.fetchMerchantsByIds(request)
+        ).stream().collect(Collectors.toMap(
+                MerchantPlatformInternalModels.MerchantData::getId,
+                merchant -> merchant.getDisplayName() != null && !merchant.getDisplayName().isBlank()
                         ? merchant.getDisplayName()
-                        : merchant.getLegalName())
-                .orElse(null);
+                        : merchant.getLegalName(),
+                (left, right) -> left
+        ));
     }
 
     private PageInfo validatePageContext(RequestContext context, PageContext query) {

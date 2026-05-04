@@ -9,12 +9,12 @@ import vn.com.routex.hub.management.service.application.command.merchant.FetchMe
 import vn.com.routex.hub.management.service.application.command.merchant.UpdateMerchantCommand;
 import vn.com.routex.hub.management.service.application.command.merchant.UpdateMerchantResult;
 import vn.com.routex.hub.management.service.application.services.MerchantManagementService;
-import vn.com.routex.hub.management.service.domain.common.PagedResult;
 import vn.com.routex.hub.management.service.domain.merchant.ApplicationFormStatus;
-import vn.com.routex.hub.management.service.domain.merchant.model.Merchant;
-import vn.com.routex.hub.management.service.domain.merchant.port.MerchantRepositoryPort;
+import vn.com.routex.hub.management.service.infrastructure.integration.common.support.InternalApiExecutor;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.merchant.repository.MerchantApplicationFormEntityRepository;
+import vn.com.routex.hub.management.service.infrastructure.integration.merchantplatform.client.MerchantPlatformInternalClient;
+import vn.com.routex.hub.management.service.infrastructure.integration.merchantplatform.model.MerchantPlatformInternalModels;
+import vn.com.routex.hub.management.service.infrastructure.integration.merchantplatform.model.MerchantPlatformUpdateMerchantRequest;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 
@@ -35,21 +35,14 @@ public class MerchantManagementServiceImpl implements MerchantManagementService 
     private static final int DEFAULT_PAGE_SIZE = 10;
     private static final int DEFAULT_PAGE_NUMBER = 1;
 
-    private final MerchantRepositoryPort merchantRepositoryPort;
-    private final MerchantApplicationFormEntityRepository merchantApplicationFormEntityRepository;
+    private final MerchantPlatformInternalClient merchantPlatformInternalClient;
 
     @Override
     public FetchMerchantDetailResult fetchMerchantDetail(FetchMerchantDetailQuery query) {
-        Merchant merchant = merchantRepositoryPort.findById(query.merchantId())
-                .orElseThrow(() -> new BusinessException(
-                        query.context().requestId(),
-                        query.context().requestDateTime(),
-                        query.context().channel(),
-                        ExceptionUtils.buildResultResponse(
-                                RECORD_NOT_FOUND,
-                                String.format(MERCHANT_NOT_FOUND_BY_ID, query.merchantId())
-                        )
-                ));
+        MerchantPlatformInternalModels.MerchantData merchant = InternalApiExecutor.execute(
+                query.context(),
+                () -> merchantPlatformInternalClient.fetchMerchantDetail(query.merchantId())
+        );
 
         return FetchMerchantDetailResult.builder()
                 .id(merchant.getId())
@@ -103,7 +96,11 @@ public class MerchantManagementServiceImpl implements MerchantManagementService 
                     ExceptionUtils.buildResultResponse(INVALID_INPUT_ERROR, INVALID_PAGE_NUMBER));
         }
 
-        PagedResult<Merchant> page = merchantRepositoryPort.fetch(pageNumber - 1, pageSize);
+        MerchantPlatformInternalModels.MerchantPage page = InternalApiExecutor.execute(
+                query.context(),
+                () -> merchantPlatformInternalClient.fetchMerchants(pageNumber, pageSize)
+        );
+
         List<FetchMerchantsResult.FetchMerchantItemResult> items = page.getItems().stream()
                 .map(merchant -> FetchMerchantsResult.FetchMerchantItemResult.builder()
                         .id(merchant.getId())
@@ -141,93 +138,67 @@ public class MerchantManagementServiceImpl implements MerchantManagementService 
                         .build())
                 .toList();
 
+        long pendingApps = InternalApiExecutor.execute(
+                query.context(),
+                () -> merchantPlatformInternalClient.fetchApplicationForms(ApplicationFormStatus.SUBMITTED, 1, 1)
+        ).getPagination().getTotalElements();
+
         return FetchMerchantsResult.builder()
                 .items(items)
-                .totalPartners(page.getTotalElements())
+                .totalPartners(page.getPagination().getTotalElements())
                 .totalRevenueShare(BigDecimal.ZERO)
                 .avgRating(BigDecimal.ZERO)
-                .numberOfPendingApps(merchantApplicationFormEntityRepository.countByStatus(ApplicationFormStatus.SUBMITTED))
-                .pageNumber(page.getPageNumber() + 1)
-                .pageSize(page.getPageSize())
-                .totalElements(page.getTotalElements())
-                .totalPages(page.getTotalPages())
+                .numberOfPendingApps(pendingApps)
+                .pageNumber(page.getPagination().getPageNumber())
+                .pageSize(page.getPagination().getPageSize())
+                .totalElements(page.getPagination().getTotalElements())
+                .totalPages(page.getPagination().getTotalPages())
                 .build();
     }
 
     @Override
     public UpdateMerchantResult updateMerchant(UpdateMerchantCommand command) {
-        Merchant existing = merchantRepositoryPort.findById(command.merchantId())
-                .orElseThrow(() -> new BusinessException(
-                        command.context().requestId(),
-                        command.context().requestDateTime(),
-                        command.context().channel(),
-                        ExceptionUtils.buildResultResponse(
-                                RECORD_NOT_FOUND,
-                                String.format(MERCHANT_NOT_FOUND_BY_ID, command.merchantId())
-                        )
-                ));
-
         validateCommissionRate(command.commissionRate(), command);
 
-        Merchant updated = existing.toBuilder()
-                .code(ApiRequestUtils.firstNonBlank(command.code(), existing.getCode()))
-                .slug(ApiRequestUtils.firstNonBlank(command.slug(), existing.getSlug()))
+        MerchantPlatformUpdateMerchantRequest request = new MerchantPlatformUpdateMerchantRequest();
+        request.setMerchantId(command.merchantId());
+        request.setCode(command.code());
+        request.setSlug(command.slug());
+        request.setDisplayName(command.displayName());
+        request.setLegalName(command.legalName());
+        request.setTaxCode(command.taxCode());
+        request.setBusinessLicenseNumber(command.businessLicenseNumber());
+        request.setBusinessLicenseUrl(command.businessLicenseUrl());
+        request.setPhone(command.phone());
+        request.setEmail(command.email());
+        request.setLogoUrl(command.logoUrl());
+        request.setDescription(command.description());
+        request.setAddress(command.address());
+        request.setWard(command.ward());
+        request.setProvince(command.province());
+        request.setCountry(command.country());
+        request.setPostalCode(command.postalCode());
+        request.setRepresentativeName(command.representativeName());
+        request.setContactName(command.contactName());
+        request.setContactPhone(command.contactPhone());
+        request.setContactEmail(command.contactEmail());
+        request.setOwnerFullName(command.ownerFullName());
+        request.setOwnerPhone(command.ownerPhone());
+        request.setOwnerEmail(command.ownerEmail());
+        request.setBankAccountName(command.bankAccountName());
+        request.setBankAccountNumber(command.bankAccountNumber());
+        request.setBankName(command.bankName());
+        request.setBankBranch(command.bankBranch());
+        request.setCommissionRate(command.commissionRate());
+        request.setStatus(command.status());
+        request.setApprovedAt(command.approvedAt());
+        request.setApprovedBy(command.approvedBy());
+        request.setUpdatedBy(command.updatedBy());
 
-                .displayName(ApiRequestUtils.firstNonBlank(command.displayName(), existing.getDisplayName()))
-                .legalName(ApiRequestUtils.firstNonBlank(command.legalName(), existing.getLegalName()))
-
-                .taxCode(ApiRequestUtils.firstNonBlank(command.taxCode(), existing.getTaxCode()))
-                .businessLicenseNumber(ApiRequestUtils.firstNonBlank(
-                        command.businessLicenseNumber(), existing.getBusinessLicenseNumber()))
-                .businessLicenseUrl(ApiRequestUtils.firstNonBlank(
-                        command.businessLicenseUrl(), existing.getBusinessLicenseUrl()))
-
-                .phone(ApiRequestUtils.firstNonBlank(command.phone(), existing.getPhone()))
-                .email(ApiRequestUtils.firstNonBlank(command.email(), existing.getEmail()))
-                .logoUrl(ApiRequestUtils.firstNonBlank(command.logoUrl(), existing.getLogoUrl()))
-                .description(ApiRequestUtils.firstNonBlank(command.description(), existing.getDescription()))
-
-                .address(ApiRequestUtils.firstNonBlank(command.address(), existing.getAddress()))
-                .ward(ApiRequestUtils.firstNonBlank(command.ward(), existing.getWard()))
-                .province(ApiRequestUtils.firstNonBlank(command.province(), existing.getProvince()))
-                .country(ApiRequestUtils.firstNonBlank(command.country(), existing.getCountry()))
-                .postalCode(ApiRequestUtils.firstNonBlank(command.postalCode(), existing.getPostalCode()))
-
-                .representativeName(ApiRequestUtils.firstNonBlank(
-                        command.representativeName(), existing.getRepresentativeName()))
-
-                .contactName(ApiRequestUtils.firstNonBlank(command.contactName(), existing.getContactName()))
-                .contactPhone(ApiRequestUtils.firstNonBlank(command.contactPhone(), existing.getContactPhone()))
-                .contactEmail(ApiRequestUtils.firstNonBlank(command.contactEmail(), existing.getContactEmail()))
-
-                .ownerFullName(ApiRequestUtils.firstNonBlank(command.ownerFullName(), existing.getOwnerFullName()))
-                .ownerPhone(ApiRequestUtils.firstNonBlank(command.ownerPhone(), existing.getOwnerPhone()))
-                .ownerEmail(ApiRequestUtils.firstNonBlank(command.ownerEmail(), existing.getOwnerEmail()))
-
-                .bankAccountName(ApiRequestUtils.firstNonBlank(
-                        command.bankAccountName(), existing.getBankAccountName()))
-                .bankAccountNumber(ApiRequestUtils.firstNonBlank(
-                        command.bankAccountNumber(), existing.getBankAccountNumber()))
-                .bankName(ApiRequestUtils.firstNonBlank(command.bankName(), existing.getBankName()))
-                .bankBranch(ApiRequestUtils.firstNonBlank(command.bankBranch(), existing.getBankBranch()))
-
-                .commissionRate(command.commissionRate() == null
-                        ? existing.getCommissionRate()
-                        : command.commissionRate())
-
-                .status(command.status() == null
-                        ? existing.getStatus()
-                        : command.status())
-
-                .approvedAt(command.approvedAt() == null
-                        ? existing.getApprovedAt()
-                        : command.approvedAt())
-
-                .approvedBy(ApiRequestUtils.firstNonBlank(command.approvedBy(), existing.getApprovedBy()))
-                .updatedBy(ApiRequestUtils.firstNonBlank(command.updatedBy(), existing.getUpdatedBy()))
-                .build();
-
-        Merchant saved = merchantRepositoryPort.save(updated);
+        MerchantPlatformInternalModels.MerchantData saved = InternalApiExecutor.execute(
+                command.context(),
+                () -> merchantPlatformInternalClient.updateMerchant(request)
+        );
 
         return UpdateMerchantResult.builder()
                 .id(saved.getId())
