@@ -76,6 +76,8 @@ public class TripAssignedConsumer {
 
         try {
             validateEvent(event, context, tripEvent);
+
+            sLog.info("VALIDATED");
             tripEventHandler.processAssignedEvent(event, context, tripEvent);
 
         } catch(Exception e) {

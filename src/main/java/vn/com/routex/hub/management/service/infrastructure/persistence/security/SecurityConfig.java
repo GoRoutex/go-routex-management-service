@@ -48,6 +48,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/actuator/**",
+                                "/api/v1/internal/**",
                                 "/api/v1/management/merchant-service/**",
                                 "/api/v1/management/merchant-application-form-service/**",
                                 "/api/v1/management/route-service/**",

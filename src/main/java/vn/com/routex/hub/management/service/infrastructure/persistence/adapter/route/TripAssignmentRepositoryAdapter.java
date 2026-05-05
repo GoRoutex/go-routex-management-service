@@ -42,8 +42,6 @@ public class TripAssignmentRepositoryAdapter implements TripAssignmentRepository
 
         if(entityOptional.isPresent()) {
             TripAssignmentEntity tripAssignmentEntity = entityOptional.get();
-            sLog.info("found entity");
-
             return Optional.ofNullable(routePersistenceMapper.toAssignmentRecord(tripAssignmentEntity));
         } else {
             sLog.info("not found");

@@ -109,6 +109,6 @@ logging:
 
 clients:
   merchant-platform:
-    base-url: ${MERCHANT_PLATFORM_BASE_URL:http://localhost:8083}
+    base-url: ${MERCHANT_PLATFORM_BASE_URL:http://localhost:8080/api/v1/merchant-service/internal}
   user-service:
-    base-url: ${USER_SERVICE_BASE_URL:http://localhost:8081}
+    base-url: ${USER_SERVICE_BASE_URL:http://localhost:8080/api/v1/user-service/internal}

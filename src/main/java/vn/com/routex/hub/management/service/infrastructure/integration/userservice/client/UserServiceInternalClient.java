@@ -17,10 +17,10 @@ import vn.com.routex.hub.management.service.interfaces.models.base.BaseResponse;
 )
 public interface UserServiceInternalClient {
 
-    @GetMapping("/api/v1/internal/user-service/customers/detail-by-user-id")
+    @GetMapping("/customers/detail-by-user-id")
     BaseResponse<UserServiceInternalModels.CustomerData> fetchCustomerByUserId(@RequestParam String userId);
 
-    @PostMapping("/api/v1/internal/user-service/customers/fetch-by-user-ids")
+    @PostMapping("/customers/fetch-by-user-ids")
     BaseResponse<UserServiceInternalModels.CustomerListData> fetchCustomersByUserIds(
             @RequestBody UserServiceFetchCustomersRequest request
     );
