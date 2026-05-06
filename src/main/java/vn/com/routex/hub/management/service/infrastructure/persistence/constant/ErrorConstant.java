@@ -15,7 +15,7 @@ public class ErrorConstant {
     public static final String AUTHORITIES_NOT_FOUND = "Authorities not found";
     public static final String TRIP_NOT_FOUND = "Trip with Id %s not found";
     public static final String ROUTE_NOT_FOUND = "Route with Id %s not found";
-    public static final String OPERATION_POINT_NOT_FOUND = "Operation point with Id %s not found";
+    public static final String DEPARTMENT_NOT_FOUND = "Operation point with Id %s not found";
     public static final String PROVINCE_NOT_FOUND = "Province with Id %s not found";
     public static final String SEAT_NOT_FOUND = "Seats not found";
     public static final String ROUTE_POINT_NOT_FOUND = "Route Point not found";
@@ -44,7 +44,7 @@ public class ErrorConstant {
     public static final String INVALID_INPUT_MESSAGE = "Invalid Input";
     public static final String INVALID_REQUEST_TIMESTAMP = "5186";
     public static final String DUPLICATE_ERROR = "9400";
-    public static final String DUPLICATE_OPERATION_POINT_MESSAGE = "Operation point with this code already exists";
+    public static final String DUPLICATE_DEPARTMENT_MESSAGE = "Operation point with this code already exists";
     public static final String DUPLICATE_PROVINCE = "Province is already exists by %s";
     public static final String DUPLICATE_USER_ROLE_MESSAGE = "User already has this role";
     public static final String DUPLICATE_USER_EMAIL_MESSAGE = "User with email %s already exists";

@@ -1,31 +1,65 @@
 package vn.com.routex.hub.management.service.application.specification;
 
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import vn.com.routex.hub.management.service.domain.trip.TripStatus;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.trip.entity.TripEntity;
+import vn.com.routex.hub.management.service.domain.trip.model.TripAggregate;
+import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.route.entity.RouteEntity;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.List;
 
 
 @RequiredArgsConstructor
 public class TripSpecification {
 
-    public static Specification<TripEntity> originNameContainsIgnoreCase(String originName) {
+    public static Specification<TripAggregate> originNameContainsIgnoreCase(String originName) {
         String v = normalize(originName);
-        return (root, query, cb) -> cb.like(cb.lower(root.get("originName")), "%" + v + "%");
+        return (root, query, cb) -> {
+            if (v.isBlank()) return cb.conjunction();
+            Root<RouteEntity> routeRoot = query.from(RouteEntity.class);
+            return cb.and(
+                    cb.equal(root.get("routeId"), routeRoot.get("id")),
+                    cb.like(cb.lower(routeRoot.get("originName")), "%" + v + "%")
+            );
+        };
     }
 
-    public static Specification<TripEntity> destinationNameContainsIgnoreCase(String destinationName) {
+    public static Specification<TripAggregate> hasOriginProvinceId(String provinceId) {
+        return (root, query, cb) -> {
+            if (provinceId == null || provinceId.isBlank()) return cb.conjunction();
+            Root<RouteEntity> routeRoot = query.from(RouteEntity.class);
+            return cb.and(
+                    cb.equal(root.get("routeId"), routeRoot.get("id")),
+                    cb.equal(routeRoot.get("originProvinceId"), provinceId)
+            );
+        };
+    }
+
+    public static Specification<TripAggregate> destinationNameContainsIgnoreCase(String destinationName) {
         String v = normalize(destinationName);
-        return (root, query, cb) -> cb.like(cb.lower(root.get("destinationName")), "%" + v + "%");
+        return (root, query, cb) -> {
+            if (v.isBlank()) return cb.conjunction();
+            Root<RouteEntity> routeRoot = query.from(RouteEntity.class);
+            return cb.and(
+                    cb.equal(root.get("routeId"), routeRoot.get("id")),
+                    cb.like(cb.lower(routeRoot.get("destinationName")), "%" + v + "%")
+            );
+        };
     }
 
-    public static Specification<TripEntity> assignedStatus(TripStatus status) {
+    public static Specification<TripAggregate> hasDestinationProvinceId(String provinceId) {
+        return (root, query, cb) -> {
+            if (provinceId == null || provinceId.isBlank()) return cb.conjunction();
+            Root<RouteEntity> routeRoot = query.from(RouteEntity.class);
+            return cb.and(
+                    cb.equal(root.get("routeId"), routeRoot.get("id")),
+                    cb.equal(routeRoot.get("destinationProvinceId"), provinceId)
+            );
+        };
+    }
+
+    public static Specification<TripAggregate> assignedStatus(TripStatus status) {
         return (root, query, cb) -> {
             if(status == null) {
                 return cb.conjunction();
@@ -34,7 +68,7 @@ public class TripSpecification {
         };
     }
 
-    public static Specification<TripEntity> hasMerchantId(String merchantId) {
+    public static Specification<TripAggregate> hasMerchantId(String merchantId) {
         return (root, query, cb) -> {
             if (merchantId == null || merchantId.isBlank()) {
                 return cb.conjunction();
@@ -44,7 +78,7 @@ public class TripSpecification {
     }
 
 
-    public static Specification<TripEntity> hasMerchantIds(List<String> merchantIds) {
+    public static Specification<TripAggregate> hasMerchantIds(List<String> merchantIds) {
         return (root, query, cb) -> {
             if (merchantIds == null) {
                 return cb.conjunction();
@@ -55,18 +89,6 @@ public class TripSpecification {
             return root.get("merchantId").in(merchantIds);
         };
     }
-    public static OffsetDateTime dayStart(LocalDate date, ZoneId zoneId) {
-        return date.atStartOfDay(zoneId).toOffsetDateTime();
-    }
-
-    public static OffsetDateTime dayEndExclusive(LocalDate date, ZoneId zoneId) {
-        return date.plusDays(1).atStartOfDay(zoneId).toOffsetDateTime();
-    }
-
-    public static OffsetDateTime atTime(LocalDate date, LocalTime time, ZoneId zoneId) {
-        return date.atTime(time).atZone(zoneId).toOffsetDateTime();
-    }
-
     private static String normalize(String message) {
         return message == null ? "" : message.trim().toLowerCase();
     }

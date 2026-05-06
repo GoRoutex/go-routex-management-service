@@ -52,8 +52,6 @@ public class TripEntity extends AbstractAuditingEntity {
     @Column(name = "RAW_DEPARTURE_DATE")
     private String rawDepartureDate;
 
-    @Column(name = "DURATION_MINUTES")
-    private Long durationMinutes;
 
     @Column(name = "STATUS")
     @Enumerated(EnumType.STRING)

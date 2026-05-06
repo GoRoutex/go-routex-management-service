@@ -20,9 +20,14 @@ public class TripResponseMapper {
                 .originName(item.originName())
                 .destinationCode(item.destinationCode())
                 .destinationName(item.destinationName())
+                .originProvinceId(item.originProvinceId())
+                .destinationProvinceId(item.destinationProvinceId())
+                .originDepartmentId(item.originDepartmentId())
+                .destinationDepartmentId(item.destinationDepartmentId())
                 .departureTime(item.departureTime())
                 .rawDepartureDate(item.rawDepartureDate())
                 .rawDepartureTime(item.rawDepartureTime())
+                .rawArrivalTime(calculateArrivalTime(item.rawDepartureTime(), item.durationMinutes()))
                 .status(item.status())
                 .vehicleId(item.vehicleId())
                 .vehiclePlate(item.vehiclePlate())
@@ -42,8 +47,13 @@ public class TripResponseMapper {
                 .originName(item.originName())
                 .destinationCode(item.destinationCode())
                 .destinationName(item.destinationName())
+                .originProvinceId(item.originProvinceId())
+                .destinationProvinceId(item.destinationProvinceId())
+                .originDepartmentId(item.originDepartmentId())
+                .destinationDepartmentId(item.destinationDepartmentId())
                 .rawDepartureTime(item.rawDepartureTime())
                 .rawDepartureDate(item.rawDepartureDate())
+                .rawArrivalTime(calculateArrivalTime(item.rawDepartureTime(), item.durationMinutes()))
                 .departureTime(item.departureTime())
                 .status(item.status())
                 .vehiclePlate(item.vehiclePlate())
@@ -64,8 +74,13 @@ public class TripResponseMapper {
                 .originName(item.originName())
                 .destinationCode(item.destinationCode())
                 .destinationName(item.destinationName())
+                .originProvinceId(item.originProvinceId())
+                .destinationProvinceId(item.destinationProvinceId())
+                .originDepartmentId(item.originDepartmentId())
+                .destinationDepartmentId(item.destinationDepartmentId())
                 .rawDepartureTime(item.rawDepartureTime())
                 .rawDepartureDate(item.rawDepartureDate())
+                .rawArrivalTime(calculateArrivalTime(item.rawDepartureTime(), item.durationMinutes()))
                 .departureTime(item.departureTime())
                 .status(item.status())
                 .vehicleId(item.vehicleId())
@@ -79,8 +94,8 @@ public class TripResponseMapper {
     }
 
 
-    public SearchTripResponse.SearchRouteResponseData toSearchRouteResponseData(SearchTripItemResult item) {
-        return SearchTripResponse.SearchRouteResponseData.builder()
+    public SearchTripResponse.SearchTripResponseData toSearchTripResponseData(SearchTripItemResult item) {
+        return SearchTripResponse.SearchTripResponseData.builder()
                 .id(item.id())
                 .merchantId(item.merchantId())
                 .merchantName(item.merchantName())
@@ -91,11 +106,16 @@ public class TripResponseMapper {
                 .originName(item.originName())
                 .destinationCode(item.destinationCode())
                 .destinationName(item.destinationName())
+                .originProvinceId(item.originProvinceId())
+                .destinationProvinceId(item.destinationProvinceId())
+                .originDepartmentId(item.originDepartmentId())
+                .destinationDepartmentId(item.destinationDepartmentId())
                 .ticketPrice(item.ticketPrice())
                 .availableSeats(item.availableSeats())
                 .departureTime(item.departureTime())
                 .rawDepartureDate(item.rawDepartureDate())
                 .rawDepartureTime(item.rawDepartureTime())
+                .rawArrivalTime(calculateArrivalTime(item.rawDepartureTime(), item.durationMinutes()))
                 .vehiclePlate(item.vehiclePlate())
                 .hasFloor(item.hasFloor())
                 .tripCode(item.tripCode())
@@ -113,12 +133,29 @@ public class TripResponseMapper {
                 .plannedArrivalTime(point.plannedArrivalTime())
                 .plannedDepartureTime(point.plannedDepartureTime())
                 .note(point.note())
-                .operationPointId(point.operationPointId())
+                .departmentId(point.departmentId())
                 .stopName(point.stopName())
                 .stopAddress(point.stopAddress())
                 .stopCity(point.stopCity())
                 .stopLatitude(point.stopLatitude())
                 .stopLongitude(point.stopLongitude())
                 .build();
+    }
+
+    private String calculateArrivalTime(String rawDepartureTime, Long durationMinutes) {
+        if (rawDepartureTime == null || durationMinutes == null) return null;
+        try {
+            String[] parts = rawDepartureTime.split(":");
+            int hours = Integer.parseInt(parts[0]);
+            int minutes = Integer.parseInt(parts[1]);
+
+            int totalMinutes = hours * 60 + minutes + durationMinutes.intValue();
+            int arrivalHours = (totalMinutes / 60) % 24;
+            int arrivalMinutes = totalMinutes % 60;
+
+            return String.format("%02d:%02d", arrivalHours, arrivalMinutes);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

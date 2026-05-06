@@ -73,11 +73,10 @@ public class TripAssignedConsumer {
 
         sLog.info("[TRIP-ASSIGNED] Trip Assigned Event: {}", tripEvent);
 
-
         try {
             validateEvent(event, context, tripEvent);
+            sLog.info("VALIDATED");
             tripEventHandler.processAssignedEvent(event, context, tripEvent);
-
         } catch(Exception e) {
             sLog.error("[TRIP-EVENT] Failed eventName={} eventId={} aggregateId={} tripId={} vehicleId={}",
                     event.eventType(),
@@ -86,7 +85,7 @@ public class TripAssignedConsumer {
                     tripEvent.tripId(),
                     tripEvent.vehicleId(),
                     e);
-            throw e;
+            acknowledgment.acknowledge();
         }
 
         acknowledgment.acknowledge();

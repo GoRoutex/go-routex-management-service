@@ -1,8 +1,11 @@
 package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.trip;
 
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
 import vn.com.routex.hub.management.service.domain.trip.model.TripAggregate;
@@ -11,6 +14,7 @@ import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.trip.
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.trip.repository.TripEntityRepository;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -64,5 +68,24 @@ public class TripAggregateRepositoryAdapter implements TripAggregateRepositoryPo
                 .totalElements(page.getTotalElements())
                 .totalPages(page.getTotalPages())
                 .build();
+    }
+
+    @Override
+    public PagedResult<TripAggregate> fetch(Specification<TripAggregate> spec, Pageable pageable) {
+        Specification<TripEntity> entitySpec = (root, query, cb) -> spec.toPredicate((Root) root, query, cb);
+        Page<TripEntity> entityPage = tripEntityRepository.findAll(entitySpec, pageable);
+        return new PagedResult<>(
+                entityPage.getContent().stream().map(tripAggregatePersistenceMapper::toDomain).collect(Collectors.toList()),
+                entityPage.getNumber(),
+                entityPage.getSize(),
+                entityPage.getTotalElements(),
+                entityPage.getTotalPages()
+        );
+    }
+
+    @Override
+    public Page<TripAggregate> findAll(Specification<TripAggregate> specification, Pageable pageable) {
+        Specification<TripEntity> entitySpec = (root, query, cb) -> specification.toPredicate((Root) root, query, cb);
+        return tripEntityRepository.findAll(entitySpec, pageable).map(tripAggregatePersistenceMapper::toDomain);
     }
 }

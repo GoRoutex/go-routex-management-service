@@ -11,7 +11,7 @@ public record TripSellableEvent(
         String vehicleId,
         String assignedBy,
         OffsetDateTime assignedAt,
-        TripStatus tripStatus,
+        TripStatus status,
         Long seatCount,
         String creator,
         Boolean hasFloor

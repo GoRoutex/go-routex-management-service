@@ -80,7 +80,7 @@ public class TripEventHandlerImpl implements TripEventHandler {
             return;
         }
 
-        validateRoutes(tripAggregate, tripAssignmentRecord, assignedEvent, context);
+        validateTrips(tripAggregate, tripAssignmentRecord, assignedEvent, context);
         validateVehicle(vehicleProfile, assignedEvent, context);
         validateDriver(driverProfile, assignedEvent, context);
 
@@ -103,7 +103,7 @@ public class TripEventHandlerImpl implements TripEventHandler {
 
     }
 
-    private void validateRoutes(TripAggregate routeAggregate, TripAssignmentRecord tripAssignmentRecord, TripAssignedEvent assignedEvent, BaseRequest context) {
+    private void validateTrips(TripAggregate routeAggregate, TripAssignmentRecord tripAssignmentRecord, TripAssignedEvent assignedEvent, BaseRequest context) {
         if(!TripStatus.SCHEDULED.equals(routeAggregate.getStatus())
         || !TripAssignmentStatus.PENDING_ASSIGNMENT.equals(tripAssignmentRecord.getStatus())) {
             throw new BusinessException(

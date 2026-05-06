@@ -14,9 +14,7 @@ import vn.com.routex.hub.management.service.application.command.route.RoutePoint
 import vn.com.routex.hub.management.service.application.command.route.SearchTripItemResult;
 import vn.com.routex.hub.management.service.application.command.route.SearchTripQuery;
 import vn.com.routex.hub.management.service.application.command.route.SearchTripResult;
-import vn.com.routex.hub.management.service.application.command.route.SearchWindow;
 import vn.com.routex.hub.management.service.application.services.TripManagementService;
-import vn.com.routex.hub.management.service.application.specification.TripSpecification;
 import vn.com.routex.hub.management.service.domain.assignment.model.TripAssignmentRecord;
 import vn.com.routex.hub.management.service.domain.assignment.port.TripAssignmentRepositoryPort;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
@@ -38,18 +36,14 @@ import vn.com.routex.hub.management.service.infrastructure.integration.merchantp
 import vn.com.routex.hub.management.service.infrastructure.integration.merchantplatform.model.MerchantPlatformInternalModels;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ApiRequestUtils;
-import vn.com.routex.hub.management.service.infrastructure.persistence.utils.DateTimeUtils;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.DEFAULT_PAGE_NUMBER;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.DEFAULT_PAGE_SIZE;
-import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.DEFAULT_ZONE;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_INPUT_ERROR;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_NUMBER;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ErrorConstant.INVALID_PAGE_SIZE;
@@ -75,12 +69,13 @@ public class TripManagementServiceImpl implements TripManagementService {
     @Override
     public SearchTripResult searchTrip(SearchTripQuery query) {
         PageInfo pageInfo = validatePageContext(query.context(), query.pageContext());
-        SearchWindow searchWindow = resolveSearchWindow(query);
 
         List<TripSearchView> searchedRoutes = tripQueryPort.searchAssignedTrips(
                 null,
                 query.originName(),
                 query.destinationName(),
+                query.originProvinceId(),
+                query.destinationProvinceId(),
                 pageInfo.pageNumber() - 1, // external is 1-based; Spring Data is 0-based
                 pageInfo.pageSize()
         );
@@ -134,7 +129,7 @@ public class TripManagementServiceImpl implements TripManagementService {
                 .plannedArrivalTime(s.getPlannedArrivalTime() == null ? null : s.getPlannedArrivalTime().toString())
                 .plannedDepartureTime(s.getPlannedDepartureTime() == null ? null : s.getPlannedDepartureTime().toString())
                 .note(s.getNote())
-                .operationPointId(s.getOperationPointId())
+                .departmentId(s.getDepartmentId())
                 .stopName(s.getStopName())
                 .stopAddress(s.getStopAddress())
                 .stopCity(s.getStopCity())
@@ -173,16 +168,6 @@ public class TripManagementServiceImpl implements TripManagementService {
                 .totalPages(page.getTotalPages())
                 .build();
     }
-
-    private SearchWindow resolveSearchWindow(SearchTripQuery query) {
-        LocalDate departureDate = DateTimeUtils.parseDateOrThrow(query.departureDate(), "departureDate",
-                query.context().requestId(), query.context().requestDateTime(), query.context().channel());
-        OffsetDateTime start = TripSpecification.dayStart(departureDate, DEFAULT_ZONE);
-        OffsetDateTime endExclusive = TripSpecification.dayEndExclusive(departureDate, DEFAULT_ZONE);
-
-        return new SearchWindow(start, endExclusive);
-    }
-
     private TripEnrichment enrichRoutes(List<String> tripIds, String merchantId) {
         if (tripIds.isEmpty()) {
             return new TripEnrichment(Map.of(), Map.of(), Map.of(), Map.of());
@@ -229,10 +214,15 @@ public class TripManagementServiceImpl implements TripManagementService {
                 .originName(trip.getOriginName())
                 .destinationName(trip.getDestinationName())
                 .destinationCode(trip.getDestinationCode())
+                .originProvinceId(trip.getOriginProvinceId())
+                .destinationProvinceId(trip.getDestinationProvinceId())
+                .originDepartmentId(trip.getOriginDepartmentId())
+                .destinationDepartmentId(trip.getDestinationDepartmentId())
                 .availableSeats(enrichment.seatAvailable().getOrDefault(trip.getId(), 0L))
                 .departureTime(trip.getDepartureTime())
                 .rawDepartureTime(trip.getRawDepartureTime())
                 .rawDepartureDate(trip.getRawDepartureDate())
+                .durationMinutes(trip.getDurationMinutes())
                 .vehiclePlate(vehicle == null ? null : vehicle.getVehiclePlate())
                 .hasFloor(vehicle != null && vehicle.isHasFloor())
                 .routePoints(toRoutePoints(enrichment.stopsByRouteId().get(trip.getRouteId())))
@@ -301,7 +291,14 @@ public class TripManagementServiceImpl implements TripManagementService {
                 .originName(trip.getOriginName())
                 .destinationCode(trip.getDestinationCode())
                 .destinationName(trip.getDestinationName())
+                .originProvinceId(trip.getOriginProvinceId())
+                .destinationProvinceId(trip.getDestinationProvinceId())
+                .originDepartmentId(trip.getOriginDepartmentId())
+                .destinationDepartmentId(trip.getDestinationDepartmentId())
                 .departureTime(trip.getDepartureTime())
+                .rawDepartureTime(trip.getRawDepartureTime())
+                .rawDepartureDate(trip.getRawDepartureDate())
+                .durationMinutes(trip.getDurationMinutes())
                 .status(trip.getStatus())
                 .vehicleId(assignment == null ? null : assignment.getVehicleId())
                 .vehiclePlate(vehicle == null ? null : vehicle.getVehiclePlate())
@@ -324,9 +321,14 @@ public class TripManagementServiceImpl implements TripManagementService {
                 .originCode(route.getOriginCode())
                 .destinationName(route.getDestinationName())
                 .destinationCode(route.getDestinationCode())
+                .originProvinceId(route.getOriginProvinceId())
+                .destinationProvinceId(route.getDestinationProvinceId())
+                .originDepartmentId(route.getOriginDepartmentId())
+                .destinationDepartmentId(route.getDestinationDepartmentId())
                 .departureTime(trip.getDepartureTime())
                 .rawDepartureDate(trip.getRawDepartureDate())
                 .rawDepartureTime(trip.getRawDepartureTime())
+                .durationMinutes(route.getDuration())
                 .status(trip.getStatus() == null ? null : trip.getStatus())
                 .vehicleId(assignment == null ? null : assignment.getVehicleId())
                 .vehiclePlate(vehicle == null ? null : vehicle.getVehiclePlate())
