@@ -1,6 +1,9 @@
 package vn.com.routex.hub.management.service.domain.trip.port;
 
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
 import vn.com.routex.hub.management.service.domain.trip.model.TripAggregate;
 
@@ -21,4 +24,8 @@ public interface TripAggregateRepositoryPort {
     void save(TripAggregate aggregate);
 
     PagedResult<TripAggregate> fetch(String merchantId, int pageNumber, int pageSize);
+
+    PagedResult<TripAggregate> fetch(Specification<TripAggregate> spec, Pageable pageable);
+
+    Page<TripAggregate> findAll(Specification<TripAggregate> specification, Pageable pageable);
 }

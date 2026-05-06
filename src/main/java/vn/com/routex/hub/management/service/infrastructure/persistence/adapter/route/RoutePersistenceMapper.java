@@ -11,7 +11,6 @@ import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.route
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.vehicle.entity.VehicleEntity;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.vehicle.entity.VehicleTemplateEntity;
 
-
 @Component
 final class RoutePersistenceMapper {
 
@@ -22,8 +21,13 @@ final class RoutePersistenceMapper {
                 .creator(route.getCreator())
                 .originCode(route.getOriginCode())
                 .originName(route.getOriginName())
+                .duration(route.getDuration())
                 .destinationCode(route.getDestinationCode())
                 .destinationName(route.getDestinationName())
+                .originProvinceId(route.getOriginProvinceId())
+                .destinationProvinceId(route.getDestinationProvinceId())
+                .originDepartmentId(route.getOriginDepartmentId())
+                .destinationDepartmentId(route.getDestinationDepartmentId())
                 .status(route.getStatus())
                 .createdAt(route.getCreatedAt())
                 .createdBy(route.getCreatedBy())
@@ -36,11 +40,16 @@ final class RoutePersistenceMapper {
         return RouteEntity.builder()
                 .id(aggregate.getId())
                 .merchantId(aggregate.getMerchantId())
+                .duration(aggregate.getDuration())
                 .creator(aggregate.getCreator())
                 .originCode(aggregate.getOriginCode())
                 .originName(aggregate.getOriginName())
                 .destinationCode(aggregate.getDestinationCode())
                 .destinationName(aggregate.getDestinationName())
+                .originProvinceId(aggregate.getOriginProvinceId())
+                .destinationProvinceId(aggregate.getDestinationProvinceId())
+                .originDepartmentId(aggregate.getOriginDepartmentId())
+                .destinationDepartmentId(aggregate.getDestinationDepartmentId())
                 .status(aggregate.getStatus())
                 .createdAt(aggregate.getCreatedAt())
                 .createdBy(aggregate.getCreatedBy())
@@ -58,7 +67,7 @@ final class RoutePersistenceMapper {
                 .plannedArrivalTime(routeStop.getPlannedArrivalTime())
                 .plannedDepartureTime(routeStop.getPlannedDepartureTime())
                 .note(routeStop.getNote())
-                .operationPointId(routeStop.getOperationPointId())
+                .departmentId(routeStop.getDepartmentId())
                 .stopName(routeStop.getStopName())
                 .stopAddress(routeStop.getStopAddress())
                 .stopCity(routeStop.getStopCity())
@@ -78,7 +87,7 @@ final class RoutePersistenceMapper {
                 .plannedArrivalTime(stopPlan.getPlannedArrivalTime())
                 .plannedDepartureTime(stopPlan.getPlannedDepartureTime())
                 .note(stopPlan.getNote())
-                .operationPointId(stopPlan.getOperationPointId())
+                .departmentId(stopPlan.getDepartmentId())
                 .stopName(stopPlan.getStopName())
                 .stopAddress(stopPlan.getStopAddress())
                 .stopCity(stopPlan.getStopCity())

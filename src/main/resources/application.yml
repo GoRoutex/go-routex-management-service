@@ -41,9 +41,9 @@ spring:
       booking: "route.bookings.event"
 
     group-id:
-      trips: "trip-service"
-      bookings: "booking-service"
-      payments: "payment-service"
+      trips: "management-service-trips"
+      bookings: "management-service-bookings"
+      payments: "management-service-payments"
 
     listener:
       ack-mode: manual

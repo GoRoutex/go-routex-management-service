@@ -14,4 +14,6 @@ public interface RouteEntityRepository extends JpaRepository<RouteEntity, String
     Optional<RouteEntity> findByIdAndMerchantId(String id, String merchantId);
 
     List<RouteEntity> findByMerchantId(String merchantId);
+
+    List<RouteEntity> findAllByIdIn(List<String> routeIds);
 }

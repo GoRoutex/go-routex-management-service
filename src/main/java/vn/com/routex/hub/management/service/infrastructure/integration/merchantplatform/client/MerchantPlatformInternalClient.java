@@ -19,36 +19,36 @@ import vn.com.routex.hub.management.service.interfaces.models.base.BaseResponse;
 )
 public interface MerchantPlatformInternalClient {
 
-    @GetMapping("/api/v1/internal/merchant-service/detail")
+    @GetMapping("/detail")
     BaseResponse<MerchantPlatformInternalModels.MerchantData> fetchMerchantDetail(@RequestParam String merchantId);
 
-    @GetMapping("/api/v1/internal/merchant-service/fetch")
+    @GetMapping("/fetch")
     BaseResponse<MerchantPlatformInternalModels.MerchantPage> fetchMerchants(
             @RequestParam int pageNumber,
             @RequestParam int pageSize
     );
 
-    @PostMapping("/api/v1/internal/merchant-service/fetch-by-ids")
+    @PostMapping("/fetch-by-ids")
     BaseResponse<java.util.List<MerchantPlatformInternalModels.MerchantData>> fetchMerchantsByIds(
             @RequestBody MerchantPlatformFetchMerchantsRequest request
     );
 
-    @GetMapping("/api/v1/internal/merchant-service/search-ids")
+    @GetMapping("/search-ids")
     BaseResponse<java.util.List<String>> searchMerchantIds(@RequestParam String merchantName);
 
-    @PostMapping("/api/v1/internal/merchant-service/update")
+    @PostMapping("/update")
     BaseResponse<MerchantPlatformInternalModels.MerchantData> updateMerchant(
             @RequestBody MerchantPlatformUpdateMerchantRequest request
     );
 
-    @GetMapping("/api/v1/internal/merchant-service/applications/fetch")
+    @GetMapping("/applications/fetch")
     BaseResponse<MerchantPlatformInternalModels.MerchantApplicationFormPage> fetchApplicationForms(
             @RequestParam(required = false) ApplicationFormStatus status,
             @RequestParam int pageNumber,
             @RequestParam int pageSize
     );
 
-    @GetMapping("/api/v1/internal/merchant-service/applications/detail")
+    @GetMapping("/applications/detail")
     BaseResponse<MerchantPlatformInternalModels.MerchantApplicationFormData> fetchApplicationFormDetail(
             @RequestParam String applicationFormId
     );

@@ -54,6 +54,8 @@ public class TripServiceController {
         SearchTripResult result = tripManagementService.searchTrip(SearchTripQuery.builder()
                 .originName(request.getData().getOrigin())
                 .destinationName(request.getData().getDestination())
+                .originProvinceId(request.getData().getOriginProvinceId())
+                .destinationProvinceId(request.getData().getDestinationProvinceId())
                 .departureDate(request.getData().getDepartureDate())
                 .seat(request.getData().getSeat())
                 .pageContext(PageContext.builder()
@@ -66,7 +68,7 @@ public class TripServiceController {
         SearchTripResponse response = SearchTripResponse.builder()
                 .result(apiResultFactory.buildSuccess())
                 .data(result.data().stream()
-                        .map(tripResponseMapper::toSearchRouteResponseData)
+                        .map(tripResponseMapper::toSearchTripResponseData)
                         .toList())
                 .build();
 

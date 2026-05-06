@@ -3,6 +3,7 @@ package vn.com.routex.hub.management.service.domain.route.port;
 import vn.com.routex.hub.management.service.domain.route.model.RouteAggregate;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface RouteAggregateRepositoryPort {
@@ -14,4 +15,5 @@ public interface RouteAggregateRepositoryPort {
 
     void save(RouteAggregate aggregate);
 
+    Map<String, RouteAggregate> findAllByIdIn(List<String> routeIds);
 }

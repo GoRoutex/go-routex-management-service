@@ -11,6 +11,8 @@ public interface TripQueryPort {
             String merchantId,
             String originName,
             String destinationName,
+            String originProvinceId,
+            String destinationProvinceId,
             int pageNumber,
             int pageSize
     );

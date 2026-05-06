@@ -50,26 +50,17 @@ public class TripEventHandlerImpl implements TripEventHandler {
                 .orElseThrow(() -> new BusinessException(context.getRequestId(), context.getRequestDateTime(), context.getChannel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, VEHICLE_NOT_FOUND)));
 
-
-        sLog.info("Vehicle: {}", vehicleProfile);
-
         DriverProfile driverProfile = driverProfileRepositoryPort.findById(assignedEvent.driverId())
                 .orElseThrow(() -> new BusinessException(context.getRequestId(), context.getRequestDateTime(), context.getChannel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, DRIVER_NOT_FOUND_MESSAGE)));
-
-        sLog.info("Driver: {}", driverProfile);
 
         TripAssignmentRecord tripAssignmentRecord = tripAssignmentRepositoryPort.findByTripIdAndStatus(assignedEvent.tripId(), TripAssignmentStatus.PENDING_ASSIGNMENT)
                         .orElseThrow(() -> new BusinessException(context.getRequestId(), context.getRequestDateTime(), context.getChannel(),
                                 ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, ROUTE_ASSIGNMENT_NOT_FOUND)));
 
-        sLog.info("Assignemnt record: {}", tripAssignmentRecord);
-
         TripAggregate tripAggregate = tripAggregateRepositoryPort.findById(assignedEvent.tripId())
                 .orElseThrow(() -> new BusinessException(context.getRequestId(), context.getRequestDateTime(), context.getChannel(),
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, assignedEvent.tripId()))));
-
-        sLog.info("Trip record: {}", tripAggregate);
 
         sLog.info("[TRIP-ASSIGNED] Processing eventId={} tripId={} vehicleId={} driverId={} vehicleStatus={} driverStatus={} driverOperationStatus={}",
                 event.eventId(),
@@ -89,7 +80,7 @@ public class TripEventHandlerImpl implements TripEventHandler {
             return;
         }
 
-        validateRoutes(tripAggregate, tripAssignmentRecord, assignedEvent, context);
+        validateTrips(tripAggregate, tripAssignmentRecord, assignedEvent, context);
         validateVehicle(vehicleProfile, assignedEvent, context);
         validateDriver(driverProfile, assignedEvent, context);
 
@@ -112,7 +103,7 @@ public class TripEventHandlerImpl implements TripEventHandler {
 
     }
 
-    private void validateRoutes(TripAggregate routeAggregate, TripAssignmentRecord tripAssignmentRecord, TripAssignedEvent assignedEvent, BaseRequest context) {
+    private void validateTrips(TripAggregate routeAggregate, TripAssignmentRecord tripAssignmentRecord, TripAssignedEvent assignedEvent, BaseRequest context) {
         if(!TripStatus.SCHEDULED.equals(routeAggregate.getStatus())
         || !TripAssignmentStatus.PENDING_ASSIGNMENT.equals(tripAssignmentRecord.getStatus())) {
             throw new BusinessException(

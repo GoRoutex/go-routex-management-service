@@ -15,12 +15,12 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @SuperBuilder
-public class SearchTripResponse extends BaseResponse<List<SearchTripResponse.SearchRouteResponseData>> {
+public class SearchTripResponse extends BaseResponse<List<SearchTripResponse.SearchTripResponseData>> {
     @Getter
     @Setter
     @NoArgsConstructor
     @SuperBuilder
-    public static class SearchRouteResponseData {
+    public static class SearchTripResponseData {
         private String id;
         private String merchantId;
         private String driverId;
@@ -31,10 +31,15 @@ public class SearchTripResponse extends BaseResponse<List<SearchTripResponse.Sea
         private String originName;
         private String destinationCode;
         private String destinationName;
+        private String originProvinceId;
+        private String destinationProvinceId;
+        private String originDepartmentId;
+        private String destinationDepartmentId;
         private Long availableSeats;
         private OffsetDateTime departureTime;
         private String rawDepartureDate;
         private String rawDepartureTime;
+        private String rawArrivalTime;
         private String vehiclePlate;
         private boolean hasFloor;
         private String tripCode;
@@ -54,7 +59,7 @@ public class SearchTripResponse extends BaseResponse<List<SearchTripResponse.Sea
         private String plannedArrivalTime;
         private String plannedDepartureTime;
         private String note;
-        private String operationPointId;
+        private String departmentId;
         private String stopName;
         private String stopAddress;
         private String stopCity;
