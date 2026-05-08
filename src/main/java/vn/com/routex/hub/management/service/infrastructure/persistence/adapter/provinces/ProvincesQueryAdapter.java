@@ -29,14 +29,12 @@ public class ProvincesQueryAdapter implements ProvincesQueryPort {
                 Sort.by(Sort.Order.asc("name"))
         );
 
-        return provincesEntityRepository.searchByMerchantId(merchantId, keyword == null ? "" : keyword.trim(), pageable)
-                .map(p -> {
-                    ProvincesSearchItem item = new ProvincesSearchItem();
-                    item.setId(p.getId());
-                    item.setName(p.getName());
-                    item.setCode(p.getCode());
-                    return item;
-                })
+        return provincesEntityRepository.searchByKeyword(keyword == null ? "" : keyword.trim(), pageable)
+                .map(p -> ProvincesSearchItem.builder()
+                        .id(p.getId())
+                        .name(p.getName())
+                        .code(p.getCode())
+                        .build())
                 .getContent();
     }
 
@@ -44,16 +42,14 @@ public class ProvincesQueryAdapter implements ProvincesQueryPort {
     public PagedResult<ProvincesFetchView> fetchRoutes(String merchantId, int pageNumber, int pageSize) {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<ProvincesEntity> page = provincesEntityRepository.fetchByMerchantId(merchantId, pageable);
+        Page<ProvincesEntity> page = provincesEntityRepository.fetchAll(pageable);
 
         List<ProvincesFetchView> items = page.getContent().stream()
-                .map(p -> {
-                    ProvincesFetchView view = new ProvincesFetchView();
-                    view.setId(p.getId());
-                    view.setName(p.getName());
-                    view.setCode(p.getCode());
-                    return view;
-                })
+                .map(p -> ProvincesFetchView.builder()
+                        .id(p.getId())
+                        .name(p.getName())
+                        .code(p.getCode())
+                        .build())
                 .toList();
 
         return PagedResult.<ProvincesFetchView>builder()

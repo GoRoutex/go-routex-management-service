@@ -12,18 +12,25 @@ public class ProvincesPersistenceMapper {
                 .id(entity.getId())
                 .name(entity.getName())
                 .code(entity.getCode())
+                .createdAt(entity.getCreatedAt())
+                .createdBy(entity.getCreatedBy())
+                .updatedAt(entity.getUpdatedAt())
+                .updatedBy(entity.getUpdatedBy())
                 .build();
 
     }
 
     public ProvincesEntity toEntity(Province province) {
         if (province == null) return null;
-        ProvincesEntity entity = new ProvincesEntity();
-        if (province.getId() != null) entity.setId(province.getId());
-        entity.setName(province.getName());
-        entity.setCode(province.getCode());
-        return entity;
-
+        return ProvincesEntity.builder()
+                .id(province.getId())
+                .name(province.getName())
+                .code(province.getCode())
+                .createdAt(province.getCreatedAt())
+                .createdBy(province.getCreatedBy())
+                .updatedAt(province.getUpdatedAt())
+                .updatedBy(province.getUpdatedBy())
+                .build();
     }
 }
 

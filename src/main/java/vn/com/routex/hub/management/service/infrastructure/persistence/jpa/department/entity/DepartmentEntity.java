@@ -27,14 +27,11 @@ public class DepartmentEntity extends AbstractAuditingEntity {
     @Id
     private String id;
 
-    @Column(name = "MERCHANT_ID")
-    private String merchantId;
-
-    @Column(name = "CODE")
-    private String code;
-
     @Column(name = "NAME")
     private String name;
+
+    @Column(name = "MERCHANT_ID")
+    private String merchantId;
 
     @Column(name = "TYPE")
     @Enumerated(EnumType.STRING)
@@ -43,8 +40,32 @@ public class DepartmentEntity extends AbstractAuditingEntity {
     @Column(name = "ADDRESS")
     private String address;
 
-    @Column(name = "CITY")
-    private String city;
+    @Column(name = "WARD_ID")
+    private String wardId;
+
+    @Column(name = "WARD_NAME")
+    private String wardName;
+
+    @Column(name = "PROVINCE_ID")
+    private String provinceId;
+
+    @Column(name = "PROVINCE_NAME")
+    private String provinceName;
+
+    @Column(name = "NOTE")
+    private String note;
+
+    @Column(name = "OPENING_TIME")
+    private String openingTime;
+
+    @Column(name = "CLOSING_TIME")
+    private String closingTime;
+
+    @Column(name = "ONLINE_OPENING_TIME")
+    private String onlineOpeningTime;
+
+    @Column(name = "ONLINE_CLOSING_TIME")
+    private String onlineClosingTime;
 
     @Column(name = "LATITUDE")
     private Double latitude;
