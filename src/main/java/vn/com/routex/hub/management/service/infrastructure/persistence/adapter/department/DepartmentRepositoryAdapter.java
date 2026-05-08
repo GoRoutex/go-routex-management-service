@@ -22,17 +22,6 @@ public class DepartmentRepositoryAdapter implements DepartmentRepositoryPort {
     private final DepartmentPersistenceMapper departmentPersistenceMapper;
 
     @Override
-    public Optional<Department> findByCode(String code) {
-        return departmentEntityRepository.findByCode(code).map(departmentPersistenceMapper::toDomain);
-    }
-
-    @Override
-    public Optional<Department> findByCode(String code, String merchantId) {
-        return departmentEntityRepository.findByCodeAndMerchantId(code, merchantId)
-                .map(departmentPersistenceMapper::toDomain);
-    }
-
-    @Override
     public Optional<Department> findById(String id) {
         return departmentEntityRepository.findById(id).map(departmentPersistenceMapper::toDomain);
     }
@@ -41,16 +30,6 @@ public class DepartmentRepositoryAdapter implements DepartmentRepositoryPort {
     public Optional<Department> findById(String id, String merchantId) {
         return departmentEntityRepository.findByIdAndMerchantId(id, merchantId)
                 .map(departmentPersistenceMapper::toDomain);
-    }
-
-    @Override
-    public boolean existsByCode(String code) {
-        return departmentEntityRepository.existsByCode(code);
-    }
-
-    @Override
-    public boolean existsByCode(String code, String merchantId) {
-        return departmentEntityRepository.existsByCodeAndMerchantId(code, merchantId);
     }
 
     @Override
