@@ -13,16 +13,24 @@ import vn.com.routex.hub.management.service.domain.department.DepartmentType;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@SuperBuilder
+@SuperBuilder(toBuilder = true)
 public class Department extends AbstractAuditingEntity {
     private String id;
-    private String merchantId;
-    private String code;
     private String name;
+    private String merchantId;
     private DepartmentType type;
     private String address;
-    private String city;
+    private String wardId;
+    private String wardName;
+    private String provinceId;
+    private String provinceName;
+    private String note;
+    private String openingTime;
+    private String closingTime;
+    private String onlineOpeningTime;
+    private String onlineClosingTime;
     private Double latitude;
     private Double longitude;
     private DepartmentStatus status;
 }
+

@@ -14,19 +14,15 @@ public interface ProvincesEntityRepository extends JpaRepository<ProvincesEntity
     Optional<ProvincesEntity> findByCode(String code);
 
     @Query(value = """
-            SELECT p.* FROM PROVINCES p 
-            JOIN MERCHANT_PROVINCE mp ON p.ID = mp.PROVINCE_ID 
-            WHERE mp.MERCHANT_ID = :merchantId
+            SELECT * FROM PROVINCES
             """, nativeQuery = true)
-    Page<ProvincesEntity> fetchByMerchantId(@Param("merchantId") String merchantId, Pageable pageable);
+    Page<ProvincesEntity> fetchAll(Pageable pageable);
 
     @Query(value = """
-            SELECT p.* FROM PROVINCES p 
-            JOIN MERCHANT_PROVINCE mp ON p.ID = mp.PROVINCE_ID 
-            WHERE mp.MERCHANT_ID = :merchantId 
-            AND (:keyword IS NULL OR :keyword = '' OR LOWER(p.NAME) LIKE LOWER(CONCAT('%', :keyword, '%')))
+            SELECT p.* FROM PROVINCES p
+            WHERE (:keyword IS NULL OR :keyword = '' OR LOWER(p.NAME) LIKE LOWER(CONCAT('%', :keyword, '%')))
             """, nativeQuery = true)
-    Page<ProvincesEntity> searchByMerchantId(@Param("merchantId") String merchantId, @Param("keyword") String keyword, Pageable pageable);
+    Page<ProvincesEntity> searchByKeyword(@Param("keyword") String keyword, Pageable pageable);
 
     @Query(value = """
             SELECT  o.code AS originCode,

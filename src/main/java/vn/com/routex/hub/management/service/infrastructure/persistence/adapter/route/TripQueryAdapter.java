@@ -20,7 +20,6 @@ import vn.com.routex.hub.management.service.domain.trip.model.TripAggregate;
 import vn.com.routex.hub.management.service.domain.trip.port.TripAggregateRepositoryPort;
 import vn.com.routex.hub.management.service.domain.trip.readmodel.TripFetchView;
 import vn.com.routex.hub.management.service.domain.trip.readmodel.TripSearchView;
-import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.trip.repository.TripEntityRepository;
 
 import java.util.Collections;
 import java.util.List;
