@@ -5,16 +5,15 @@ import lombok.Builder;
 @Builder
 public record RoutePointResult(
         String id,
-        String operationOrder,
+        int stopOrder,
         String routeId,
-        String plannedArrivalTime,
-        String plannedDepartureTime,
         String note,
         String departmentId,
         String stopName,
         String stopAddress,
         String stopCity,
         Double stopLatitude,
-        Double stopLongitude
+        Double stopLongitude,
+        Integer timeAtDepartment
 ) {
 }

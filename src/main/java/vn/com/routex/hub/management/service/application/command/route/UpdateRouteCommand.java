@@ -26,7 +26,7 @@ public record UpdateRouteCommand(
     @Builder
     public record UpdateRoutePointCommand(
         String id,
-        String operationOrder,
+        int stopOrder,
         OffsetDateTime plannedArrivalTime,
         OffsetDateTime plannedDepartureTime,
         String note

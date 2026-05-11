@@ -9,6 +9,6 @@ public record SearchSeatCommand(
         RequestContext context,
         int pageNumber,
         int pageSize,
-        String routeId
+        String tripId
 ) {
 }

@@ -36,16 +36,13 @@ public class SearchTripRequest extends BaseRequest {
 
         @NotNull
         @NotBlank
-        @Pattern(regexp = ONLY_CHARACTER_REGEX, message = "only characters are allowed for this field")
+        @Pattern(regexp = "^[\\p{L}0-9 ]+$", message = "only characters, numbers and spaces are allowed for this field")
         private String origin;
 
         @NotNull
         @NotBlank
-        @Pattern(regexp = ONLY_CHARACTER_REGEX, message = "only characters are allowed for this field")
+        @Pattern(regexp = "^[\\p{L}0-9 ]+$", message = "only characters, numbers and spaces are allowed for this field")
         private String destination;
-
-        private String originProvinceId;
-        private String destinationProvinceId;
 
         @Pattern(regexp = YEAR_MONTH_DATE_REGEX, message = "must be in format of yyyy-MM-dd")
         private String departureDate;

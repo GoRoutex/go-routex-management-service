@@ -40,16 +40,15 @@ public class TripQueryAdapter implements TripQueryPort {
             String merchantId,
             String originName,
             String destinationName,
-            String originProvinceId,
-            String destinationProvinceId,
             int pageNumber,
             int pageSize
         ) {
+
         Specification<TripAggregate> specification = Specification.where(TripSpecification.hasMerchantId(merchantId))
                 .and(TripSpecification.originNameContainsIgnoreCase(originName))
                 .and(TripSpecification.destinationNameContainsIgnoreCase(destinationName))
-                .and(TripSpecification.hasOriginProvinceId(originProvinceId))
-                .and(TripSpecification.hasDestinationProvinceId(destinationProvinceId))
+//                .and(TripSpecification.hasOriginProvinceId(originProvinceId))
+//                .and(TripSpecification.hasDestinationProvinceId(destinationProvinceId))
                 .and(TripSpecification.assignedStatus(TripStatus.ASSIGNED));
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, "departureTime"));
@@ -69,8 +68,6 @@ public class TripQueryAdapter implements TripQueryPort {
                 .toList();
 
         Map<String, TripAssignmentRecord> assignmentRecordMap = tripAssignmentRepositoryPort.findLatestActiveByTripIds(tripIds);
-
-        sLog.info("Assignment record map: {}", assignmentRecordMap);
         Map<String, RouteAggregate> routeAggregateMap = routeAggregateRepositoryPort.findAllByIdIn(routeIds);
 
         return tripAggregateRepositoryPort.findAll(specification, pageable)
@@ -83,6 +80,7 @@ public class TripQueryAdapter implements TripQueryPort {
                             .id(trip.getId())
                             .driverId(assignmentRecord.getDriverId())
                             .vehicleId(assignmentRecord.getVehicleId())
+                            .routeId(trip.getRouteId())
                             .merchantId(trip.getMerchantId())
                             .tripCode(trip.getTripCode())
                             .pickupBranch(trip.getPickupBranch())

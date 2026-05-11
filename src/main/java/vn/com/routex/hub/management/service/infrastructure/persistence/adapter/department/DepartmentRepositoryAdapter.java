@@ -45,6 +45,13 @@ public class DepartmentRepositoryAdapter implements DepartmentRepositoryPort {
     }
 
     @Override
+    public List<Department> findAllByIdIn(List<String> departmentIds) {
+        return departmentEntityRepository.findAllById(departmentIds)
+                .stream().map(departmentPersistenceMapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public PagedResult<Department> fetch(int pageNumber, int pageSize) {
         Page<DepartmentEntity> page = departmentEntityRepository.findAll(PageRequest.of(pageNumber, pageSize));
         return toPagedResult(page);

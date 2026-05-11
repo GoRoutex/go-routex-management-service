@@ -2,7 +2,7 @@ package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import vn.com.routex.hub.management.service.domain.route.port.RouteSeatAvailabilityPort;
+import vn.com.routex.hub.management.service.domain.route.port.TripSeatAvailabilityPort;
 import vn.com.routex.hub.management.service.domain.seat.SeatStatus;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.seat.projection.TripSeatAvailabilityProjection;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.seat.repository.TripSeatEntityRepository;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
-public class TripSeatAvailabilityAdapter implements RouteSeatAvailabilityPort {
+public class TripSeatAvailabilityAdapter implements TripSeatAvailabilityPort {
 
     private final TripSeatEntityRepository tripSeatEntityRepository;
 

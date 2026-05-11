@@ -29,7 +29,10 @@ public class RouteAggregate extends AbstractAuditingEntity {
     private String destinationProvinceId;
     private String originDepartmentId;
     private String destinationDepartmentId;
+    private String originDepartmentName;
+    private String destinationDepartmentName;
     private Long duration;
+    private Long distance;
     private RouteStatus status;
     private List<RouteStopPlan> stopPlans;
 
@@ -39,9 +42,16 @@ public class RouteAggregate extends AbstractAuditingEntity {
             String merchantId,
             String originCode,
             String destinationCode,
+            String originProvinceId,
+            String destinationProvinceId,
+            String originDepartmentId,
+            String destinationDepartmentId,
+            String originDepartmentName,
+            String destinationDepartmentName,
             String originName,
             String destinationName,
             Long duration,
+            Long distance,
             OffsetDateTime createdAt,
             List<RouteStopPlan> stopPlans
     ) {
@@ -51,9 +61,16 @@ public class RouteAggregate extends AbstractAuditingEntity {
                 .merchantId(merchantId)
                 .originCode(originCode)
                 .destinationCode(destinationCode)
+                .originProvinceId(originProvinceId)
+                .destinationProvinceId(destinationProvinceId)
+                .originDepartmentId(originDepartmentId)
+                .destinationDepartmentId(destinationDepartmentId)
+                .originDepartmentName(originDepartmentName)
+                .destinationDepartmentName(destinationDepartmentName)
                 .originName(originName)
                 .destinationName(destinationName)
                 .duration(duration)
+                .distance(distance)
                 .status(RouteStatus.ACTIVE)
                 .createdAt(createdAt)
                 .createdBy(creator)
@@ -62,8 +79,9 @@ public class RouteAggregate extends AbstractAuditingEntity {
     }
 
     public void cancel(String creator, OffsetDateTime now) {
-        this.status = RouteStatus.INACTIVE;
+        this.status = RouteStatus.SUSPENDED;
         this.setUpdatedBy(creator);
         this.setUpdatedAt(now);
     }
 }
+

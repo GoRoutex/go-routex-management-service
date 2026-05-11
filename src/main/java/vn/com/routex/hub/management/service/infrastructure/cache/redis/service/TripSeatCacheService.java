@@ -6,7 +6,7 @@ import vn.com.routex.hub.management.service.infrastructure.cache.redis.models.Tr
 import java.util.List;
 import java.util.Map;
 
-public interface RouteSeatCacheService {
+public interface TripSeatCacheService {
 
     void putSeats(String routeId, List<TripCacheSeat> cacheSeats);
     List<TripCacheSeat> getSeats(String routeId);

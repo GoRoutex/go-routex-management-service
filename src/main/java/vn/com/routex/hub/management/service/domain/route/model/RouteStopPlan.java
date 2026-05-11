@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import vn.com.routex.hub.management.service.domain.auditing.AbstractAuditingEntity;
 
 import java.time.OffsetDateTime;
 
@@ -13,13 +14,11 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
-public class RouteStopPlan {
+public class RouteStopPlan extends AbstractAuditingEntity {
     private String id;
     private String routeId;
     private String creator;
     private int stopOrder;
-    private OffsetDateTime plannedArrivalTime;
-    private OffsetDateTime plannedDepartureTime;
     private String note;
     private String departmentId;
     private String stopName;
@@ -27,6 +26,6 @@ public class RouteStopPlan {
     private String stopCity;
     private Double stopLatitude;
     private Double stopLongitude;
-    private OffsetDateTime createdAt;
-    private String createdBy;
+    private Long stayDuration;
+    private Integer timeAtDepartment;
 }
