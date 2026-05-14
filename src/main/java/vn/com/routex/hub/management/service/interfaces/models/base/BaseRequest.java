@@ -36,7 +36,7 @@ public class BaseRequest {
 
     @NotBlank
     @Size(max = 30, message = "Channel can't exceed 30 characters")
-    @Pattern(regexp = CHANNEL_REGEX, message = "Channel must be ONL, OFF")
+    @Pattern(regexp = CHANNEL_REGEX, message = "Channel must be ONL, OFF, INTERNAL")
     private String channel;
 }
 

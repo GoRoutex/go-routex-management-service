@@ -8,7 +8,7 @@ import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.membe
 @Component
 public class MembershipPersistenceMapper {
 
-    public MembershipTierEntity toJpaEntity(MembershipTier membershipTier) {
+    public MembershipTierEntity toEntity(MembershipTier membershipTier) {
         return MembershipTierEntity.builder()
                 .id(membershipTier.getId())
                 .badge(membershipTier.getBadge())

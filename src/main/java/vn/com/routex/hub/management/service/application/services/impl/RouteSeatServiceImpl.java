@@ -77,6 +77,7 @@ public class RouteSeatServiceImpl implements RouteSeatService {
                                 .rowNo(seatTemplate != null ? seatTemplate.getRowNo() : 0)
                                 .build();
                     })
+                    .sorted(Comparator.comparing(TripCacheSeat::seatNo))
                     .toList();
             tripSeatCacheService.putSeats(command.tripId(), cacheSeats);
         }

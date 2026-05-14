@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.management.service.application.specification.TripSpecification;
 import vn.com.routex.hub.management.service.domain.assignment.model.TripAssignmentRecord;
 import vn.com.routex.hub.management.service.domain.assignment.port.TripAssignmentRepositoryPort;
@@ -33,7 +32,6 @@ public class TripQueryAdapter implements TripQueryPort {
     private final TripAssignmentRepositoryPort tripAssignmentRepositoryPort;
     private final RouteAggregateRepositoryPort routeAggregateRepositoryPort;
     private final TripAggregateRepositoryPort tripAggregateRepositoryPort;
-    private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @Override
     public List<TripSearchView> searchAssignedTrips(

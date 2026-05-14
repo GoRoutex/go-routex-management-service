@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -26,6 +27,7 @@ public class TripSeatCacheServiceImpl implements TripSeatCacheService {
 
     private static final String TRIP_SEAT_KEY = "trip-seat:%s";
     private static final Duration TTL = Duration.ofMinutes(30);
+
 
     @Override
     public void putSeats(String tripId, List<TripCacheSeat> cacheSeats) {
@@ -90,21 +92,37 @@ public class TripSeatCacheServiceImpl implements TripSeatCacheService {
     public void updateSeatsStatus(String tripId, List<TripCacheSeat> cacheSeats) {
         String key = String.format(TRIP_SEAT_KEY, tripId);
         RMap<String, String> map = redissonClient.getMap(key, StringCodec.INSTANCE);
-        Map<String, String> updates = cacheSeats
-                .stream()
+
+        Set<String> seatNumbers = cacheSeats.stream()
+                .map(TripCacheSeat::seatNo)
+                .collect(Collectors.toSet());
+
+        Map<String, String> existingSeatMap = map.getAll(seatNumbers);
+
+        Map<String, String> updates = cacheSeats.stream()
+                .filter(seat -> existingSeatMap.containsKey(seat.seatNo()))
                 .collect(Collectors.toMap(
                         TripCacheSeat::seatNo,
-                        s -> {
+                        seat -> {
                             try {
-                                return objectMapper.writeValueAsString(s);
-                            } catch (Exception e) {
-                                throw new RuntimeException("Error serializing seat", e);
+                                String json = existingSeatMap.get(seat.seatNo());
+                                TripCacheSeat existing = objectMapper.readValue(json, TripCacheSeat.class);
+
+                                TripCacheSeat mergedSeat = existing.toBuilder()
+                                        .status(seat.status())
+                                        .build();
+
+                                return objectMapper.writeValueAsString(mergedSeat);
+                            } catch(Exception e) {
+                                throw new RuntimeException("Error deserializing seat: ", e);
                             }
                         }
                 ));
-
-        map.putAll(updates);
+        if(!updates.isEmpty()) {
+            map.putAll(updates);
+        }
     }
+
 
     @Override
     public void evictSeat(String tripId) {
