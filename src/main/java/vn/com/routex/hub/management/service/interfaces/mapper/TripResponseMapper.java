@@ -77,7 +77,9 @@ public class TripResponseMapper {
                 .originProvinceId(item.originProvinceId())
                 .destinationProvinceId(item.destinationProvinceId())
                 .originDepartmentId(item.originDepartmentId())
+                .originDepartmentName(item.originDepartmentName())
                 .destinationDepartmentId(item.destinationDepartmentId())
+                .destinationDepartmentName(item.destinationDepartmentName())
                 .rawDepartureTime(item.rawDepartureTime())
                 .rawDepartureDate(item.rawDepartureDate())
                 .rawArrivalTime(calculateArrivalTime(item.rawDepartureTime(), item.durationMinutes()))
@@ -108,6 +110,8 @@ public class TripResponseMapper {
                 .destinationName(item.destinationName())
                 .originProvinceId(item.originProvinceId())
                 .destinationProvinceId(item.destinationProvinceId())
+                .originDepartmentName(item.originDepartmentName())
+                .destinationDepartmentName(item.destinationDepartmentName())
                 .originDepartmentId(item.originDepartmentId())
                 .destinationDepartmentId(item.destinationDepartmentId())
                 .ticketPrice(item.ticketPrice())
@@ -128,10 +132,8 @@ public class TripResponseMapper {
     public SearchTripResponse.SearchRoutePoints toSearchRoutePoint(RoutePointResult point) {
         return SearchTripResponse.SearchRoutePoints.builder()
                 .id(point.id())
-                .operationOrder(point.operationOrder())
+                .stopOrder(point.stopOrder())
                 .routeId(point.routeId())
-                .plannedArrivalTime(point.plannedArrivalTime())
-                .plannedDepartureTime(point.plannedDepartureTime())
                 .note(point.note())
                 .departmentId(point.departmentId())
                 .stopName(point.stopName())
@@ -139,6 +141,7 @@ public class TripResponseMapper {
                 .stopCity(point.stopCity())
                 .stopLatitude(point.stopLatitude())
                 .stopLongitude(point.stopLongitude())
+                .timeAtDepartment(point.timeAtDepartment())
                 .build();
     }
 

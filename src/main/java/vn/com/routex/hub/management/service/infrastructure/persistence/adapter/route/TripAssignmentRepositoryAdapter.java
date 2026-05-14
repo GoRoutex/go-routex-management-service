@@ -81,6 +81,8 @@ public class TripAssignmentRepositoryAdapter implements TripAssignmentRepository
                 merchantId,
                 TripAssignmentStatus.ASSIGNED.name()
         );
+
+        sLog.info("Assignment: {}", assignments);
         return toAssignmentMap(assignments);
     }
 

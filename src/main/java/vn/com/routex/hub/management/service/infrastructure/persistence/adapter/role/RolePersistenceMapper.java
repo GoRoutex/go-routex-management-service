@@ -59,7 +59,7 @@ public class RolePersistenceMapper {
                 .build();
     }
 
-    public UserRolesEntity toJpaEntity(UserRoles userRoles) {
+    public UserRolesEntity toEntity(UserRoles userRoles) {
         return UserRolesEntity.builder()
                 .id(UserRoleEntityId.builder()
                         .userId(userRoles.getId().getUserId())

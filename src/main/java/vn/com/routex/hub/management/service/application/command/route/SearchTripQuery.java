@@ -9,8 +9,6 @@ public record SearchTripQuery(
         RequestContext context,
         String originName,
         String destinationName,
-        String originProvinceId,
-        String destinationProvinceId,
         String departureDate,
         String seat,
         PageContext pageContext

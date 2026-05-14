@@ -11,7 +11,7 @@ import vn.com.routex.hub.management.service.domain.seat.model.TripSeat;
 import vn.com.routex.hub.management.service.domain.seat.port.RouteSeatRepositoryPort;
 import vn.com.routex.hub.management.service.domain.seat.port.SeatTemplateRepositoryPort;
 import vn.com.routex.hub.management.service.infrastructure.cache.redis.models.TripCacheSeat;
-import vn.com.routex.hub.management.service.infrastructure.cache.redis.service.RouteSeatCacheService;
+import vn.com.routex.hub.management.service.infrastructure.cache.redis.service.TripSeatCacheService;
 import vn.com.routex.hub.management.service.infrastructure.persistence.exception.BusinessException;
 import vn.com.routex.hub.management.service.infrastructure.persistence.utils.ExceptionUtils;
 
@@ -32,7 +32,7 @@ public class RouteSeatServiceImpl implements RouteSeatService {
 
     private final RouteSeatRepositoryPort routeSeatRepositoryPort;
     private final SeatTemplateRepositoryPort seatTemplateRepositoryPort;
-    private final RouteSeatCacheService routeSeatCacheService;
+    private final TripSeatCacheService tripSeatCacheService;
 
     private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
@@ -40,14 +40,14 @@ public class RouteSeatServiceImpl implements RouteSeatService {
     public SearchSeatResult searchSeat(SearchSeatCommand command) {
 
         sLog.info("[SEARCH-SEAT] Search Seat Command: {}", command);
-        List<TripCacheSeat> cacheSeats = routeSeatCacheService.getSeats(command.routeId());
+        List<TripCacheSeat> cacheSeats = tripSeatCacheService.getSeats(command.tripId());
 
         if(cacheSeats.isEmpty()) {
-            List<TripSeat> seatLists = routeSeatRepositoryPort.findAllByTripIdOrderBySeatNoAsc(command.routeId());
+            List<TripSeat> seatLists = routeSeatRepositoryPort.findAllByTripIdOrderBySeatNoAsc(command.tripId());
 
             if (seatLists.isEmpty()) {
                 throw new BusinessException(command.context().requestId(), command.context().requestDateTime(), command.context().channel(),
-                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_SEAT_NOT_FOUND, command.routeId())));
+                        ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_SEAT_NOT_FOUND, command.tripId())));
             }
 
             Set<String> seatTemplateIds = seatLists
@@ -63,8 +63,6 @@ public class RouteSeatServiceImpl implements RouteSeatService {
                             Function.identity()
                             ));
 
-
-            sLog.info("[TEST");
             cacheSeats = seatLists.stream()
                     .map(s -> {
                         SeatTemplate seatTemplate = templateMap.get(s.getSeatTemplateId());
@@ -79,8 +77,9 @@ public class RouteSeatServiceImpl implements RouteSeatService {
                                 .rowNo(seatTemplate != null ? seatTemplate.getRowNo() : 0)
                                 .build();
                     })
+                    .sorted(Comparator.comparing(TripCacheSeat::seatNo))
                     .toList();
-            routeSeatCacheService.putSeats(command.routeId(), cacheSeats);
+            tripSeatCacheService.putSeats(command.tripId(), cacheSeats);
         }
         List<SearchSeatResult.SearchSeatResultData> seats = cacheSeats.stream()
                 .map(rs -> SearchSeatResult.SearchSeatResultData.builder()

@@ -19,4 +19,7 @@ public interface DepartmentRepositoryPort {
     PagedResult<Department> fetch(int pageNumber, int pageSize);
 
     PagedResult<Department> fetch(String merchantId, int pageNumber, int pageSize);
+
+
+    List<Department> findAllByIdIn(List<String> departmentIds);
 }

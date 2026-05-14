@@ -20,6 +20,7 @@ public class VehicleProfile extends AbstractAuditingEntity {
     private String merchantId;
     private String templateId;
     private String creator;
+    private boolean hasFloor;
     private VehicleStatus status;
     private String vehiclePlate;
 
@@ -28,6 +29,7 @@ public class VehicleProfile extends AbstractAuditingEntity {
             String merchantId,
             String templateId,
             String creator,
+            boolean hasFloor,
             String vehiclePlate,
             OffsetDateTime createdAt
     ) {
@@ -36,6 +38,7 @@ public class VehicleProfile extends AbstractAuditingEntity {
                 .merchantId(merchantId)
                 .templateId(templateId)
                 .creator(creator)
+                .hasFloor(hasFloor)
                 .status(VehicleStatus.AVAILABLE)
                 .vehiclePlate(vehiclePlate)
                 .createdAt(createdAt)

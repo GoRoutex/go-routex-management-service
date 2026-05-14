@@ -2,8 +2,9 @@ package vn.com.routex.hub.management.service.infrastructure.persistence.adapter.
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import vn.com.routex.hub.management.service.domain.route.model.VehicleSnapshot;
+import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.management.service.domain.route.port.RouteVehicleRepositoryPort;
+import vn.com.routex.hub.management.service.domain.vehicle.model.VehicleProfile;
 import vn.com.routex.hub.management.service.infrastructure.persistence.adapter.vehicle.VehicleTemplatePersistenceMapper;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.vehicle.entity.VehicleEntity;
 import vn.com.routex.hub.management.service.infrastructure.persistence.jpa.vehicle.entity.VehicleTemplateEntity;
@@ -23,31 +24,32 @@ public class RouteVehicleRepositoryAdapter implements RouteVehicleRepositoryPort
     private final VehicleEntityRepository vehicleEntityRepository;
     private final RoutePersistenceMapper routePersistenceMapper;
     private final VehicleTemplateRepository vehicleTemplateRepository;
-    private final VehicleTemplatePersistenceMapper vehicleTemplatePersistenceMapper;
+    private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @Override
-    public Optional<VehicleSnapshot> findById(String vehicleId) {
+    public Optional<VehicleProfile> findById(String vehicleId) {
         return vehicleEntityRepository.findById(vehicleId)
                 .flatMap(this::toVehicleSnapshot);
     }
 
     @Override
-    public Optional<VehicleSnapshot> findById(String vehicleId, String merchantId) {
+    public Optional<VehicleProfile> findById(String vehicleId, String merchantId) {
         return vehicleEntityRepository.findByIdAndMerchantId(vehicleId, merchantId)
                 .flatMap(this::toVehicleSnapshot);
     }
 
     @Override
-    public Map<String, VehicleSnapshot> findByIds(List<String> vehicleIds) {
-        return toVehicleSnapshotMap(vehicleEntityRepository.findByIdIn(vehicleIds));
+    public Map<String, VehicleProfile> findByIds(List<String> vehicleIds) {
+        List<VehicleEntity> listVehicle = vehicleEntityRepository.findByIdIn(vehicleIds);
+        return toVehicleSnapshotMap(listVehicle);
     }
 
     @Override
-    public Map<String, VehicleSnapshot> findByIds(List<String> vehicleIds, String merchantId) {
+    public Map<String, VehicleProfile> findByIds(List<String> vehicleIds, String merchantId) {
         return toVehicleSnapshotMap(vehicleEntityRepository.findByIdInAndMerchantId(vehicleIds, merchantId));
     }
 
-    private Map<String, VehicleSnapshot> toVehicleSnapshotMap(List<VehicleEntity> vehicles) {
+    private Map<String, VehicleProfile> toVehicleSnapshotMap(List<VehicleEntity> vehicles) {
         Map<String, VehicleTemplateEntity> templatesById = vehicleTemplateRepository.findAllById(vehicles.stream()
                         .map(VehicleEntity::getTemplateId)
                         .distinct()
@@ -56,20 +58,20 @@ public class RouteVehicleRepositoryAdapter implements RouteVehicleRepositoryPort
                 .collect(Collectors.toMap(VehicleTemplateEntity::getId, Function.identity()));
 
         return vehicles.stream()
-                .map(vehicle -> toVehicleSnapshot(vehicle, templatesById.get(vehicle.getTemplateId())))
+                .map(vehicle -> toVehicleProfile(vehicle, templatesById.get(vehicle.getTemplateId())))
                 .flatMap(Optional::stream)
-                .collect(Collectors.toMap(VehicleSnapshot::getId, Function.identity()));
+                .collect(Collectors.toMap(VehicleProfile::getId, Function.identity()));
     }
 
-    private Optional<VehicleSnapshot> toVehicleSnapshot(VehicleEntity vehicle) {
+    private Optional<VehicleProfile> toVehicleSnapshot(VehicleEntity vehicle) {
         return vehicleTemplateRepository.findById(vehicle.getTemplateId())
-                .map(template -> routePersistenceMapper.toVehicleSnapshot(vehicle, template));
+                .map(template -> routePersistenceMapper.toVehicleProfile(vehicle, template));
     }
 
-    private Optional<VehicleSnapshot> toVehicleSnapshot(VehicleEntity vehicle, VehicleTemplateEntity template) {
+    private Optional<VehicleProfile> toVehicleProfile(VehicleEntity vehicle, VehicleTemplateEntity template) {
         if (template == null) {
             return Optional.empty();
         }
-        return Optional.of(routePersistenceMapper.toVehicleSnapshot(vehicle, template));
+        return Optional.of(routePersistenceMapper.toVehicleProfile(vehicle, template));
     }
 }

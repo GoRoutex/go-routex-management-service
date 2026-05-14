@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
-import vn.com.go.routex.identity.security.log.SystemLog;
 import vn.com.routex.hub.management.service.application.specification.TripSpecification;
 import vn.com.routex.hub.management.service.domain.assignment.model.TripAssignmentRecord;
 import vn.com.routex.hub.management.service.domain.assignment.port.TripAssignmentRepositoryPort;
@@ -33,23 +32,21 @@ public class TripQueryAdapter implements TripQueryPort {
     private final TripAssignmentRepositoryPort tripAssignmentRepositoryPort;
     private final RouteAggregateRepositoryPort routeAggregateRepositoryPort;
     private final TripAggregateRepositoryPort tripAggregateRepositoryPort;
-    private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @Override
     public List<TripSearchView> searchAssignedTrips(
             String merchantId,
             String originName,
             String destinationName,
-            String originProvinceId,
-            String destinationProvinceId,
             int pageNumber,
             int pageSize
         ) {
+
         Specification<TripAggregate> specification = Specification.where(TripSpecification.hasMerchantId(merchantId))
                 .and(TripSpecification.originNameContainsIgnoreCase(originName))
                 .and(TripSpecification.destinationNameContainsIgnoreCase(destinationName))
-                .and(TripSpecification.hasOriginProvinceId(originProvinceId))
-                .and(TripSpecification.hasDestinationProvinceId(destinationProvinceId))
+//                .and(TripSpecification.hasOriginProvinceId(originProvinceId))
+//                .and(TripSpecification.hasDestinationProvinceId(destinationProvinceId))
                 .and(TripSpecification.assignedStatus(TripStatus.ASSIGNED));
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, "departureTime"));
@@ -69,8 +66,6 @@ public class TripQueryAdapter implements TripQueryPort {
                 .toList();
 
         Map<String, TripAssignmentRecord> assignmentRecordMap = tripAssignmentRepositoryPort.findLatestActiveByTripIds(tripIds);
-
-        sLog.info("Assignment record map: {}", assignmentRecordMap);
         Map<String, RouteAggregate> routeAggregateMap = routeAggregateRepositoryPort.findAllByIdIn(routeIds);
 
         return tripAggregateRepositoryPort.findAll(specification, pageable)
@@ -83,6 +78,7 @@ public class TripQueryAdapter implements TripQueryPort {
                             .id(trip.getId())
                             .driverId(assignmentRecord.getDriverId())
                             .vehicleId(assignmentRecord.getVehicleId())
+                            .routeId(trip.getRouteId())
                             .merchantId(trip.getMerchantId())
                             .tripCode(trip.getTripCode())
                             .pickupBranch(trip.getPickupBranch())

@@ -20,7 +20,7 @@ import java.time.OffsetDateTime;
 @Entity
 @Table(name = "ROUTE_STOP")
 @SuperBuilder
-public class RoutePointEntity extends AbstractAuditingEntity {
+public class RouteStopEntity extends AbstractAuditingEntity {
 
     @Id
     private String id;
@@ -33,18 +33,6 @@ public class RoutePointEntity extends AbstractAuditingEntity {
 
     @Column(name = "STOP_ORDER")
     private String stopOrder;
-
-    @Column(name = "PLANNED_ARRIVAL_TIME")
-    private OffsetDateTime plannedArrivalTime;
-
-    @Column(name = "PLANNED_DEPARTURE_TIME")
-    private OffsetDateTime plannedDepartureTime;
-
-    @Column(name = "ACTUAL_ARRIVAL_TIME")
-    private OffsetDateTime actualArrivalTime;
-
-    @Column(name = "ACTUAL_DEPARTURE_TIME")
-    private OffsetDateTime actualDepartureTime;
 
     @Column(name = "NOTE")
     private String note;
@@ -66,4 +54,10 @@ public class RoutePointEntity extends AbstractAuditingEntity {
 
     @Column(name = "STOP_LONGITUDE")
     private Double stopLongitude;
+
+    @Column(name = "STAY_DURATION")
+    private Long stayDuration;
+
+    @Column(name = "TIME_AT_DEPARTMENT")
+    private Integer timeAtDepartment;
 }

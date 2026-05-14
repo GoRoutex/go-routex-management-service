@@ -45,6 +45,12 @@ public class RouteEntity extends AbstractAuditingEntity {
     @Column(name = "DESTINATION_DEPARTMENT_ID")
     private String destinationDepartmentId;
 
+    @Column(name = "ORIGIN_DEPARTMENT_NAME")
+    private String originDepartmentName;
+
+    @Column(name = "DESTINATION_DEPARTMENT_NAME")
+    private String destinationDepartmentName;
+
     @Column(name = "ORIGIN_NAME")
     private String originName;
 
@@ -53,6 +59,9 @@ public class RouteEntity extends AbstractAuditingEntity {
 
     @Column(name = "DURATION")
     private Long duration;
+
+    @Column(name = "DISTANCE")
+    private Long distance;
 
     @Column(name = "CREATOR")
     private String creator;

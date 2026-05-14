@@ -37,7 +37,7 @@ public class RouteSeatServiceController {
     @GetMapping(SEARCH_PATH)
     public ResponseEntity<SearchSeatResponse> searchSeat(@RequestParam(defaultValue = "1") int pageNumber,
                                                          @RequestParam(defaultValue = "10") int pageSize,
-                                                         @RequestParam String routeId,
+                                                         @RequestParam String tripId,
                                                          HttpServletRequest servletRequest) {
         BaseRequest baseRequest = ApiRequestUtils.getBaseRequestOrDefault(servletRequest);
 
@@ -45,7 +45,7 @@ public class RouteSeatServiceController {
                 .context(HttpUtils.toContext(baseRequest))
                 .pageNumber(pageNumber)
                 .pageSize(pageSize)
-                .routeId(routeId)
+                .tripId(tripId)
                 .build());
 
 

@@ -12,6 +12,8 @@ import vn.com.routex.hub.management.service.infrastructure.integration.merchantp
 import vn.com.routex.hub.management.service.infrastructure.integration.merchantplatform.model.MerchantPlatformUpdateMerchantRequest;
 import vn.com.routex.hub.management.service.interfaces.models.base.BaseResponse;
 
+import java.util.List;
+
 @FeignClient(
         name = "merchantPlatformInternalClient",
         url = "${clients.merchant-platform.base-url}",
@@ -29,12 +31,12 @@ public interface MerchantPlatformInternalClient {
     );
 
     @PostMapping("/fetch-by-ids")
-    BaseResponse<java.util.List<MerchantPlatformInternalModels.MerchantData>> fetchMerchantsByIds(
+    BaseResponse<List<MerchantPlatformInternalModels.MerchantData>> fetchMerchantsByIds(
             @RequestBody MerchantPlatformFetchMerchantsRequest request
     );
 
     @GetMapping("/search-ids")
-    BaseResponse<java.util.List<String>> searchMerchantIds(@RequestParam String merchantName);
+    BaseResponse<List<String>> searchMerchantIds(@RequestParam String merchantName);
 
     @PostMapping("/update")
     BaseResponse<MerchantPlatformInternalModels.MerchantData> updateMerchant(

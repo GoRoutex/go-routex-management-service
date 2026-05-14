@@ -18,18 +18,20 @@ import vn.com.routex.hub.management.service.application.services.TripManagementS
 import vn.com.routex.hub.management.service.domain.assignment.model.TripAssignmentRecord;
 import vn.com.routex.hub.management.service.domain.assignment.port.TripAssignmentRepositoryPort;
 import vn.com.routex.hub.management.service.domain.common.PagedResult;
+import vn.com.routex.hub.management.service.domain.department.model.Department;
+import vn.com.routex.hub.management.service.domain.department.port.DepartmentRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.model.RouteAggregate;
 import vn.com.routex.hub.management.service.domain.route.model.RouteStopPlan;
-import vn.com.routex.hub.management.service.domain.route.model.VehicleSnapshot;
 import vn.com.routex.hub.management.service.domain.route.port.RouteAggregateRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.RoutePointRepositoryPort;
-import vn.com.routex.hub.management.service.domain.route.port.RouteSeatAvailabilityPort;
 import vn.com.routex.hub.management.service.domain.route.port.RouteVehicleRepositoryPort;
 import vn.com.routex.hub.management.service.domain.route.port.TripQueryPort;
+import vn.com.routex.hub.management.service.domain.route.port.TripSeatAvailabilityPort;
 import vn.com.routex.hub.management.service.domain.trip.model.TripAggregate;
 import vn.com.routex.hub.management.service.domain.trip.port.TripAggregateRepositoryPort;
 import vn.com.routex.hub.management.service.domain.trip.readmodel.TripFetchView;
 import vn.com.routex.hub.management.service.domain.trip.readmodel.TripSearchView;
+import vn.com.routex.hub.management.service.domain.vehicle.model.VehicleProfile;
 import vn.com.routex.hub.management.service.infrastructure.integration.common.support.InternalApiExecutor;
 import vn.com.routex.hub.management.service.infrastructure.integration.merchantplatform.client.MerchantPlatformInternalClient;
 import vn.com.routex.hub.management.service.infrastructure.integration.merchantplatform.model.MerchantPlatformFetchMerchantsRequest;
@@ -40,7 +42,10 @@ import vn.com.routex.hub.management.service.infrastructure.persistence.utils.Exc
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.DEFAULT_PAGE_NUMBER;
 import static vn.com.routex.hub.management.service.infrastructure.persistence.constant.ApplicationConstant.DEFAULT_PAGE_SIZE;
@@ -59,12 +64,12 @@ public class TripManagementServiceImpl implements TripManagementService {
     private final TripAssignmentRepositoryPort tripAssignmentRepositoryPort;
     private final RouteAggregateRepositoryPort routeAggregateRepositoryPort;
     private final RouteVehicleRepositoryPort routeVehicleRepositoryPort;
-    private final RouteSeatAvailabilityPort routeSeatAvailabilityPort;
+    private final TripSeatAvailabilityPort tripSeatAvailabilityPort;
     private final TripQueryPort tripQueryPort;
     private final MerchantPlatformInternalClient merchantPlatformInternalClient;
-
-    private final SystemLog sLog = SystemLog.getLogger(this.getClass());
     private final TripAggregateRepositoryPort tripAggregateRepositoryPort;
+    private final DepartmentRepositoryPort departmentRepositoryPort;
+    private final SystemLog sLog = SystemLog.getLogger(this.getClass());
 
     @Override
     public SearchTripResult searchTrip(SearchTripQuery query) {
@@ -74,16 +79,22 @@ public class TripManagementServiceImpl implements TripManagementService {
                 null,
                 query.originName(),
                 query.destinationName(),
-                query.originProvinceId(),
-                query.destinationProvinceId(),
                 pageInfo.pageNumber() - 1, // external is 1-based; Spring Data is 0-based
                 pageInfo.pageSize()
         );
 
         TripEnrichment enrichment = enrichRoutes(
                 searchedRoutes.stream().map(TripSearchView::getId).toList(),
-                null
+                searchedRoutes.stream().map(TripSearchView::getRouteId).toList(),
+                searchedRoutes.stream().flatMap(route -> Stream.of(
+                        route.getOriginDepartmentId(),
+                        route.getDestinationDepartmentId()
+                ))
+                        .filter(Objects::nonNull)
+                        .distinct().toList()
         );
+
+        sLog.info("Enrichment: {}", enrichment);
 
         Map<String, String> merchantNames = fetchMerchantNames(
                 searchedRoutes.stream().map(TripSearchView::getMerchantId).distinct().toList(),
@@ -117,17 +128,18 @@ public class TripManagementServiceImpl implements TripManagementService {
                         ExceptionUtils.buildResultResponse(RECORD_NOT_FOUND, String.format(ROUTE_NOT_FOUND, query.tripId()))
                 ));
 
-        TripEnrichment enrichment = enrichRoutes(List.of(route.getId()), null);
+        List<String> departmentIds = List.of(route.getOriginDepartmentId(), route.getDestinationDepartmentId());
+
+        TripEnrichment enrichment = enrichRoutes(List.of(trip.getId()), List.of(trip.getRouteId()), departmentIds);
+
         return toFetchTripDetail(route, trip, enrichment);
     }
 
     private RoutePointResult toRoutePoint(RouteStopPlan s) {
         return RoutePointResult.builder()
                 .id(s.getId())
-                .operationOrder(String.valueOf(s.getStopOrder()))
+                .stopOrder(s.getStopOrder())
                 .routeId(s.getRouteId())
-                .plannedArrivalTime(s.getPlannedArrivalTime() == null ? null : s.getPlannedArrivalTime().toString())
-                .plannedDepartureTime(s.getPlannedDepartureTime() == null ? null : s.getPlannedDepartureTime().toString())
                 .note(s.getNote())
                 .departmentId(s.getDepartmentId())
                 .stopName(s.getStopName())
@@ -135,6 +147,7 @@ public class TripManagementServiceImpl implements TripManagementService {
                 .stopCity(s.getStopCity())
                 .stopLatitude(s.getStopLatitude())
                 .stopLongitude(s.getStopLongitude())
+                .timeAtDepartment(s.getTimeAtDepartment())
                 .build();
     }
 
@@ -153,7 +166,15 @@ public class TripManagementServiceImpl implements TripManagementService {
         List<TripFetchView> routes = page.getItems();
         TripEnrichment enrichment = enrichRoutes(
                 routes.stream().map(TripFetchView::getId).toList(),
-                query.merchantId()
+                routes.stream().map(TripFetchView::getRouteId).toList(),
+                routes.stream()
+                        .flatMap(route -> Stream.of(
+                                route.getOriginDepartmentId(),
+                                route.getDestinationDepartmentId()
+                        ))
+                        .filter(Objects::nonNull)
+                        .distinct()
+                        .toList()
         );
 
         List<FetchTripResult> items = routes.stream()
@@ -168,30 +189,28 @@ public class TripManagementServiceImpl implements TripManagementService {
                 .totalPages(page.getTotalPages())
                 .build();
     }
-    private TripEnrichment enrichRoutes(List<String> tripIds, String merchantId) {
+    private TripEnrichment enrichRoutes(List<String> tripIds, List<String> routeIds, List<String> departmentIds) {
         if (tripIds.isEmpty()) {
-            return new TripEnrichment(Map.of(), Map.of(), Map.of(), Map.of());
+            return new TripEnrichment(Map.of(), Map.of(), Map.of(), Map.of(), Map.of());
         }
-
-        Map<String, Long> seatAvailable = routeSeatAvailabilityPort.countAvailableSeats(tripIds);
-        Map<String, TripAssignmentRecord> assignments = merchantId == null || merchantId.isBlank()
-                ? tripAssignmentRepositoryPort.findLatestActiveByTripIds(tripIds)
-                : tripAssignmentRepositoryPort.findLatestActiveByTripIds(tripIds, merchantId);
+        Map<String, Long> seatAvailable = tripSeatAvailabilityPort.countAvailableSeats(tripIds);
+        Map<String, TripAssignmentRecord> assignments = tripAssignmentRepositoryPort.findLatestActiveByTripIds(tripIds);
         List<String> vehicleIds = assignments.values().stream()
                 .map(TripAssignmentRecord::getVehicleId)
                 .distinct()
                 .toList();
-        Map<String, VehicleSnapshot> vehicles;
-        if (vehicleIds.isEmpty()) {
-            vehicles = Map.of();
-        } else if (merchantId == null || merchantId.isBlank()) {
-            vehicles = routeVehicleRepositoryPort.findByIds(vehicleIds);
-        } else {
-            vehicles = routeVehicleRepositoryPort.findByIds(vehicleIds, merchantId);
-        }
-        Map<String, List<RouteStopPlan>> stopsByRouteId = routePointRepositoryPort.findByRouteIds(tripIds);
+        Map<String, VehicleProfile> vehicles = routeVehicleRepositoryPort.findByIds(vehicleIds);
+        Map<String, List<RouteStopPlan>> stopsByRouteId = routePointRepositoryPort.findByRouteIds(routeIds);
+        List<Department> listDepartment = departmentRepositoryPort.findAllByIdIn(departmentIds);
 
-        return new TripEnrichment(assignments, seatAvailable, vehicles, stopsByRouteId);
+        Map<String, Department> departmentMap = listDepartment
+                .stream()
+                .collect(Collectors.toMap(
+                        Department::getId,
+                        Function.identity()
+                ));
+
+        return new TripEnrichment(assignments, seatAvailable, vehicles, stopsByRouteId, departmentMap);
     }
 
     private SearchTripItemResult toSearchRouteItem(
@@ -200,7 +219,13 @@ public class TripManagementServiceImpl implements TripManagementService {
             Map<String, String> merchantNames
     ) {
         TripAssignmentRecord assignment = enrichment.assignments().get(trip.getId());
-        VehicleSnapshot vehicle = findVehicle(assignment, enrichment);
+        VehicleProfile vehicle = findVehicle(assignment, enrichment);
+        List<RouteStopPlan> routeStopPlans = enrichment.stopsByRouteId().get(trip.getRouteId());
+        List<RoutePointResult> routePointResults = toRoutePoints(routeStopPlans);
+
+        String originDepartmentName = enrichment.departmentMap.get(trip.getOriginDepartmentId()).getName();
+        String destinationDepartmentName = enrichment.departmentMap.get(trip.getDestinationDepartmentId()).getName();
+
         return SearchTripItemResult.builder()
                 .id(trip.getId())
                 .merchantId(trip.getMerchantId())
@@ -217,7 +242,9 @@ public class TripManagementServiceImpl implements TripManagementService {
                 .originProvinceId(trip.getOriginProvinceId())
                 .destinationProvinceId(trip.getDestinationProvinceId())
                 .originDepartmentId(trip.getOriginDepartmentId())
+                .originDepartmentName(originDepartmentName)
                 .destinationDepartmentId(trip.getDestinationDepartmentId())
+                .destinationDepartmentName(destinationDepartmentName)
                 .availableSeats(enrichment.seatAvailable().getOrDefault(trip.getId(), 0L))
                 .departureTime(trip.getDepartureTime())
                 .rawDepartureTime(trip.getRawDepartureTime())
@@ -225,7 +252,7 @@ public class TripManagementServiceImpl implements TripManagementService {
                 .durationMinutes(trip.getDurationMinutes())
                 .vehiclePlate(vehicle == null ? null : vehicle.getVehiclePlate())
                 .hasFloor(vehicle != null && vehicle.isHasFloor())
-                .routePoints(toRoutePoints(enrichment.stopsByRouteId().get(trip.getRouteId())))
+                .routePoints(routePointResults)
                 .build();
     }
 
@@ -280,7 +307,7 @@ public class TripManagementServiceImpl implements TripManagementService {
 
     private FetchTripResult toFetchRouteItem(TripFetchView trip, TripEnrichment enrichment) {
         TripAssignmentRecord assignment = enrichment.assignments().get(trip.getId());
-        VehicleSnapshot vehicle = findVehicle(assignment, enrichment);
+        VehicleProfile vehicle = findVehicle(assignment, enrichment);
 
         return FetchTripResult.builder()
                 .id(trip.getId())
@@ -310,10 +337,13 @@ public class TripManagementServiceImpl implements TripManagementService {
 
     private FetchTripResult toFetchTripDetail(RouteAggregate route, TripAggregate trip, TripEnrichment enrichment) {
         TripAssignmentRecord assignment = enrichment.assignments().get(trip.getId());
-        VehicleSnapshot vehicle = findVehicle(assignment, enrichment);
+        VehicleProfile vehicle = findVehicle(assignment, enrichment);
+
+        String originDepartmentName = enrichment.departmentMap.get(route.getOriginDepartmentId()).getName();
+        String destinationDepartmentName = enrichment.departmentMap.get(route.getDestinationDepartmentId()).getName();
 
         return FetchTripResult.builder()
-                .id(route.getId())
+                .id(trip.getId())
                 .creator(route.getCreator())
                 .pickupBranch(trip.getPickupBranch())
                 .tripCode(trip.getTripCode())
@@ -324,7 +354,9 @@ public class TripManagementServiceImpl implements TripManagementService {
                 .originProvinceId(route.getOriginProvinceId())
                 .destinationProvinceId(route.getDestinationProvinceId())
                 .originDepartmentId(route.getOriginDepartmentId())
+                .originDepartmentName(originDepartmentName)
                 .destinationDepartmentId(route.getDestinationDepartmentId())
+                .destinationDepartmentName(destinationDepartmentName)
                 .departureTime(trip.getDepartureTime())
                 .rawDepartureDate(trip.getRawDepartureDate())
                 .rawDepartureTime(trip.getRawDepartureTime())
@@ -338,7 +370,7 @@ public class TripManagementServiceImpl implements TripManagementService {
                 .build();
     }
 
-    private VehicleSnapshot findVehicle(TripAssignmentRecord assignment, TripEnrichment enrichment) {
+    private VehicleProfile findVehicle(TripAssignmentRecord assignment, TripEnrichment enrichment) {
         return assignment == null ? null : enrichment.vehicles().get(assignment.getVehicleId());
     }
 
@@ -352,8 +384,9 @@ public class TripManagementServiceImpl implements TripManagementService {
     private record TripEnrichment(
             Map<String, TripAssignmentRecord> assignments,
             Map<String, Long> seatAvailable,
-            Map<String, VehicleSnapshot> vehicles,
-            Map<String, List<RouteStopPlan>> stopsByRouteId
+            Map<String, VehicleProfile> vehicles,
+            Map<String, List<RouteStopPlan>> stopsByRouteId,
+            Map<String, Department> departmentMap
     ) {
     }
 }

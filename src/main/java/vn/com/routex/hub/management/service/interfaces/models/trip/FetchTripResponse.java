@@ -42,7 +42,9 @@ public class FetchTripResponse extends BaseResponse<FetchTripResponse.FetchTripR
         private String originProvinceId;
         private String destinationProvinceId;
         private String originDepartmentId;
+        private String originDepartmentName;
         private String destinationDepartmentId;
+        private String destinationDepartmentName;
         private OffsetDateTime departureTime;
         private String rawDepartureDate;
         private String rawDepartureTime;

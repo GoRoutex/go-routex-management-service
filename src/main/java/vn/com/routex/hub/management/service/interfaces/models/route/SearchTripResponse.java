@@ -34,7 +34,9 @@ public class SearchTripResponse extends BaseResponse<List<SearchTripResponse.Sea
         private String originProvinceId;
         private String destinationProvinceId;
         private String originDepartmentId;
+        private String originDepartmentName;
         private String destinationDepartmentId;
+        private String destinationDepartmentName;
         private Long availableSeats;
         private OffsetDateTime departureTime;
         private String rawDepartureDate;
@@ -54,10 +56,8 @@ public class SearchTripResponse extends BaseResponse<List<SearchTripResponse.Sea
     @SuperBuilder
     public static class SearchRoutePoints {
         private String id;
-        private String operationOrder;
+        private int stopOrder;
         private String routeId;
-        private String plannedArrivalTime;
-        private String plannedDepartureTime;
         private String note;
         private String departmentId;
         private String stopName;
@@ -65,5 +65,6 @@ public class SearchTripResponse extends BaseResponse<List<SearchTripResponse.Sea
         private String stopCity;
         private Double stopLatitude;
         private Double stopLongitude;
+        private Integer timeAtDepartment;
     }
 }

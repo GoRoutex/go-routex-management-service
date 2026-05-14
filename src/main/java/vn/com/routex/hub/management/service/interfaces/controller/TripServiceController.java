@@ -54,8 +54,6 @@ public class TripServiceController {
         SearchTripResult result = tripManagementService.searchTrip(SearchTripQuery.builder()
                 .originName(request.getData().getOrigin())
                 .destinationName(request.getData().getDestination())
-                .originProvinceId(request.getData().getOriginProvinceId())
-                .destinationProvinceId(request.getData().getDestinationProvinceId())
                 .departureDate(request.getData().getDepartureDate())
                 .seat(request.getData().getSeat())
                 .pageContext(PageContext.builder()
@@ -99,7 +97,7 @@ public class TripServiceController {
     }
 
     @GetMapping(FETCH_PATH)
-    public ResponseEntity<FetchTripResponse> fetchRoutes(
+    public ResponseEntity<FetchTripResponse> fetchTrips(
             HttpServletRequest servletRequest,
             @RequestParam(required = false) String merchantName,
             @RequestParam(defaultValue = "1") int pageNumber,
