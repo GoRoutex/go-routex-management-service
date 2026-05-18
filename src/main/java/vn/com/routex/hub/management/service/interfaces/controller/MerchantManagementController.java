@@ -39,7 +39,6 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(API_PATH + API_VERSION + MANAGEMENT_PATH)
-//@PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
 public class MerchantManagementController {
 
     private final MerchantManagementService merchantManagementService;

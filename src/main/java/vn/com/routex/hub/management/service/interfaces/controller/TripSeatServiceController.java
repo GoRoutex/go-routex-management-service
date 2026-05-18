@@ -29,7 +29,7 @@ import static vn.com.routex.hub.management.service.infrastructure.persistence.co
 @RestController
 @RequestMapping( API_PATH + API_VERSION + MANAGEMENT_PATH + SEAT_DIAGRAM)
 @RequiredArgsConstructor
-public class RouteSeatServiceController {
+public class TripSeatServiceController {
 
     private final RouteSeatService routeSeatService;
     private final ApiResultFactory apiResultFactory;
