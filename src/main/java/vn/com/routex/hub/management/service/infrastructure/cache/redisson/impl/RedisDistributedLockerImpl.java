@@ -38,7 +38,7 @@ public class RedisDistributedLockerImpl implements RedisDistributedService {
             @Override
             public void unlock() {
                 if(isLocked() && isHeldByCurrentThread()) {
-                    rLock.lock();
+                    rLock.unlock();
                 }
             }
 
